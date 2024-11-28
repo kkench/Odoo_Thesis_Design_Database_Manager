@@ -1,0 +1,17 @@
+<odoo>
+    <record id="paper_info_view_form" model="ir.ui.view">
+        <field name="name">paper.info.form</field>
+        <field name="model">paper.info</field>
+        <field name="arch" type="xml">
+            <form>
+                <!-- add that header tag thing for status here later <header> -->
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                         <!-- <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/> -->
+                    </div>
+        </field>
+    </record>
+<odoo>
