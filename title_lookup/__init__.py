@@ -2,7 +2,7 @@
 # More info at https://www.odoo.com/documentation/master/reference/module.html
 
 {
-    "name": "Title Lookup",
+    "name": "Thesis/Design Database Manager",
     "depends": [
         "base",
         "web",
