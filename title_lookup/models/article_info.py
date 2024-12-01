@@ -4,7 +4,7 @@ class ArticleInfo(models.Model):
     _name = "article.info"
     _order = "add_date desc" #order by date on initial open then sort by alphabetical later? 
 
-    name = fields.Char(string="Paper Title", required=True)
+    title = fields.Char(string="Paper Title", required=True)
     #add_date = fields.Date(string="Date Added")
     state = fields.Selection(string="Current Status",
                              required=True,
@@ -30,6 +30,6 @@ class ArticleInfo(models.Model):
     abstract = fields.Text(string="Abstract")
     viewable = fields.Boolean(string="Viewable by Instructor")
 
-    paper_tag_ids = fields.Many2one("paper.info.tags", "paper_tag", string="Tags") #split topic-related tags and system tags? (i.e. "Embedded Systems" as "department/spec/type" tag and "Fish"  as "topic focus" tag respectively)
+    paper_tag_ids = fields.Many2many("paper.info.tags", "paper_tag", string="Tags") #split topic-related tags and system tags? (i.e. "Embedded Systems" as "department/spec/type" tag and "Fish"  as "topic focus" tag respectively)
 #add res users as teacher account?
 #add csv importation

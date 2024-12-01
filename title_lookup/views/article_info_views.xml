@@ -1,17 +1,27 @@
 <odoo>
-    <record id="paper_info_view_form" model="ir.ui.view">
-        <field name="name">paper.info.form</field>
-        <field name="model">paper.info</field>
+    <record id="article_info_view_form" model="ir.ui.view">
+        <field name="name">article.info.form</field>
+        <field name="model">article.info</field>
         <field name="arch" type="xml">
             <form>
-                <!-- add that header tag thing for status here later <header> -->
+                <header>
+                    <button name="design_paper" type="object" string="Design" invisible="dt != design" class="oe_highlight"/>
+                    <button name="thesis_paper" type="object" string="Thesis" invisible="dt != thesis" class="oe_highlight"/>
+                    <field name="dt_status" widget="statusbar" statusbar_visible="design,thesis"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name"/>
+                            <field name="title"/>
                         </h1>
                          <!-- <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/> -->
                     </div>
+                    <group>
+                        <field name="abstract">
+                        <field name="state">
+                        <field name="publish">
+                    </group>
+                </sheet>
         </field>
     </record>
 <odoo>
