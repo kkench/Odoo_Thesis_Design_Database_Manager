@@ -1,0 +1,38 @@
+<odoo>
+    <record id="article_publication_form_view" model="ir.ui.view">
+        <field name='name'>article.publication.form.view</field>
+        <field name='model'>article.publication</field>
+        <field name='arch' type='xml'>
+            <form string="Article Publication Form">
+                <field name='name' string="Article Title"/>
+                <field name='publishing_state'/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="article_publication_tree_view" model="ir.ui.view">
+        <field name='name'>article.publication.tree.view</field>
+        <field name='model'>article.publication</field>
+        <field name='arch' type='xml'>
+            <tree string="Article Publication List">
+                <field name='name'/>
+                <field name='name'/>
+            </tree>       
+        </field>
+    </record>
+    
+    <record id="article_publication_action" model="ir.actions.act_window" >
+        <field name="name">Article Publications</field>
+        <field name="res_model">article.publication</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]"/>
+        <field name="help" type="html"> 
+            <p class="o_view_nocontent_smiling_face">
+                Create New Article Topics
+            </p>
+        </field>
+    </record>
+</odoo>
