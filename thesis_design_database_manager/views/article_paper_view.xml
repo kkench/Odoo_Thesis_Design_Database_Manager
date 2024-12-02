@@ -1,0 +1,35 @@
+<odoo>
+    <record id="article_paper_form_view" model="ir.ui.view">
+        <field name='name'>article.paper.group.form.view</field>
+        <field name='model'>article.paper</field>
+        <field name='arch' type='xml'>
+            <form string="Student Form">
+                <group>
+                    <field name="name"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="article_paper_tree_view" model="ir.ui.view">
+        <field name='name'>article.paper.tree.view</field>
+        <field name='model'>article.paper</field>
+        <field name='arch' type='xml'>
+            <tree string="List of Registered Vehicles">
+                <field name="name"/>
+                <field name="name"/>
+            </tree>       
+        </field>
+    </record>
+
+    <record id="article_paper_action" model="ir.actions.act_window">
+        <field name="name">Student Group List</field>
+        <field name="res_model">article.paper</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Display Paper Articles
+            </p>
+        </field>
+    </record>
+</odoo>
