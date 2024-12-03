@@ -1,0 +1,38 @@
+<odoo>
+    <data noupdate="0"> <!--Update to 1 after running once-->
+        <record id="article_journal_groups" model="ir.module.category">
+            <field name="name">Thesis Design Database Users</field>
+            <field name="description">Groups under Article Database Management</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <!-- Define the new user group -->
+        <record id="group_article_authors" model="res.groups">
+            <field name="name">Authors</field>
+            <field name="category_id" ref="thesis_design_database_manager.article_journal_groups"/>
+            <field name="comment">Users that register as authors</field>
+        </record>
+
+        <record id="group_article_faculty_adviser" model="res.groups">
+            <field name="name">Faculty Adviser</field>
+            <field name="category_id" ref="thesis_design_database_manager.article_journal_groups"/>
+            <field name="implied_ids" eval="[(4, ref('thesis_design_database_manager.group_article_authors'))]"/>
+            <field name="comment">Users that advises authors</field>
+        </record>
+
+        <record id="group_article_thesis_instructor" model="res.groups">
+            <field name="name">Thesis Instructor</field>
+            <field name="category_id" ref="thesis_design_database_manager.article_journal_groups"/>
+            <field name="implied_ids" eval="[(4, ref('thesis_design_database_manager.group_article_faculty_adviser'))]"/>
+            <field name="comment">Users that is handling all thesis document</field>
+        </record>
+
+        <record id="group_article_design_instructor" model="res.groups">
+            <field name="name">Design Instructor</field>
+            <field name="category_id" ref="thesis_design_database_manager.article_journal_groups"/>
+            <field name="implied_ids" eval="[(4, ref('thesis_design_database_manager.group_article_faculty_adviser'))]"/>
+            <field name="comment">Users that is handling all design document</field>
+        </record>
+
+    </data>
+</odoo>

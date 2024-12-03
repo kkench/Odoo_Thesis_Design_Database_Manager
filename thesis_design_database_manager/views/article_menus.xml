@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="article_menu_root" name="Article Publications">
-        <menuitem name="View Publication List" id="article_menu" action="article_publication_action" sequence="1"/>
+        <menuitem name="View Publication List" id="article_publication_menu" action="article_publication_view_action" sequence="1"/>
+        <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="2"/>
     </menuitem>
 </odoo>

@@ -1,1 +1,1 @@
-from . import article_publication, article_tags
+from . import article_publication, article_tag
