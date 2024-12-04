@@ -15,7 +15,6 @@
         "security/ir.model.access.csv",
         "views/article_publication_views.xml",
         "views/article_tag_views.xml",
-        "views/article_faculty_user_view.xml",
         "views/article_menus.xml",
     ],
     "assets": { 'web.assets_backend': 

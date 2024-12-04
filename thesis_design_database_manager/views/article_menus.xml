@@ -2,7 +2,6 @@
 <odoo>
     <menuitem id="article_menu_root" name="Article Publications">
         <menuitem name="View Publication List" id="article_publication_menu" action="article_publication_view_action" sequence="1"/>
-        <menuitem name="Faculty List" id="article_faculty_menu" action="action_users_in_faculty_adviser" sequence="2"/>
-        <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="3"/>
+        <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="2"/>
     </menuitem>
 </odoo>

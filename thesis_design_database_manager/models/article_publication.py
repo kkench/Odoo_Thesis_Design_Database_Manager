@@ -1,12 +1,10 @@
 from odoo import api,fields,models
-from odoo.exceptions import ValidationError
 
 class ArticlePublication(models.Model):
     _name = "article.publication"
     _description = "Main Study/ies of CpE Students"
 
     name = fields.Char(string="Article Title", required=True)
-
     state = fields.Selection(string="Course Status",
                              required=True,
                              selection=[
@@ -14,7 +12,6 @@ class ArticlePublication(models.Model):
                                  ("accepted", "Proposal Defense Completed"),
                                  ("defended", "Final Defense Completed"),
                              ],default="proposal")
-    
     publishing_state = fields.Selection(string="Published Status",#DO WE NEED TO KEEP TRACK OF STATUS OR JUST BOOLEAN
                                         selection=[
                                             ("no_registration", "Not Registered"),
@@ -31,11 +28,8 @@ class ArticlePublication(models.Model):
                                                 ("thesis", "Thesis")
                                                 ],
                                     default="thesis")
-    
     abstract = fields.Text(string="Abstract")
-    editable_by_viewer = fields.Boolean(string="Viewable by Instructor", default=False)
-    adviser_id = fields.Many2many("res.users", "article_publication_id", string="Advisers", domain="[('is_faculty', '=', True)]")
-    
+    editable_by_viewer = fields.Boolean(string="Viewable by Instructor")
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags")
     related_article_ids = fields.Many2many("article.publication", "related_article_ids", readonly=True, string="Related Studies", compute="_compute_related_studies") 
@@ -44,9 +38,6 @@ class ArticlePublication(models.Model):
 
     @api.onchange("article_tag_ids")
     def _compute_related_studies(self):
-        groups = self.env['res.groups'].search([])
-        for group in groups:
-            print(f"ID: {group.id}, Name: {group.name}")
         self.related_score = 0
         if self.article_tag_ids:
             related_articles = self.env['article.publication'].search([
@@ -64,12 +55,6 @@ class ArticlePublication(models.Model):
         else:
             self.related_article_ids = [(5, 0, 0)]
 
-    @api.constrains("adviser_id")
-    def _check_user_adviser(self):
-        for record in self:
-            if not record.adviser_id.is_faculty and record.adviser_id:
-                raise ValidationError("User is Not Faculty")
-            
     def act_view_article(self):
         self.ensure_one()
         return {
