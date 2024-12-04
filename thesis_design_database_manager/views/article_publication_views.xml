@@ -11,16 +11,31 @@
                     <group>
                         <group>
                             <field name="state"/>
-                            <field name="publishing_state"/>
+                            <field name="publishing_state" invisible="course_name != 'thesis'"/>
                             <field name="course_name"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="tags">
+                        <page string="details">
+                            <h1>
+                                <field name="article_tag_ids" widget="many2many_tags"/>
+                            </h1>
                             <group>
                                 <field name="abstract"/>
-                                <field name="article_tag_ids" widget="many2many_tags"/>
+                                <field name="max_related_score"/>
                             </group>
+                        </page>
+                        <page string="Similar Studies">
+                            <field name="related_article_ids">
+                                <tree default_order="related_score" editable="bottom"><!-- Keep editable even though read only(prevents clickability)-->
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="publishing_state"/>
+                                    <field name="course_name"/>
+                                    <field name="related_score"/>
+                                    <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>

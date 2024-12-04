@@ -9,4 +9,4 @@ class ArticleTag(models.Model):
 
     name = fields.Char(string='Name', required=True)
 
-    article_publication_ids = fields.Many2many("article.publication", "paper_tag_ids", string="Related Publications")
+    article_publication_ids = fields.Many2many("article.publication", "paper_tag_ids", string="Related Publications")  
