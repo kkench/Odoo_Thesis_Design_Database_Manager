@@ -36,24 +36,28 @@ class ArticlePublication(models.Model):
     related_score = fields.Integer("Related Score", readonly=True, compute="_compute_related_studies")
     max_related_score = fields.Integer("Max Related Score", readonly=True, default=0)
 
-    @api.onchange("article_tag_ids")
+    @api.onchange('article_tag_ids')
     def _compute_related_studies(self):
         self.related_score = 0
         if self.article_tag_ids:
-            related_articles = self.env['article.publication'].search([
-                ('article_tag_ids', 'in', self.article_tag_ids.ids),
-                ('id', '!=', self.id)
-            ])
-            self.related_article_ids = [(6, 0, related_articles.ids)]
-            for article in related_articles:
-                similar_tags = set(article.article_tag_ids.ids) & set(self.article_tag_ids.ids)
-                article.related_score = len(similar_tags)
-                if article.related_score > article.max_related_score:
-                    article.max_related_score = article.related_score
-                if article.related_score > self.max_related_score:
-                    self.max_related_score = article.related_score
+            if self.id and isinstance(self.id, int):
+                related_articles = self.env['article.publication'].search([
+                    ('article_tag_ids', 'in', self.article_tag_ids.ids),
+                    ('id', '!=', self.id)
+                ])
+                self.related_article_ids = [(6, 0, related_articles.ids)]
+                for article in related_articles:
+                    similar_tags = set(article.article_tag_ids.ids) & set(self.article_tag_ids.ids)
+                    article.related_score = len(similar_tags)
+                    if article.related_score > article.max_related_score:
+                        article.max_related_score = article.related_score
+                    if article.related_score > self.max_related_score:
+                        self.max_related_score = article.related_score
+            else:
+                self.related_article_ids = [(5, 0, 0)]
         else:
             self.related_article_ids = [(5, 0, 0)]
+
 
     def act_view_article(self):
         self.ensure_one()
