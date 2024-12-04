@@ -50,7 +50,10 @@
         <field name='arch' type='xml'>
             <tree string="Article Publication List">
                 <field name='name'/>
-                <field name='name'/>
+                <field name="state"/>
+                <field name="publishing_state"/>
+                <field name="course_name"/>
+                <field name="article_tag_ids" widget="many2many_tags"/>
             </tree>       
         </field>
     </record>
@@ -66,6 +69,22 @@
             <p class="o_view_nocontent_smiling_face">
                 Create New Article Topics
             </p>
+        </field>
+    </record>
+
+    <record id="article_publication_view_search" model="ir.ui.view">
+        <field name="name">article.publication.search.view</field>
+        <field name="model">article.publication</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <separator/>
+                <field name="state"/>
+                <field name="publishing_state"/>
+                <separator/>
+                <field name="course_name"/><!-- add a search for design/thesis? not sure if needed because it's based on bool already -->
+                <field name="article_tag_ids"/>
+            </search>
         </field>
     </record>
 </odoo>

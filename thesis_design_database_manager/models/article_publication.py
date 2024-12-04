@@ -3,6 +3,9 @@ from odoo import api,fields,models
 class ArticlePublication(models.Model):
     _name = "article.publication"
     _description = "Main Study/ies of CpE Students"
+    _sql_constraints = [
+        ("check_title", "UNIQUE(name)", "Title must be unique.")
+    ]
 
     name = fields.Char(string="Article Title", required=True)
     state = fields.Selection(string="Course Status",
