@@ -12,6 +12,7 @@
                         <group>
                             <field name="state"/>
                             <field name="publishing_state" invisible="course_name != 'thesis'"/>
+                            <field name="adviser_id" widget="many2many_tags"/>
                             <field name="course_name"/>
                         </group>
                     </group>
