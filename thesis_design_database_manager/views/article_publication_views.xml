@@ -33,6 +33,7 @@
                                     <field name="publishing_state"/>
                                     <field name="course_name"/>
                                     <field name="related_score"/>
+                                    <field name="similarity_score"/>
                                     <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
                                 </tree>
                             </field>

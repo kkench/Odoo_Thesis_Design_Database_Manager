@@ -1,4 +1,5 @@
 from odoo import api,fields,models
+from difflib import SequenceMatcher
 
 class ArticlePublication(models.Model):
     _name = "article.publication"
@@ -38,10 +39,13 @@ class ArticlePublication(models.Model):
     related_article_ids = fields.Many2many("article.publication", "related_article_ids", readonly=True, string="Related Studies", compute="_compute_related_studies") 
     related_score = fields.Integer("Related Score", readonly=True, compute="_compute_related_studies")
     max_related_score = fields.Integer("Max Related Score", readonly=True, default=0)
+    max_similarity_score = fields.Integer("Max Similarity Score", readonly=True, default=0)
+    similarity_score = fields.Float("Title Similarity Score", readonly=True, compute="_compute_related_studies")
 
     @api.onchange("article_tag_ids")
     def _compute_related_studies(self):
         self.related_score = 0
+        self.similarity_score = 0
         if self.article_tag_ids:
             related_articles = self.env['article.publication'].search([
                 ('article_tag_ids', 'in', self.article_tag_ids.ids),
@@ -51,10 +55,12 @@ class ArticlePublication(models.Model):
             for article in related_articles:
                 similar_tags = set(article.article_tag_ids.ids) & set(self.article_tag_ids.ids)
                 article.related_score = len(similar_tags)
+                seq_match = SequenceMatcher(None, self.name,article.name)
+                article.similarity_score = seq_match.ratio()
                 if article.related_score > article.max_related_score:
                     article.max_related_score = article.related_score
-                if article.related_score > self.max_related_score:
-                    self.max_related_score = article.related_score
+                if article.similarity_score > self.similarity_score:
+                    self.max_similarity_score = article.similarity_score
         else:
             self.related_article_ids = [(5, 0, 0)]
 
