@@ -69,3 +69,17 @@ class ArticlePublication(models.Model):
             'res_id': self.id,
             'target': 'current',
         }
+
+    def act_open_faculty_list(self):
+        group = self.env.ref('thesis_design_database_manager.group_article_faculty_adviser')
+        faculty_advisers = self.env['res.users'].search([('groups_id', 'in', group.id)])
+        # for adviser in faculty_advisers:
+        #     print(adviser.name)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Adviser List',
+            'view_mode': 'tree',
+            'res_model': 'res.users',
+            'domain': [('id', 'in', faculty_advisers.ids)],
+            'views': [(self.env.ref('thesis_design_database_manager.article_faculty_adviser_tree_view').id, 'tree')],  # Replace with your view ID
+        }

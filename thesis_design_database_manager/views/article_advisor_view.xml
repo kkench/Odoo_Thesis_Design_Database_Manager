@@ -1,0 +1,21 @@
+<odoo>
+    <record id="article_faculty_adviser_tree_view" model="ir.ui.view">
+        <field name="name">article.faculty.adviser.tree.view</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <tree string="Users" create="false">
+                <field name="name"/>
+                <field name="login"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Below is an action to call a function from article publication -->
+    <record id="action_open_faculty_list" model="ir.actions.server">
+        <field name="name">Open Faculty List</field>
+        <field name="model_id" ref="model_article_publication"/>
+        <field name="binding_model_id" ref="model_article_publication"/>
+        <field name="state">code</field>
+        <field name="code">action = model.act_open_faculty_list()</field>
+    </record>
+</odoo>
