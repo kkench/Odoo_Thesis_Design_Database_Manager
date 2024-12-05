@@ -23,6 +23,7 @@
                             <group>
                                 <field name="abstract"/>
                                 <field name="max_related_score"/>
+                                <button name="act_suggested_tags" type="object" string="Get Suggested Tags" class="oe_highlight"/>
                             </group>
                         </page>
                         <page string="Similar Studies">
