@@ -22,19 +22,19 @@
                             </h1>
                             <group>
                                 <field name="abstract"/>
-                                <field name="max_related_score"/>
+                                <field name="max_tag_similarity_score"/>
                                 <button name="act_suggested_tags" type="object" string="Get Suggested Tags" class="oe_highlight"/>
                             </group>
                         </page>
                         <page string="Similar Studies">
                             <field name="related_article_ids">
-                                <tree default_order="related_score" editable="bottom"><!-- Keep editable even though read only(prevents clickability)-->
+                                <tree default_order="title_similarity_score desc" editable="bottom"><!-- Keep editable even though read only(prevents clickability)-->
                                     <field name="name"/>
                                     <field name="state"/>
                                     <field name="publishing_state"/>
                                     <field name="course_name"/>
-                                    <field name="related_score"/>
-                                    <field name="similarity_score"/>
+                                    <field name="tag_similarity_score"/>
+                                    <field name="title_similarity_score"/>
                                     <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
                                 </tree>
                             </field>
