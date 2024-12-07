@@ -8,3 +8,5 @@ thesis_design_database_manager/models/__init__.py
 thesis_design_database_manager/models/__pycache__/__init__.cpython-310.pyc
 thesis_design_database_manager/models/__pycache__/article_publication.cpython-310.pyc
 thesis_design_database_manager/models/__pycache__/article_tag.cpython-310.pyc
+thesis_design_database_manager/models/__pycache__/__init__.cpython-310.pyc
+thesis_design_database_manager/models/__pycache__/article_publication.cpython-310.pyc

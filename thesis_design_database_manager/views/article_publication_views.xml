@@ -5,24 +5,27 @@
         <field name='arch' type='xml'>
             <form string="Article Publication Form">
                 <sheet>
-                    <h1>
-                        Article Name: <field name="name"/>
+                    <h1><!--NOTE:readonly statement here are cumbersome, this is a placeholder, an alternative idea is having two copies of the same form with different readonly capabilities-->
+                        Article Name: <field name="name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                     </h1>
                     <group>
                         <group>
-                            <field name="state"/>
-                            <field name="publishing_state" invisible="course_name != 'thesis'"/>
-                            <field name="course_name"/>
+                            <field name="state" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                            <field name="publishing_state" invisible="course_name != 'thesis'" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                            <field name="course_name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                            <field name="adviser_ids" widget="many2many_tags" readonly="is_course_instructor == False"/>
+                            <field name="is_course_instructor" readonly="True"/>
+                            <field name="is_article_adviser" readonly="True"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="details">
                             <h1>
-                                <field name="article_tag_ids" widget="many2many_tags"/>
+                                <field name="article_tag_ids" widget="many2many_tags" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                             </h1>
                             <group>
-                                <field name="abstract"/>
-                                <field name="max_tag_similarity_score"/>
+                                <field name="abstract" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                                <field name="max_tag_similarity_score" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                                 <button name="act_suggested_tags" type="object" string="Get Suggested Tags" class="oe_highlight"/>
                             </group>
                         </page>

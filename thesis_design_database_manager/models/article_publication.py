@@ -1,5 +1,6 @@
 from odoo import api,fields,models
 from difflib import SequenceMatcher, get_close_matches
+from odoo.exceptions import UserError
 
 class ArticlePublication(models.Model):
     _name = "article.publication"
@@ -33,14 +34,34 @@ class ArticlePublication(models.Model):
                                                 ],
                                     default="thesis")
     abstract = fields.Text(string="Abstract")
-    editable_by_viewer = fields.Boolean(string="Viewable by Instructor")
+
+    is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
+    is_course_instructor = fields.Boolean(string="The user is the instructor of the paper", compute="_compute_article_editability")
+    adviser_ids = fields.Many2many(
+        "res.users",
+        "article_publication_res_users_rel",
+        "publication_id",
+        "user_id",
+        string="Advisers",
+        domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])]
+        )
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags")
     related_article_ids = fields.Many2many("article.publication", "related_article_ids", readonly=True, string="Related Studies", compute="_compute_related_studies") 
     tag_similarity_score = fields.Integer("Related Score", readonly=True, compute="_compute_related_studies")
     max_tag_similarity_score = fields.Integer("Max Related Score", readonly=True, default=0)
+    
     max_title_similarity_score = fields.Integer("Max Similarity Score", readonly=True, default=0)
     title_similarity_score = fields.Float("Title Similarity Score", readonly=True, compute="_compute_related_studies")
+
+    def _compute_article_editability(self):
+        for record in self:
+            user = record.env.user
+            record.is_course_instructor = (
+                (record.course_name == "thesis" and user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or
+                (record.course_name == "design" and user.has_group('thesis_design_database_manager.group_article_design_instructor'))
+            )
+            record.is_article_adviser = user.id in record.adviser_ids.ids
 
     @api.onchange('article_tag_ids')
     def _compute_related_studies(self):
@@ -99,21 +120,4 @@ class ArticlePublication(models.Model):
             'res_model': 'article.publication',
             'res_id': self.id,
             'target': 'current',
-        }
-    
-
-
-
-    def act_open_faculty_list(self):
-        group = self.env.ref('thesis_design_database_manager.group_article_faculty_adviser')
-        faculty_advisers = self.env['res.users'].search([('groups_id', 'in', group.id)])
-        # for adviser in faculty_advisers:
-        #     print(adviser.name)
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Adviser List',
-            'view_mode': 'tree',
-            'res_model': 'res.users',
-            'domain': [('id', 'in', faculty_advisers.ids)],
-            'views': [(self.env.ref('thesis_design_database_manager.article_faculty_adviser_tree_view').id, 'tree')],  # Replace with your view ID
         }
