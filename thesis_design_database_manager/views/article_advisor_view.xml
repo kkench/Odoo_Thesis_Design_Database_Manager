@@ -55,7 +55,7 @@
         <field name="name">article.faculty.adviser.tree.view</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <tree string="Users" create="false">
+            <tree string="Users" create="false" import="false">
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>

@@ -16,6 +16,7 @@
         "views/article_publication_views.xml",
         "views/article_tag_views.xml",
         "views/article_advisor_view.xml",
+        "views/article_import_excel.xml",
         "views/article_menus.xml",
     ],
     "assets": { 'web.assets_backend': 

@@ -5,17 +5,24 @@
         <field name='arch' type='xml'>
             <form string="Article Publication Form">
                 <sheet>
-                    <h1><!--NOTE:readonly statement here are cumbersome, this is a placeholder, an alternative idea is having two copies of the same form with different readonly capabilities-->
+                    <!--NOTE:readonly statement here are cumbersome, no better alternative that i could think off, 
+                    an alternative idea is having two copies of the same form with different readonly capabilities-->
+                    <h1>
                         Article Name: <field name="name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                     </h1>
+                    <field name="is_course_instructor" readonly="True"/>
+                    <field name="is_article_adviser" readonly="True"/>
                     <group>
                         <group>
                             <field name="state" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                             <field name="publishing_state" invisible="course_name != 'thesis'" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
-                            <field name="course_name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                            <field name="course_name" readonly="True"/>
                             <field name="adviser_ids" widget="many2many_tags" readonly="is_course_instructor == False"/>
-                            <field name="is_course_instructor" readonly="True"/>
-                            <field name="is_article_adviser" readonly="True"/>
+                        </group>
+                        <group>
+                            <field name="author1" readonly="is_course_instructor == False"/>
+                            <field name="author2" readonly="is_course_instructor == False"/>
+                            <field name="author3" readonly="is_course_instructor == False" invisible="course_name != 'design'"/>
                         </group>
                     </group>
                     <notebook>
@@ -53,7 +60,7 @@
         <field name='name'>article.publication.tree.view</field>
         <field name='model'>article.publication</field>
         <field name='arch' type='xml'>
-            <tree string="Article Publication List">
+            <tree string="Article Publication List" import="false">
                 <field name='name'/>
                 <field name="state"/>
                 <field name="publishing_state"/>

@@ -1,5 +1,5 @@
 <odoo>
-    <data noupdate="0"> <!--Update to 1 after running once-->
+    <data noupdate="1"> <!--Update to 1 after running once-->
         <record id="article_journal_groups" model="ir.module.category">
             <field name="name">Thesis Design Database Users</field>
             <field name="description">Groups under Article Database Management</field>

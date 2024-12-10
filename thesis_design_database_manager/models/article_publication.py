@@ -4,12 +4,13 @@ from odoo.exceptions import UserError
 
 class ArticlePublication(models.Model):
     _name = "article.publication"
-    _description = "Main Study/ies of CpE Students"
+    _description = "Main Studies of CpE Students"
     _sql_constraints = [
         ("check_title", "UNIQUE(name)", "Title must be unique.")
     ]
 
     name = fields.Char(string="Article Title", required=True)
+
     state = fields.Selection(string="Course Status",
                              required=True,
                              selection=[
@@ -17,7 +18,7 @@ class ArticlePublication(models.Model):
                                  ("accepted", "Proposal Defense Completed"),
                                  ("defended", "Final Defense Completed"),
                              ],default="proposal")
-    publishing_state = fields.Selection(string="Published Status",#DO WE NEED TO KEEP TRACK OF STATUS OR JUST BOOLEAN
+    publishing_state = fields.Selection(string="Published Status",
                                         selection=[
                                             ("no_registration", "Not Registered"),
                                             ("waiting", "Waiting Confirmation"),
@@ -25,7 +26,7 @@ class ArticlePublication(models.Model):
                                             ("presented", "Presented"),
                                             ("published", "Published") 
                                             ],default="no_registration")
-            
+          
     course_name = fields.Selection(string="Course",
                                     required=True,
                                     selection=[
@@ -45,6 +46,10 @@ class ArticlePublication(models.Model):
         string="Advisers",
         domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])]
         )
+    
+    author1 = fields.Char("Author 1",default=None)
+    author2 = fields.Char("Author 2",default=None)
+    author3 = fields.Char("Author 3",default=None)
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags")
     related_article_ids = fields.Many2many("article.publication", "related_article_ids", readonly=True, string="Related Studies", compute="_compute_related_studies") 
@@ -54,8 +59,10 @@ class ArticlePublication(models.Model):
     max_title_similarity_score = fields.Integer("Max Similarity Score", readonly=True, default=0)
     title_similarity_score = fields.Float("Title Similarity Score", readonly=True, compute="_compute_related_studies")
 
+    @api.depends("course_name","adviser_ids")
     def _compute_article_editability(self):
         for record in self:
+            print("GOT HERE")
             user = record.env.user
             record.is_course_instructor = (
                 (record.course_name == "thesis" and user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or
@@ -87,6 +94,23 @@ class ArticlePublication(models.Model):
                 self.related_article_ids = [(5, 0, 0)]
         else:
             self.related_article_ids = [(5, 0, 0)]
+    
+    @api.constrains('author3')
+    def _check_author3_eligability(self):
+        for record in self:
+            if (not record.author3) or (record.course_name == "design"):
+                continue
+            raise UserError("Thesis Can Only Have Two Authors")
+        
+    @api.model
+    def default_get(self, fields_list): 
+        res = super(ArticlePublication, self).default_get(fields_list)
+        # Customize the default value based on the current user
+        if self.env.user.has_group('thesis_design_database_manager.group_article_thesis_instructor'):
+            res['course_name'] = 'thesis'
+        if self.env.user.has_group('thesis_design_database_manager.group_article_design_instructor'):
+            res['course_name'] = 'design'
+        return res
 
 
     def act_suggested_tags(self):

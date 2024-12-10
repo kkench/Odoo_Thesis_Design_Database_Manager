@@ -1,0 +1,25 @@
+<odoo>
+    <record id="article_import_excel_wizard_form_view" model="ir.ui.view">
+        <field name="name">article.import.excel.wizard.form.view</field>
+        <field name="model">article.import.excel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import CSV">
+                <group>
+                    <field name="excel_file" filename="file_name"/>
+                </group>
+                <footer>
+                    <button string="Import" type="object" name="import_excel" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <record id="article_import_excel_wizard_action" model="ir.actions.act_window">
+        <field name="name">Import excel</field>
+        <field name="res_model">article.import.excel.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="article_import_excel_wizard_form_view"/>
+        <field name="target">new</field> <!--new is popup-->
+    </record>
+</odoo>

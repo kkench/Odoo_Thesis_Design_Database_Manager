@@ -3,7 +3,7 @@
         <field name="name">article.tag.tree.view</field>
         <field name="model">article.tag</field>
         <field name="arch" type="xml">
-            <tree string="Article Tag Lists" editable="bottom">
+            <tree string="Article Tag Lists" editable="bottom" import="false">
                 <field name="name"/>
             </tree>
         </field>
