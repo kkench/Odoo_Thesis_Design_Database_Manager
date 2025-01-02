@@ -2,3 +2,6 @@ id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_article_publication,access.article.publication,model_article_publication,base.group_user,1,1,1,1
 access_article_tag,access.article.tag,model_article_tag,base.group_user,1,1,1,1
 access_article_import_excel_wizard,access.article.import.excel.wizard,model_article_import_excel_wizard,base.group_user,1,1,1,1
+access_article_wizard_excel_column,access.article.wizard.excel.column,model_article_wizard_excel_column,base.group_user,1,1,1,1
+access_article_wizard_record_column,access.article.wizard.record.column,model_article_wizard_record_column,base.group_user,1,1,1,1
+access_article_wizard_publications,access.article.wizard.publications,model_article_wizard_publications,base.group_user,1,1,1,1

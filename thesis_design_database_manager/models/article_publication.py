@@ -8,24 +8,26 @@ class ArticlePublication(models.Model):
     _sql_constraints = [
         ("check_title", "UNIQUE(name)", "Title must be unique.")
     ]
-
+    #-------Form Requirements--------
+    custom_id = fields.Char(string='Custom ID', required=True)
     name = fields.Char(string="Article Title", required=True)
-
     state = fields.Selection(string="Course Status",
                              required=True,
                              selection=[
                                  ("proposal", "For Proposal"),
-                                 ("accepted", "Proposal Defense Completed"),
-                                 ("defended", "Final Defense Completed"),
+                                 ("proposal_approved", "Proposal Approved"),
+                                 ("proposal_redefense", "Proposal Redefense Required"),
+                                 ("proposal_conformity_of_revisions", "Proposal Conformity of Revisions"),
+                                 ("final_approved", "Article Approved"),
+                                 ("final_redefense", "Final Redefense Required"),
+                                 ("final_conformity_of_revisions", "Final Conformity of Revisions"),
                              ],default="proposal")
+
     publishing_state = fields.Selection(string="Published Status",
                                         selection=[
-                                            ("no_registration", "Not Registered"),
-                                            ("waiting", "Waiting Confirmation"),
-                                            ("confirmed", "Confirmed"),
-                                            ("presented", "Presented"),
+                                            ("not_published", "Not Published"),
                                             ("published", "Published") 
-                                            ],default="no_registration")
+                                            ],default="not_published", required=True)
           
     course_name = fields.Selection(string="Course",
                                     required=True,
@@ -34,24 +36,26 @@ class ArticlePublication(models.Model):
                                                 ("thesis", "Thesis")
                                                 ],
                                     default="thesis")
-    abstract = fields.Text(string="Abstract")
-
-    is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
-    is_course_instructor = fields.Boolean(string="The user is the instructor of the paper", compute="_compute_article_editability")
+    abstract = fields.Text(string="Abstract", required=True)
+    date_registered = fields.Date(string="Day of Registration") 
+    author1 = fields.Char("Author 1",default=None)
+    author2 = fields.Char("Author 2",default=None)
+    author3 = fields.Char("Author 3",default=None)
     adviser_ids = fields.Many2many(
         "res.users",
         "article_publication_res_users_rel",
         "publication_id",
         "user_id",
         string="Advisers",
-        domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])]
+        domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])], required=True
         )
-    
-    author1 = fields.Char("Author 1",default=None)
-    author2 = fields.Char("Author 2",default=None)
-    author3 = fields.Char("Author 3",default=None)
 
-    article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags")
+    article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
+
+    #-----Computable Information------
+    is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
+    is_course_instructor = fields.Boolean(string="The user is the instructor of the paper", compute="_compute_article_editability")
+
     related_article_ids = fields.Many2many("article.publication", "related_article_ids", readonly=True, string="Related Studies", compute="_compute_related_studies") 
     tag_similarity_score = fields.Integer("Related Score", readonly=True, compute="_compute_related_studies")
     max_tag_similarity_score = fields.Integer("Max Related Score", readonly=True, default=0)
@@ -61,13 +65,15 @@ class ArticlePublication(models.Model):
 
     @api.depends("course_name","adviser_ids")
     def _compute_article_editability(self):
+        user = self.env.user
+        user_is_instructor_dictionary = {
+                        "thesis": user.has_group('thesis_design_database_manager.group_article_thesis_instructor'),
+                        "design": user.has_group('thesis_design_database_manager.group_article_design_instructor')
+                        }
+
         for record in self:
             print("GOT HERE")
-            user = record.env.user
-            record.is_course_instructor = (
-                (record.course_name == "thesis" and user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or
-                (record.course_name == "design" and user.has_group('thesis_design_database_manager.group_article_design_instructor'))
-            )
+            record.is_course_instructor = user_is_instructor_dictionary.get(record.course_name, False)
             record.is_article_adviser = user.id in record.adviser_ids.ids
 
     @api.onchange('article_tag_ids')

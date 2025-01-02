@@ -10,14 +10,14 @@
                     <h1>
                         Article Name: <field name="name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                     </h1>
-                    <field name="is_course_instructor" readonly="True"/>
-                    <field name="is_article_adviser" readonly="True"/>
+                    <field name="is_course_instructor" readonly="True" invisible="True"/>
+                    <field name="is_article_adviser" readonly="True" invisible="True"/>
                     <group>
                         <group>
                             <field name="state" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                             <field name="publishing_state" invisible="course_name != 'thesis'" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                             <field name="course_name" readonly="True"/>
-                            <field name="adviser_ids" widget="many2many_tags" readonly="is_course_instructor == False"/>
+                            <field name="adviser_ids" widget="many2many_tags" readonly="is_course_instructor == False" options="{'no_create': True}"/>
                         </group>
                         <group>
                             <field name="author1" readonly="is_course_instructor == False"/>
@@ -38,7 +38,7 @@
                         </page>
                         <page string="Similar Studies">
                             <field name="related_article_ids">
-                                <tree default_order="title_similarity_score desc" editable="bottom"><!-- Keep editable even though read only(prevents clickability)-->
+                                <tree default_order="title_similarity_score desc" create="0" delete="0">
                                     <field name="name"/>
                                     <field name="state"/>
                                     <field name="publishing_state"/>
@@ -60,7 +60,8 @@
         <field name='name'>article.publication.tree.view</field>
         <field name='model'>article.publication</field>
         <field name='arch' type='xml'>
-            <tree string="Article Publication List" import="false">
+            <tree string="Article Publication List" import="true"> <!-- set import false after finalizing import wizard-->
+                <field name='custom_id'/>
                 <field name='name'/>
                 <field name="state"/>
                 <field name="publishing_state"/>
