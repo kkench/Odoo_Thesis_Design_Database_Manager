@@ -17,14 +17,6 @@ DEFAULT_COLUMN_LINK_DICT = { #EXCEL : OFFICIAL
     "Topic Tag":"Tags",
     "Main Advisor":"Adviser",
 }
-"""
-Index(['ID', 'Start time', 'Completion time', 'Email', 'Name',
-       'Last modified time', 'Author 1 (LN, FN MI. ; Alphabetically Arranged)',
-       'Author 1 Student Number', 'Author 2 (LN, FN MI.)',
-       'Author 2 Student Number', 'Topic Title', 'Topic Description/Abstract',
-       'Topic Tag', 'Main Advisor'],
-      dtype='object')
-"""
 
 class ArticleImportExcelWizard(models.TransientModel):
     _name = "article.import.excel.wizard"
@@ -55,7 +47,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             'Tags': 'tags',
                                         }
     
-
+    #NEW RECORDS
     def import_new_articles_excel(self):
         #------------------Setup---------------------
         ms_forms_required_information_list = ['ID','Start time','Completion time','Email','Name','Last modified time']
@@ -251,3 +243,5 @@ class ArticleImportExcelWizard(models.TransientModel):
             'res_id': self.id,
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
             'target': 'current', }
+    
+    # EXISTING RECORDS

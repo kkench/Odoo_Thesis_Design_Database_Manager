@@ -46,6 +46,7 @@ class ArticleWizardPublication(models.TransientModel):
         - Get initial ID 
         '''
         for record in self:
+            record.error_comment = None
             record.initial_id = None
             record.error_code = 0
             if not record.is_author_name_valid():
@@ -106,6 +107,7 @@ class ArticleWizardPublication(models.TransientModel):
         self.arrange_authors_alphabetically()
         self._update_initial_id()
         self.check_for_duplicate()
+        self.clear_newline_from_abstract_and_title()
 
     def arrange_authors_alphabetically(self):
         for record in self:
@@ -176,7 +178,19 @@ class ArticleWizardPublication(models.TransientModel):
                 return False
         return True
 
-
-
+    def clear_newline_from_abstract_and_title(self):
+        for record in self:
+            print("Got Here")
+            if not record.abstract: continue
+            abstract = record.abstract 
+            abstract = re.sub(r'\n+', ' ', abstract)
+            abstract = re.sub(r'\s{2,}', ' ', abstract)
+            record.abstract = abstract
+            
+            title = record.name
+            title = re.sub(r'\n+', ' ', title)
+            title = re.sub(r'\s{2,}', ' ', title)
+            record.name = title
+            
     def tags_are_valid(self):
         return True

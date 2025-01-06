@@ -5,5 +5,6 @@
         <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="2"/>
         <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="3"/>
         <menuitem name="Import CSV" id="article_import_menu" action="article_import_excel_wizard_popup_action" sequence="4"/>
+        <menuitem name="Import CSV Debugging Tree View" id="article_debug_import_menu" action="action_article_import_excel_wizard" sequence="5"/>
     </menuitem>
 </odoo>

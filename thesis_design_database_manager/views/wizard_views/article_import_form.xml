@@ -73,7 +73,7 @@
                             Article Import Wizard Part 3/3 
                         </h1>
                         <notebook>
-                            <page string="Failed Records">
+                            <page string="Uploaded New Records">
                                 <field name="created_article_record_ids">
                                     <tree create="0" delete="0">
                                         <field name="custom_id" string="Title"/>
