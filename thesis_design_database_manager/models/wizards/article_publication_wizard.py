@@ -27,11 +27,17 @@ class ArticleImportExcelWizard(models.TransientModel):
     excel_column_ids = fields.One2many('article.wizard.excel.column','import_wizard_id','Excel Record')
     official_record_column_ids = fields.One2many('article.wizard.record.column','import_wizard_id','Official Record')
     wizard_article_form_df = fields.Binary(string='Wizard Article Form DataFrame')
-    wizard_new_records_ids = fields.One2many('article.wizard.publications','import_wizard_id','List of New Records')
-    wizard_failed_record_ids = fields.One2many('article.wizard.publications','failed_import_wizard_id','List of Failed to Import Records')
+    wizard_type = fields.Selection([
+                                        ("null", "None Set"),
+                                        ("new", "New Article"),
+                                        ("update", "Update Article"),
+                                    ],"Type of Wizard")
+    wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publications","import_wizard_id","Excel Records")
+    created_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_created_rel',string="Successful Records")
+    updated_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
+    failed_extracted_excel_record_ids = fields.Many2many("article.wizard.publications", 'article_import_excel_wizard_failed_rel',string="Failed Records")
 
-    created_article_record_ids = fields.Many2many('article.publication',string="Successful Records")
-
+    popup_message = fields.Char("Warning")
     user_privilege = fields.Char('User Privilege',compute="_compute_user_privilege")
     COLUMNS_FOR_NEW_ARTICLE_DICT = {
                                             'Title': 'name',
@@ -50,6 +56,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     #NEW RECORDS
     def import_new_articles_excel(self):
         #------------------Setup---------------------
+        self.wizard_type = "new"
         ms_forms_required_information_list = ['ID','Start time','Completion time','Email','Name','Last modified time']
         new_article_column_list = list(self.COLUMNS_FOR_NEW_ARTICLE_DICT.keys())
         
@@ -127,7 +134,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     def act_import_new_article_wizard_part1(self):
         # excel_df = self._get_wizard_df()
         #---------Delete The Temporary Data-----------
-        self.wizard_new_records_ids.unlink()
+        self.wizard_excel_extracted_record_ids.unlink()
         #---------Return to Page 1
         return { 
             'type': 'ir.actions.act_window', 
@@ -160,10 +167,10 @@ class ArticleImportExcelWizard(models.TransientModel):
                     continue
                 row_data_dictionary[self.COLUMNS_FOR_NEW_ARTICLE_DICT[excel_column_record.official_record_id.name]] = row[excel_column_record.name]
             new_article = self.env['article.wizard.publications'].create(row_data_dictionary)
-            new_article._compute_errors_and_id()
+            new_article._process_errors_new_article()
             new_article_list.append(new_article.id)
             #------------------------------------------------------------
-        self.wizard_new_records_ids = [(6, 0, new_article_list)]
+        self.wizard_excel_extracted_record_ids = [(6, 0, new_article_list)]
 
         return { 
             'type': 'ir.actions.act_window', 
@@ -174,15 +181,77 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
             'target': 'current', }
 
-    def _get_initial_temp_data(self,row):
-        if not self.user_privilege:
-            raise UserError("User has no privilege")
-        record_dictionary = {
-                                'uploader_email':row['Email'],
-                                'uploader_name':row['Name'],
-                             }
-        return record_dictionary
+    def act_overwriting_confirmation(self):
+        records_with_related_authors = self.wizard_excel_extracted_record_ids.mapped('article_to_update_id')
+        if not records_with_related_authors: return self.act_upload_new_records()
 
+        authors_to_rewrite = ""
+        for related_records in records_with_related_authors:
+            authors_to_rewrite += f", {related_records.custom_id.split('_')[0]}" if authors_to_rewrite != "" else related_records.custom_id.split('_')[0]
+        
+        self.popup_message = "Related Authors will be overwritten: " + authors_to_rewrite
+
+        return {
+            'name': 'Upload Confirmation',
+            'type': 'ir.actions.act_window',
+            'res_model': 'article.import.excel.wizard',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'view_id': self.env.ref('thesis_design_database_manager.article_final_warning_confirmation_popup_form').id,
+            'target': 'new',
+        }
+
+    def act_upload_new_records(self):
+        if not self.wizard_excel_extracted_record_ids:
+            return  # if blank
+        record_created_list = []
+        record_update_list = []
+        record_failed_list = []
+        for form_record in self.wizard_excel_extracted_record_ids:
+            if form_record.error_code != 0:
+                record_failed_list.append(form_record.id)
+                continue
+            form_record.cleanup() #IDK why it resets the initial id but this is a bandaid solution
+            form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
+            row_record_dictionary = {
+                'custom_id': form_record.initial_id,
+                'name': form_record.name,
+                'state': 'proposal',
+                'publishing_state': 'not_published',
+                'course_name': "thesis" if form_record.course == "T" else "design",
+                'abstract': form_record.abstract,
+                'author1': form_record.author1,
+                'author2': form_record.author2,
+                'author3': form_record.author3,
+                'adviser_ids': [(6, 0, [form_record_advisor.id])],
+            }
+            print(form_record.initial_id, "Success")
+
+            if not form_record.article_to_update_id:
+                record = self.env['article.publication'].create(row_record_dictionary)
+                record_created_list.append(record.id)
+            else:
+                record = form_record.article_to_update_id.write(row_record_dictionary)
+                record_update_list.append(form_record.article_to_update_id.id)
+            
+        self.created_article_record_ids = [(6, 0, record_created_list)]
+        self.updated_article_record_ids = [(6, 0, record_update_list)]
+        self.failed_extracted_excel_record_ids = [(6, 0, record_failed_list)]
+
+        return {
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 3', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
+            'target': 'current', }
+    
+    #EXISTING RECORDS
+    def act_update_old_articles(self):
+        pass
+
+    #Reusable Functions
     @api.depends('excel_file')
     def _compute_user_privilege(self):
         for record in self:
@@ -204,44 +273,13 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     def _get_wizard_df(self):
         df_data = base64.b64decode(self.wizard_article_form_df)
-        return pd.read_pickle(io.BytesIO(df_data))
-
-    def act_upload_new_records(self):
-        if not self.wizard_new_records_ids: return #if blank
-        failed_record_ids = []
-        successfull_records = []
-        for form_record in self.wizard_new_records_ids:
-            if not form_record.error_code == 0:
-                failed_record_ids.append(form_record.id)
-                print(form_record.name,"Failed")
-                continue
-            form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
-            row_record_dictionary = {
-                'custom_id':form_record.initial_id,
-                'name':form_record.name,
-                'state':'proposal',
-                'publishing_state':'not_published',
-                'course_name':"thesis" if form_record.course == "T" else "design",
-                'abstract':form_record.abstract,
-                # 'date_registered':form_record.,
-                'author1':form_record.author1,
-                'author2':form_record.author2,
-                'author3':form_record.author3,
-                'adviser_ids': [(6, 0, [form_record_advisor.id])],
-            }
-            print(form_record.name,"Success")
-            record = self.env['article.publication'].create(row_record_dictionary)
-            successfull_records.append(record.id)
-        self.wizard_failed_record_ids = [(6, 0,failed_record_ids)]
-        self.created_article_record_ids = [(6, 0,successfull_records)]
-
-        return {
-            'type': 'ir.actions.act_window', 
-            'name': 'Part 3', 
-            'view_mode': 'form', 
-            'res_model': 'article.import.excel.wizard',
-            'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
-            'target': 'current', }
+        return pd.read_pickle(io.BytesIO(df_data)) 
     
-    # EXISTING RECORDS
+    def _get_initial_temp_data(self,row):
+        if not self.user_privilege:
+            raise UserError("User has no privilege")
+        record_dictionary = {
+                                'uploader_email':row['Email'],
+                                'uploader_name':row['Name'],
+                             }
+        return record_dictionary

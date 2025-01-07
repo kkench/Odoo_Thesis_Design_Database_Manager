@@ -21,6 +21,7 @@
                     </sheet>
                 </form>
             </field>
+            <field name="priority" eval="1"/>
         </record>
     </data>
 
@@ -34,17 +35,15 @@
                         <h1>
                             Article Import Wizard Part 2/3 
                             <button string="Go Back" type="object" name="act_import_new_article_wizard_part1" class="btn-primary"/> 
-                            <button string="Upload to Database" type="object" name="act_upload_new_records" class="btn-primary"/>
+                            <button string="Upload to Database" type="object" name="act_overwriting_confirmation" class="btn-primary"/>
                         </h1>
                         <notebook>
                             <page string="NEW RECORDS">
-                                <field name="wizard_new_records_ids">
-                                    <tree create="0" delete="0">
+                                <field name="wizard_excel_extracted_record_ids">
+                                    <tree create="0" delete="0" editable="bottom">
                                         <field name="initial_id" string="ID"/>
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course"/>
-                                        <!-- <field name="uploader_email" string=""/> --> <!--Not shown, just look at the error code-->
-                                        <!-- <field name="abstract" string=""/> --> <!--Not shown, too long-->
                                         <field name="author1" string="A1"/>
                                         <field name="author2" string="A2"/>
                                         <field name="author3" string="A3"/>
@@ -52,7 +51,6 @@
                                         <field name="student_number_1" string="SN1" /> 
                                         <field name="student_number_2" string="SN2"/>
                                         <field name="student_number_3" string="SN3"/>
-                                        <!-- <field name="tags"/>--> <!--Too Long -->
                                         <field name="error_code" string="E.C."/>
                                     </tree>
                                 </field>
@@ -73,10 +71,10 @@
                             Article Import Wizard Part 3/3 
                         </h1>
                         <notebook>
-                            <page string="Uploaded New Records">
+                            <page string="New Authors with New Topics">
                                 <field name="created_article_record_ids">
                                     <tree create="0" delete="0">
-                                        <field name="custom_id" string="Title"/>
+                                        <!-- <field name="custom_id" string="Title"/> -->
                                         <field name="name" string="Title"/>
                                         <field name="course_name" string="Course"/>
                                         <field name="author1" string="A1"/>
@@ -85,10 +83,23 @@
                                         <field name="adviser_ids" string="ADV"/>
                                     </tree>
                                 </field>
-                            </page>     
-                            <page string="Failed Records">
-                                <field name="wizard_failed_record_ids">
+                            </page>
+                            <page string="Old Authors with New Topics">
+                                <field name="updated_article_record_ids">
                                     <tree create="0" delete="0">
+                                        <!-- <field name="custom_id" string="Title"/> -->
+                                        <field name="name" string="Title"/>
+                                        <field name="course_name" string="Course"/>
+                                        <field name="author1" string="A1"/>
+                                        <field name="author2" string="A2"/>
+                                        <field name="author3" string="A3"/>
+                                        <field name="adviser_ids" string="ADV"/>
+                                    </tree>
+                                </field>
+                            </page>  
+                            <page string="Failed Records">
+                                <field name="failed_extracted_excel_record_ids" options="{'no_open': True}">
+                                    <tree create="0" delete="0" editable="false">
                                         <field name="initial_id" string="ID"/>
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course"/>
@@ -96,17 +107,34 @@
                                         <field name="author2" string="A2"/>
                                         <field name="author3" string="A3"/>
                                         <field name="adviser" string="ADV"/>
-                                        <field name="student_number_1" string="SN1" /> 
+                                        <field name="student_number_1" string="SN1"/>
                                         <field name="student_number_2" string="SN2"/>
                                         <field name="student_number_3" string="SN3"/>
                                         <field name="error_code" string="E.C."/>
                                     </tree>
                                 </field>
-                            </page>      
+                            </page>
                         </notebook>
                     </sheet>
                 </form>
             </field>
         </record>
     </data>
+
+    <record id="article_final_warning_confirmation_popup_form" model="ir.ui.view">
+        <field name="name">article.final.warning.confirmation.popup.form</field>
+        <field name="model">article.import.excel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload Confirmation">
+                <group>
+                    <field name="popup_message"/>
+                </group>
+                <footer>
+                    <button string="Confirm" type="object" name="act_upload_new_records" class="oe_highlight"/>
+                    <button string="Cancel" special="cancel" class="oe_link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>

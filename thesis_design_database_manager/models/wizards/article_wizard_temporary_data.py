@@ -7,7 +7,7 @@ class ArticleWizardPublication(models.TransientModel):
 
     name = fields.Char("Title")
     course = fields.Char("Course Name")
-    initial_id = fields.Char("ID",compute="_compute_errors_and_id",readonly=True)
+    initial_id = fields.Char("ID",compute="_compute_id_and_initial_data",readonly=True,store=True)
     uploader_email = fields.Char("Uploader Email", readonly=True)
     uploader_name = fields.Char("Uploader Name", readonly=True)
     # registration_date = fields.date("Date Registered")
@@ -20,17 +20,17 @@ class ArticleWizardPublication(models.TransientModel):
     student_number_1 = fields.Char("Student Number 1")
     student_number_2 = fields.Char("Student Number 2")
     student_number_3 = fields.Char("Student Number 3")
-    error_comment = fields.Char("Comments",compute="_compute_errors_and_id")
+    error_comment = fields.Char("Comments",compute="_process_errors")
     article_2_flag = fields.Boolean("Check if Article 2",default=False)
+    article_to_update_id = fields.Many2one("article.publication","If Author has already existing ID")
 
     tags = fields.Text("TAGS")
-    error_code = fields.Integer("Error Code Number", default=0,compute="_compute_errors_and_id", readonly=True)
+    error_code = fields.Integer("Error Code Number", default=0,compute="_process_errors", readonly=True)
 
     import_wizard_id = fields.Many2one("article.import.excel.wizard")
-    failed_import_wizard_id = fields.Many2one("article.import.excel.wizard")
 
-    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser')
-    def _compute_errors_and_id(self):
+    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_wizard_id')
+    def _process_errors(self):
         ''' Error Codes:
         0 - No Errors
         1 - Incorrect Name Format (Cannot Read) DONE
@@ -46,21 +46,35 @@ class ArticleWizardPublication(models.TransientModel):
         - Get initial ID 
         '''
         for record in self:
-            record.error_comment = None
-            record.initial_id = None
             record.error_code = 0
+            if not record.import_wizard_id: continue
             if not record.is_author_name_valid():
                 record.error_code = 1
             elif not record.does_author_email_and_name_match(): 
                 record.error_code = 2
-            elif not record.adviser_is_searchable():
-                record.error_code = 3
             elif not record.is_student_number_in_format():
                 record.error_code = 4
             elif record.course == "D" and (None in [record.author1,record.author2,record.author3]): # only max 2 authors for thesis
                 record.error_code = 5
             elif not record.tags_are_valid():
                 record.error_code = 7
+
+            if record.import_wizard_id.wizard_type == "new": 
+                record._process_errors_new_article()
+            elif record.import_wizard_id.wizard_type == "update":
+                pass
+
+    def _process_errors_new_article(self):
+        #the function that calls this will cycle the records already, keep it as 'self'
+        self.error_comment = None
+        self.initial_id = None
+        if not self.adviser_is_searchable():
+            self.error_code = 3
+
+
+    @api.depends('error_code')
+    def _compute_id_and_initial_data(self):
+        for record in self:
             if record.error_code == 0: 
                 record.cleanup() ##Includes checking for duplicate (error 6)
                 
@@ -161,26 +175,33 @@ class ArticleWizardPublication(models.TransientModel):
                 return False
         return True
 
-    def check_for_duplicate(self):
-        for record in self:
-            # Convert the initial_id to a compatible data type if necessary
-            initial_id = record.initial_id if record.initial_id else None
+    def check_for_duplicate(self):#method that calls should already cycle through the records itself
+        self.initial_id = self.initial_id if self.initial_id else None
+        
+        # Search for existing records with the same name and initial_id
+        existing_temporary_data = self.env['article.wizard.publications'].search([
+                                                                                    ('initial_id', '=', self.initial_id),
+                                                                                    ('id', '!=', self.id), # Exclude the current record   
+                                                                                    ('import_wizard_id', '=', self.import_wizard_id.id), # Corrected condition
+                                                                                ])
+                
+        if existing_temporary_data:
+            self.error_comment = "Multiple Form Submission Done"
+            self.error_code = 6  # Duplicate Form Answer
+            return False
+        
+        existing_record_article = self.env['article.publication'].search([('custom_id', '=', self.initial_id)], limit=1)
+
+        if existing_record_article: #not an error but will allocate updates to the old data
+            self.error_comment = "Authors Have A Record in the Database Already/Names Have Duplicate (Unlikely But Check); This will override the Original and Become Proposal"
+            self.write({'article_to_update_id': existing_record_article.id})
+            return False
             
-            # Search for existing records with the same name and initial_id
-            existing_records = self.search([
-                ('name', '=', record.name),
-                ('initial_id', '=', initial_id),
-                ('id', '!=', record.id), # Exclude the current record   
-                ('import_wizard_id', '=', record.import_wizard_id.id), # Corrected condition
-            ])
-            if existing_records:
-                record.error_code = 6  # Duplicate Record
-                return False
         return True
 
     def clear_newline_from_abstract_and_title(self):
         for record in self:
-            print("Got Here")
+            # print("Got Here")
             if not record.abstract: continue
             abstract = record.abstract 
             abstract = re.sub(r'\n+', ' ', abstract)
@@ -194,3 +215,4 @@ class ArticleWizardPublication(models.TransientModel):
             
     def tags_are_valid(self):
         return True
+    

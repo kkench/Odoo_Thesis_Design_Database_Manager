@@ -23,6 +23,7 @@
                             <field name="author1" readonly="is_course_instructor == False"/>
                             <field name="author2" readonly="is_course_instructor == False"/>
                             <field name="author3" readonly="is_course_instructor == False" invisible="course_name != 'design'"/>
+                            <field name='custom_id'/>
                         </group>
                     </group>
                     <notebook>
