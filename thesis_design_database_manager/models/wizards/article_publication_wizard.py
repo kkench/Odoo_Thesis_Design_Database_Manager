@@ -189,7 +189,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         for related_records in records_with_related_authors:
             authors_to_rewrite += f", {related_records.custom_id.split('_')[0]}" if authors_to_rewrite != "" else related_records.custom_id.split('_')[0]
         
-        self.popup_message = "Related Authors will be overwritten: " + authors_to_rewrite
+        self.popup_message = "Related authors' paper status will reset and will be overwritten: " + authors_to_rewrite
 
         return {
             'name': 'Upload Confirmation',
@@ -211,7 +211,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             if form_record.error_code != 0:
                 record_failed_list.append(form_record.id)
                 continue
-            form_record.cleanup() #IDK why it resets the initial id but this is a bandaid solution
             form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,

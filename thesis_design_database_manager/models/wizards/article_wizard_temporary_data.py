@@ -67,7 +67,6 @@ class ArticleWizardPublication(models.TransientModel):
     def _process_errors_new_article(self):
         #the function that calls this will cycle the records already, keep it as 'self'
         self.error_comment = None
-        self.initial_id = None
         if not self.adviser_is_searchable():
             self.error_code = 3
 
