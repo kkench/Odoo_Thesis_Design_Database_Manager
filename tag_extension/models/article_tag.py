@@ -1,7 +1,6 @@
 from odoo import api, fields, models
 
 class ArticleTag(models.Model):
-    _name = "article.tag"
     _description = "Tags for Scanning Similarities"
     _inherit = "article.tag"
 

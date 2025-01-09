@@ -179,4 +179,5 @@ class ArticleWizardPublication(models.TransientModel):
 
 
     def tags_are_valid(self):
+        
         return True
