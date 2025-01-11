@@ -172,6 +172,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             new_article_list.append(new_article.id)
             #------------------------------------------------------------
         self.wizard_new_records_ids = [(6, 0, new_article_list)]
+        #for record in wizard_new_record_ids
 
         return { 
             'type': 'ir.actions.act_window', 

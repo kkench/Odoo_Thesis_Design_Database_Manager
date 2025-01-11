@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="article_import_excel_wizard_form_view_part2" model="ir.ui.view">
+            <field name='name'>article.import.excel.wizard.form.view</field>
+            <field name='model'>article.import.excel.wizard</field>
+            <field name="inherit_id" ref="thesis_design_database_manager.article_import_excel_wizard_form_view_part2"/>
+            <field name='arch' type='xml'>
+                <xpath expr="//button[@name='act_upload_new_records']" position="replace">
+                    <button string="Confirm Details" type="object" name="act_get_tags" class="btn-primary"/>
+                </xpath>
+            </field>
+        </record>
+    <data>
+<odoo>

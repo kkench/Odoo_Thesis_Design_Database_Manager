@@ -74,7 +74,6 @@ A database manager that updates the status of the studies of thesis/design group
                 "install",
                 "pandas",
                 "openpyxl",
-                "nltk",
             ],
             "group": {
                 "kind": "build",

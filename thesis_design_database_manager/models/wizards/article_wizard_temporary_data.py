@@ -23,7 +23,7 @@ class ArticleWizardPublication(models.TransientModel):
     error_comment = fields.Char("Comments",compute="_compute_errors_and_id")
     article_2_flag = fields.Boolean("Check if Article 2",default=False)
 
-    tags = fields.Text("TAGS")
+    tags = fields.Text("TAGS") #a;b;c;d;
     error_code = fields.Integer("Error Code Number", default=0,compute="_compute_errors_and_id", readonly=True)
 
     import_wizard_id = fields.Many2one("article.import.excel.wizard")
