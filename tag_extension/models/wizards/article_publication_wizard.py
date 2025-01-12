@@ -12,7 +12,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         provided_tags = tag_string.split(';')
         return provided_tags        
 
-    def check_abbreviation(keywords):
+    def check_abbreviation(self, keywords):
         abbreviations = []
         for tag in keywords:
             if tag.isupper() and len(tag) > 1:
@@ -73,7 +73,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')],#[(self.env.ref('article_import_excel_wizard_form_view_tags').id, 'form')],  
             'target': 'current', }
         #Not sure if return will override super, but this will move part 2 to the tagging system
         #Make sure to create the new view listed here
