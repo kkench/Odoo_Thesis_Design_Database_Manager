@@ -465,6 +465,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_dictionary = {
                                 'uploader_email':row['Email'],
                                 'uploader_name':row['Name'],
+                                'import_wizard_id':self.id,
                             }
         
         if self.user_privilege == "design_instructor":

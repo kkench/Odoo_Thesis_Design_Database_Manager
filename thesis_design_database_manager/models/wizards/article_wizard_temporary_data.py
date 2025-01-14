@@ -84,6 +84,8 @@ class ArticleWizardPublication(models.TransientModel):
                 reset_record(record)
                 continue
             record_existance_flag = record._authors_has_existing_records_already()
+            # print("Import Wizard ID:", record.import_wizard_id) 
+            # print("Wizard Type:", record.import_wizard_id.wizard_type)
             if record.import_wizard_id.wizard_type == "new":
                 if record._has_errors_for_new_articles(): #check if anything is wrong for new record
                     reset_record(record)
@@ -91,11 +93,15 @@ class ArticleWizardPublication(models.TransientModel):
                 if record_existance_flag:
                     record.error_comment = "Existing_Title_Exists, Will Overwrite"
             if record.import_wizard_id.wizard_type == "edit":
+                print(record_existance_flag)
                 if not record_existance_flag:
+                    print("nani??")
                     record.error_code = 8
                     record.error_comment = "Cannot Find Existing Record"
+                    self.article_to_update_id = None
+                    continue
                 record.link_existing_record()
-                print("should be linked")
+                # print("should be linked")
             record.error_code = 0
             record.clear_newline_from_abstract_and_title()
         return
@@ -187,17 +193,21 @@ class ArticleWizardPublication(models.TransientModel):
     
     def _authors_has_existing_records_already(self):
         if not self.initial_id: return False
+        print("??", self.initial_id)
         existing_record_article = self.env['article.publication'].search([('custom_id', '=', self.initial_id)], limit=1)
+        print(existing_record_article)
         if existing_record_article: #not an error but will allocate updates to the old data
             self.error_comment = "Authors Have A Record in the Database Already/Names Have Duplicate (Unlikely But Check); This will override the Original and Become Proposal"
-            self.write({'article_to_update_id': existing_record_article.id})
+            self.article_to_update_id = existing_record_article.id
             return True
-        return False
+        else:
+            self.article_to_update_id = None
+            return False
     
     def link_existing_record(self):
-        print("another one bites the dust")
+        # print("another one bites the dust")
         binary_string = self.edit_binary_string
-        print(binary_string)
+        # print(binary_string)
         if binary_string == "0000" or not binary_string:
             return False
         if not self.article_to_update_id:
