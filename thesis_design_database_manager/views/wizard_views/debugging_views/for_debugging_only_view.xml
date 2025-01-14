@@ -18,5 +18,25 @@
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_article_import_excel_wizard_tree"/>
         </record>
+
+        <record id="view_article_wizard_publication_form" model="ir.ui.view">
+            <field name="name">article.wizard.publication.form</field>
+            <field name="model">article.wizard.publication</field>
+            <field name="arch" type="xml">
+                <form string="Article Wizard Publication">
+                    <sheet>
+                        <group>
+                            <field name="error_comment"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="action_article_wizard_publication" model="ir.actions.act_window">
+            <field name="name">Article Wizard Publications</field>
+            <field name="res_model">article.wizard.publication</field>
+            <field name="view_mode">tree,form</field>
+        </record> -->
     </data>
 </odoo>

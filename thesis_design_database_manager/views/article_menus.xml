@@ -4,7 +4,9 @@
         <menuitem name="View Publication List" id="article_publication_menu" action="article_publication_view_action" sequence="1"/>
         <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="2"/>
         <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="3"/>
-        <menuitem name="Import CSV" id="article_import_menu" action="article_import_excel_wizard_popup_action" sequence="4"/>
-        <menuitem name="Import CSV Debugging Tree View" id="article_debug_import_menu" action="action_article_import_excel_wizard" sequence="5"/>
+        <menuitem name="Import New with Excel" id="article_import_new_records_menu" action="article_import_excel_new_wizard_popup_action" sequence="4"/>
+        <menuitem name="Edit Old Record with Excel" id="article_import_edit_records_menu" action="article_import_excel_edit_wizard_popup_action" sequence="5"/>
+        <menuitem name="Import CSV Debugging Tree View" id="article_debug_import_menu" action="action_article_import_excel_wizard" sequence="6"/>
+        <!-- <menuitem id="menu_article_wizard_publication" name="Article Wizard Publications" action="action_article_wizard_publication" sequence="7"/> -->
     </menuitem>
 </odoo>
