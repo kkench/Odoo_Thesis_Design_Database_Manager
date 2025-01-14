@@ -1,2 +1,3 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_article_import_excel_wizard,access.article.import.excel.wizard,model_article_import_excel_wizard,base.group_user,1,1,1,1
+access_article_wizard_publications,access.article.wizard.publications,model_article_wizard_publications,base.group_user,1,1,1,1

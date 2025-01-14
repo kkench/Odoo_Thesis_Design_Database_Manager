@@ -6,8 +6,39 @@
             <field name="inherit_id" ref="thesis_design_database_manager.article_import_excel_wizard_form_view_part2"/>
             <field name='arch' type='xml'>
                 <xpath expr="//button[@name='act_upload_new_records']" position="replace">
-                    <button string="Confirm Details" type="object" name="act_get_tags" class="btn-primary"/>
+                    <!-- <button string="Confirm Details" type="object" name="act_get_tags" class="btn-primary"/> -->
                 </xpath>
+            </field>
+        </record>
+    </data>
+
+    <data>
+        <record id="article_import_excel_wizard_form_view_tags" model="ir.ui.view">
+            <field name="name">article.import.excel.wizard.form.view.tags</field>
+            <field name="model">article.import.excel.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Tag Checking">
+                    <sheet>
+                        <h1>
+                            Article Import Wizard Tag Verification
+                            <button string="Go Back" type="object" name="act_import_new_article_wizard_part1" class="btn-primary"/> 
+                            <!-- <button string="Confirm" type="object" name="act_" class="btn-primary"/> -->
+                        </h1>
+                        <notebook>
+                            <page string="Changed Works">
+                                <field name="wizard_check_tags_records_ids">
+                                    <tree create="0" delete="0">
+                                        <field name="initial_id" string="ID"/>
+                                        <field name="name" string="Title"/>
+                                        <field name="course" string="Course"/>
+                                        <field name="tags"/> <!--Too Long -->
+                                        <!-- <field name="error_code" string="E.C."/> -->
+                                    </tree>
+                                </field>
+                            </page>                           
+                        </notebook>
+                    </sheet>
+                </form>
             </field>
         </record>
     </data>
