@@ -1,12 +1,13 @@
 <odoo>
     <data>
-        <record id="article_import_excel_wizard_form_view_part2" model="ir.ui.view">
-            <field name='name'>article.import.excel.wizard.form.view</field>
+        <record id="article_import_excel_wizard_form_view" model="ir.ui.view">
+            <field name='name'>article.import.excel.wizard.form.view.part2</field>
             <field name='model'>article.import.excel.wizard</field>
-            <field name="inherit_id" ref="thesis_design_database_manager.article_import_excel_wizard_form_view_part2"/>
+            <field name="inherit_id" ref="thesis_design_database_manager.article_import_excel_wizard_form_view"/>
             <field name='arch' type='xml'>
-                <xpath expr="//button[@name='act_upload_new_records']" position="replace">
-                    <!-- <button string="Confirm Details" type="object" name="act_get_tags" class="btn-primary"/> -->
+                <xpath expr="//button[@name='act_import_article_wizard_part2']" position="replace">
+                    <field name="excel_file"/>
+                        <button string="Confirm Column Selection; Proceed to Next Step" type="object" name="act_get_tags" class="btn-primary"/>
                 </xpath>
             </field>
         </record>
@@ -21,7 +22,7 @@
                     <sheet>
                         <h1>
                             Article Import Wizard Tag Verification
-                            <button string="Go Back" type="object" name="act_import_new_article_wizard_part1" class="btn-primary"/> 
+                            <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
                             <!-- <button string="Confirm" type="object" name="act_" class="btn-primary"/> -->
                         </h1>
                         <notebook>
