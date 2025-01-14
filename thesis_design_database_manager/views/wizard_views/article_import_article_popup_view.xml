@@ -1,0 +1,49 @@
+<odoo>
+    <record id="article_import_excel_new_wizard_popup_view" model="ir.ui.view">
+        <field name="name">article.import.excel.new.wizard.popup.view</field>
+        <field name="model">article.import.excel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import CSV" create="false">
+                <group>
+                    <field name="excel_file" filename="file_name"/>
+                </group>
+                <footer>
+                    <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <record id="article_import_excel_new_wizard_popup_action" model="ir.actions.act_window">
+        <field name="name">Import excel</field>
+        <field name="res_model">article.import.excel.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="article_import_excel_new_wizard_popup_view"/>
+        <field name="target">new</field> <!--new is popup-->
+    </record>
+
+    <record id="article_import_excel_edit_wizard_popup_view" model="ir.ui.view">
+        <field name="name">article.import.excel.edit.wizard.popup.view</field>
+        <field name="model">article.import.excel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import CSV" create="false">
+                <group>
+                    <field name="excel_file" filename="file_name"/>
+                </group>
+                <footer>
+                    <button string="Import Edits for Old Articles" type="object" name="act_edit_existing_articles" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <record id="article_import_excel_edit_wizard_popup_action" model="ir.actions.act_window">
+        <field name="name">Import excel</field>
+        <field name="res_model">article.import.excel.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="article_import_excel_edit_wizard_popup_view"/>
+        <field name="target">new</field> <!--new is popup-->
+    </record>
+</odoo>

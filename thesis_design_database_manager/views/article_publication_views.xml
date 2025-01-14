@@ -7,8 +7,8 @@
                 <sheet>
                     <!--NOTE:readonly statement here are cumbersome, no better alternative that i could think off, 
                     an alternative idea is having two copies of the same form with different readonly capabilities-->
-                    <h1>
-                        Article Name: <field name="name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
+                    <h1 style="width: 100%;">
+                        <field name="name" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                     </h1>
                     <field name="is_course_instructor" readonly="True" invisible="True"/>
                     <field name="is_article_adviser" readonly="True" invisible="True"/>
@@ -23,11 +23,12 @@
                             <field name="author1" readonly="is_course_instructor == False"/>
                             <field name="author2" readonly="is_course_instructor == False"/>
                             <field name="author3" readonly="is_course_instructor == False" invisible="course_name != 'design'"/>
+                            <field name='custom_id'/>
                         </group>
                     </group>
                     <notebook>
                         <page string="details">
-                            <h1>
+                            <h1 style="width: 100%;"> 
                                 <field name="article_tag_ids" widget="many2many_tags" readonly="(is_article_adviser == False) and (is_course_instructor == False)"/>
                             </h1>
                             <group>

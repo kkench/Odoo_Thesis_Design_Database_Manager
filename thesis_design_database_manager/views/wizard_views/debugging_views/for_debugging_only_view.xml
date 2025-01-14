@@ -1,0 +1,42 @@
+<odoo>
+    <data>
+        <record id="view_article_import_excel_wizard_tree" model="ir.ui.view">
+            <field name="name">article.import.excel.wizard.tree</field>
+            <field name="model">article.import.excel.wizard</field>
+            <field name="arch" type="xml">
+                <tree string="Article Import Excel Wizard">
+                    <field name="file_name"/>
+                    <field name="user_privilege"/>
+                    <field name="created_article_record_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_article_import_excel_wizard" model="ir.actions.act_window">
+            <field name="name">Article Import Excel Wizard</field>
+            <field name="res_model">article.import.excel.wizard</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_article_import_excel_wizard_tree"/>
+        </record>
+
+        <record id="view_article_wizard_publication_form" model="ir.ui.view">
+            <field name="name">article.wizard.publication.form</field>
+            <field name="model">article.wizard.publication</field>
+            <field name="arch" type="xml">
+                <form string="Article Wizard Publication">
+                    <sheet>
+                        <group>
+                            <field name="error_comment"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="action_article_wizard_publication" model="ir.actions.act_window">
+            <field name="name">Article Wizard Publications</field>
+            <field name="res_model">article.wizard.publication</field>
+            <field name="view_mode">tree,form</field>
+        </record> -->
+    </data>
+</odoo>
