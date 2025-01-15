@@ -6,6 +6,7 @@
         "shipment_monitoring_system",
     ],
     "data": [
+        "security/ir.model.access.csv",
         "views/wizard_views/article_import_form.xml",
         ],
 

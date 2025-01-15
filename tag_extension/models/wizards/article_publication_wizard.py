@@ -12,10 +12,12 @@ class ArticleImportExcelWizard(models.TransientModel):
        for_checking_list = []
        super().process_new_data_for_part_2()
 
-       for_sorting = self.env['article.wizard.publication'].search([('error_code','=','7')])
-       for_checking_list.append(for_sorting.id)
-
-       self.wizard_check_tags_records_ids = [(6,0,for_checking_list)]
+    #    for_sorting = self.env['article.wizard.publication'].search([('error_code','=','7')])
+    #    for_checking_list.append(for_sorting.id)
+    #    print(for_sorting.for_checking_tags_ids)
+    #    print("Here")
+    #    self.wizard_check_tags_records_ids = [(6,0,for_checking_list)]
+       
 
        return { 
             'type': 'ir.actions.act_window', 
@@ -26,6 +28,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
 
+    #def process_edit_data_for_part_2(self):
 
     # def act_import_new_article_wizard_part3(self):
     #run similarity check, abbreviation check then move to tag adjustment page
