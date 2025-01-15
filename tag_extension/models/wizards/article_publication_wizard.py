@@ -8,7 +8,24 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     wizard_check_tags_records_ids = fields.One2many('article.wizard.publication','checking_wizard_id','List of Records for Checking')
 
-    
+    def process_new_data_for_part_2(self):
+       for_checking_list = []
+       super().process_new_data_for_part_2()
+
+       for_sorting = self.env['article.wizard.publication'].search([('error_code','=','7')])
+       for_checking_list.append(for_sorting.id)
+
+       self.wizard_check_tags_records_ids = [(6,0,for_checking_list)]
+
+       return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 2-2', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')], 
+            'target': 'current', }
+
 
     # def act_import_new_article_wizard_part3(self):
     #run similarity check, abbreviation check then move to tag adjustment page

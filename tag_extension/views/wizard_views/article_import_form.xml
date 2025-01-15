@@ -1,5 +1,5 @@
 <odoo>
-    <data>
+    <!-- <data>
         <record id="article_import_excel_wizard_form_view" model="ir.ui.view">
             <field name='name'>article.import.excel.wizard.form.view.part2</field>
             <field name='model'>article.import.excel.wizard</field>
@@ -11,7 +11,7 @@
                 </xpath>
             </field>
         </record>
-    </data>
+    </data> -->
 
     <data>
         <record id="article_import_excel_wizard_form_view_tags" model="ir.ui.view">
