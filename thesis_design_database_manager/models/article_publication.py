@@ -149,5 +149,5 @@ class ArticlePublication(models.Model):
             'view_mode': 'form',
             'res_model': 'article.publication',
             'res_id': self.id,
-            'target': 'current',
+            'target': 'new',
         }

@@ -41,7 +41,7 @@
                                     <tree create="0" delete="0" editable="bottom">
                                         <field name="initial_id" string="ID"/>
                                         <field name="name" string="Title"/>
-                                        <field name="course" string="Course"/>
+                                        <field name="course" string="Course" readonly="1"/>
                                         <field name="author1" string="A1"/>
                                         <field name="author2" string="A2"/>
                                         <field name="author3" string="A3"/>
@@ -50,7 +50,8 @@
                                         <field name="student_number_2" string="SN2"/>
                                         <field name="student_number_3" string="SN3"/>
                                         <field name="error_code" string="E.C."/>
-                                        <button name="act_open_error_code" type="object" string="See Error" class="btn-primary" invisible="error_code == 0"/>
+                                        <field name="error_comment" column_invisible="true"/>
+                                        <button name="act_open_error_code" type="object" string="Comments" class="btn-primary" invisible="not error_comment"/>
                                     </tree>
                                 </field>
                             </page>                           

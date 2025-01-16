@@ -6,9 +6,12 @@
             <form string="Import CSV" create="false">
                 <group>
                     <field name="excel_file" filename="file_name"/>
+                    <field name="user_privilege"/>
                 </group>
                 <footer>
-                    <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary"/>
+                    <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege != 'faculty_adviser'"/>
+                    <button string="Import New Articles As Instructor" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/>
+                    <button string="Import New Articles As Adviser" type="object" name="act_set_import_new_and_as_adviser" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

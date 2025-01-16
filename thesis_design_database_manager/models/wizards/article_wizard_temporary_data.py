@@ -6,7 +6,7 @@ class ArticleWizardPublication(models.TransientModel):
     _description = "Sample list of what will be uploaded"
 
     name = fields.Char("Title")
-    course = fields.Char("Course Name")
+    course = fields.Selection([("T", "T"),("D", "D")],string="Course Code")
     initial_id = fields.Char("ID",compute="_compute_data_and_errors",readonly=True,store=True)
     uploader_email = fields.Char("Uploader Email", readonly=True)
     uploader_name = fields.Char("Uploader Name", readonly=True)
@@ -20,6 +20,7 @@ class ArticleWizardPublication(models.TransientModel):
     student_number_1 = fields.Char("Student Number 1", default=None)
     student_number_2 = fields.Char("Student Number 2", default=None)
     student_number_3 = fields.Char("Student Number 3", default=None)
+    instructor_privilege_flag = fields.Boolean("Adviser Mode/Instructor (0/1)")# delete when you cant find a use case
     
     article_2_flag = fields.Boolean("Check if Article 2",default=False)
     article_to_update_id = fields.Many2one("article.publication","If Author has already existing ID",compute="_compute_data_and_errors",store=True)
@@ -31,22 +32,19 @@ class ArticleWizardPublication(models.TransientModel):
 
     import_wizard_id = fields.Many2one("article.import.excel.wizard")
 
-    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_wizard_id')
+    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_wizard_id')
     def _compute_data_and_errors(self):
         ''' Error Codes:
         0 - No Errors
-        1 - Incorrect Name Format (Cannot Read) DONE
-        2 - Student is not the editor DONE
-        3 - Cannot Search Adviser DONE
+        1 - Incorrect Name Format (Cannot Read) 
+        2 - Student is not the editor
+        3 - Invalid Course
         4 - Student Number Does Not Follow Proper Formatting
         5 - 3rd Author Exists on Thesis
         6 - Duplicate Submission
         7 - Tags Stuff
-        8 - Edit Mode, Record Not Searchable
-
-        OTHER STUFF:
-        - Automatically arrange authors by name
-        - Get initial ID 
+        8 - Cannot Search Adviser
+        9 - Edit Mode, Record Not Searchable
         '''
         def reset_record(record):
             record.initial_id = None
@@ -61,6 +59,11 @@ class ArticleWizardPublication(models.TransientModel):
             if not record.does_author_email_and_name_match(): 
                 record.error_code = 2
                 record.error_comment = "Uploader Error; Use Own Mapuan Email"
+                reset_record(record)
+                continue
+            if record.course_is_unknown(): 
+                record.error_code = 3
+                record.error_comment = "No Course Given"
                 reset_record(record)
                 continue
             if not record.is_student_number_in_format():
@@ -83,25 +86,18 @@ class ArticleWizardPublication(models.TransientModel):
                 record.error_comment = "Tagging Error"   
                 reset_record(record)
                 continue
-            record_existance_flag = record._authors_has_existing_records_already()
-            # print("Import Wizard ID:", record.import_wizard_id) 
-            # print("Wizard Type:", record.import_wizard_id.wizard_type)
+            record._check_for_existing_records()
             if record.import_wizard_id.wizard_type == "new":
                 if record._has_errors_for_new_articles(): #check if anything is wrong for new record
                     reset_record(record)
                     continue
-                if record_existance_flag:
-                    record.error_comment = "Existing_Title_Exists, Will Overwrite"
+                if record.article_to_update_id:
+                    record.error_comment = "Existing Title Exists, Will Overwrite"
             if record.import_wizard_id.wizard_type == "edit":
-                print(record_existance_flag)
-                if not record_existance_flag:
-                    print("nani??")
-                    record.error_code = 8
-                    record.error_comment = "Cannot Find Existing Record"
-                    self.article_to_update_id = None
+                if record._has_errors_for_edit_articles():
+                    reset_record(record)
                     continue
                 record.link_existing_record()
-                # print("should be linked")
             record.error_code = 0
             record.clear_newline_from_abstract_and_title()
         return
@@ -156,12 +152,17 @@ class ArticleWizardPublication(models.TransientModel):
     
     def adviser_is_searchable(self):
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
-        adviser = self.env['res.users'].search([('name', '=', self.adviser)], limit=1)
-        if adviser:
-            if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
-                return True
-        return False
-    
+        if not self.adviser:return False
+        # print(self.adviser.split(';'))
+        for adviser_name in self.adviser.split(';'):
+            adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
+            if adviser:
+                if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
+                    continue
+                else:
+                    return False
+        return True    
+            
     def is_student_number_in_format(self):
         # THIS IS A COMPUTE FUNCTION, DON'T EDIT NON-STORED DATA
         student_list = [self.author1, self.author2, self.author3]
@@ -176,59 +177,44 @@ class ArticleWizardPublication(models.TransientModel):
         
         return not all(student_number is None for student_number in student_number_list)
 
+    def course_is_unknown(self):
+        return not (self.course in ['T','D'])
+
     def _has_errors_for_new_articles(self):
         #the function that calls this will cycle the records already, keep it as 'self' 
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
         if not self.adviser_is_searchable():
-            self.error_code = 3
+            self.error_code = 8
             self.error_comment = "Adviser is Not Found"
             return True
         return False
-
-    def _compute_data_and_errors_edit_articles(self):
-        #the function that calls this will cycle the records already, keep it as 'self' 
-        #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
-        #not sure what to put here yet
-        return True
     
-    def _authors_has_existing_records_already(self):
+    def _has_errors_for_edit_articles(self):
+        #self is already a single instance
+        #this assumes wizard is on edit mode
+        if not self.article_to_update_id:
+            self.error_code = 9
+            self.error_comment = "Cannot Find Existing Record"
+            self.article_to_update_id = None
+            return True
+        if self.import_wizard_id.user_privilege != "faculty_adviser": return False
+
+        for adviser in self.article_to_update_id.adviser_ids:
+            if adviser.name in self.adviser.split(";"):
+                return False
+        self.error_code = 10
+        self.error_comment = "User is not an adviser"
+        return True
+
+    def _check_for_existing_records(self):
         if not self.initial_id: return False
-        print("??", self.initial_id)
         existing_record_article = self.env['article.publication'].search([('custom_id', '=', self.initial_id)], limit=1)
-        print(existing_record_article)
         if existing_record_article: #not an error but will allocate updates to the old data
-            self.error_comment = "Authors Have A Record in the Database Already/Names Have Duplicate (Unlikely But Check); This will override the Original and Become Proposal"
             self.article_to_update_id = existing_record_article.id
             return True
         else:
             self.article_to_update_id = None
             return False
-    
-    def link_existing_record(self):
-        # print("another one bites the dust")
-        binary_string = self.edit_binary_string
-        # print(binary_string)
-        if binary_string == "0000" or not binary_string:
-            return False
-        if not self.article_to_update_id:
-            return False
-        if int(binary_string[0]):  # Edit everything
-            print("Checked in")
-            return True
-        else:
-            print("Checked Out")
-            print(bool(int(binary_string[1])),bool(int(binary_string[2])),bool(int(binary_string[3])))
-            if not int(binary_string[1]):  # If not supposed to edit, copy it
-                print("title checked")
-                self.name = self.article_to_update_id.name
-            if not int(binary_string[2]):
-                print("abstract checked")
-                self.abstract = self.article_to_update_id.abstract
-            if int(binary_string[3]):
-                pass  # This is more complicated
-                # temp.tags = record.tags here
-        return True
-
     ##########################
 
     def _update_initial_id(self):
@@ -251,7 +237,8 @@ class ArticleWizardPublication(models.TransientModel):
             #-------------Include Course Initial------------------
             record.initial_id += "_" + record.course
             #-------------For Thesis Articles-----------------------
-            record.initial_id += "_Art2" if record.article_2_flag else "_Art1"
+            if record.course == "T":
+                record.initial_id += "_Art2" if record.article_2_flag else "_Art1"
 
     def arrange_authors_alphabetically(self):
         # print("arranging now")
@@ -277,14 +264,6 @@ class ArticleWizardPublication(models.TransientModel):
             self.student_number_1, self.student_number_2, self.student_number_3 = sorted_student_number
             return False
 
-
-        # existing_record_article = self.env['article.publication'].search([('custom_id', '=', self.initial_id)], limit=1)
-
-        # if existing_record_article:  # Not an error but will allocate updates to the old data
-        #     self.error_comment = "Authors Have A Record in the Database Already/Names Have Duplicate (Unlikely But Check); This will override the Original and Become Proposal"
-        #     self.write({'article_to_update_id': existing_record_article.id})
-        #     return False
-
     def clear_newline_from_abstract_and_title(self):
         for record in self:
             if not record.abstract: continue
@@ -302,7 +281,6 @@ class ArticleWizardPublication(models.TransientModel):
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
         return True
     
-
     def act_open_error_code(self):
         self.ensure_one()
         return { 
@@ -313,4 +291,32 @@ class ArticleWizardPublication(models.TransientModel):
             'res_id': self.id,
             'views': [(self.env.ref('thesis_design_database_manager.view_article_wizard_publication_error_code_popup').id, 'form')], 
             'target': 'new', }
+    
+    def link_existing_record(self):
+        # print("another one bites the dust")
+        binary_string = self.edit_binary_string
+        # print(binary_string)
+        if binary_string == "0000" or not binary_string:
+            return False
+        if not self.article_to_update_id:
+            return False
+        if int(binary_string[0]):  # Edit everything
+            return True
+        else:
+            print(bool(int(binary_string[1])),bool(int(binary_string[2])),bool(int(binary_string[3])))
+            # self.adviser = self.article_to_update_id.adviser_ids
+            semicolon_separated_advisers = "" 
+            for adviser_id in self.article_to_update_id.adviser_ids:
+                semicolon_separated_advisers += adviser_id.name if semicolon_separated_advisers == "" else f";{adviser_id.name}"
+            self.adviser = semicolon_separated_advisers
+            if not int(binary_string[1]):  # If not supposed to edit, copy it
+                print("title checked")
+                self.name = self.article_to_update_id.name
+            if not int(binary_string[2]):
+                print("abstract checked")
+                self.abstract = self.article_to_update_id.abstract
+            if int(binary_string[3]):
+                pass  
+        return True
+
     #################

@@ -40,13 +40,13 @@
                         <page string="Similar Studies">
                             <field name="related_article_ids">
                                 <tree default_order="title_similarity_score desc" create="0" delete="0">
+                                    <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
                                     <field name="name"/>
                                     <field name="state"/>
                                     <field name="publishing_state"/>
                                     <field name="course_name"/>
                                     <field name="tag_similarity_score"/>
                                     <field name="title_similarity_score"/>
-                                    <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
                                 </tree>
                             </field>
                         </page>

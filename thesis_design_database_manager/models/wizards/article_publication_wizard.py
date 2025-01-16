@@ -25,10 +25,16 @@ class ArticleImportExcelWizard(models.TransientModel):
     updated_article_records_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
     overwritten_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_overwritten_rel',string="Overwritten Records")
     failed_form_submissions_record_ids = fields.Many2many("article.wizard.publication", 'article_import_excel_wizard_failed_rel',string="Failed Records")
-    # duplicate_extracted_author_submission_ids = fields.Many2many("article.wizard.publication", 'article_import_excel_wizard_duplicate_rel',string="Duplicate Submission")
+
+    ignore_instructor_privilege = fields.Boolean("As Adviser, not Instructor", default=False)
 
     popup_message = fields.Char("Warning", readonly=True)
-    user_privilege = fields.Char('User Privilege',compute="_compute_user_privilege")
+    user_privilege = fields.Selection([
+                                            ('thesis_instructor', 'Thesis Instructor'),
+                                            ('design_instructor', 'Design Instructor'),
+                                            ('faculty_adviser', 'Faculty Adviser')
+                                        ], string='User Privilege', compute='_compute_user_privilege', store=True)
+
 
     DEFAULT_COLUMN_LINK_DICT_FOR_NEW_MODE = { #EXCEL : OFFICIAL
         "Author 1 (LN, FN MI. ; Alphabetically Arranged)":"1st Author",
@@ -37,6 +43,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Author 1 Student Number":"1st Author Student Number",
         "Author 2 Student Number":"2nd Author Student Number",
         "Author 3 Student Number":"3rd Author Student Number",
+        "Course?":"Course Name",
         "Topic Title":"Title",
         "Topic Description/Abstract":"Abstract",
         "Topic Tag":"Tags",
@@ -68,6 +75,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "New Title Name":"Title",
         "New Abstract":"Abstract",
         "New Topic Tags":"Tags",
+        "Course?": "Course Name"
     }
 
     LABEL_TO_RECORD_DICTIONARY = {
@@ -83,28 +91,70 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             '3rd Author Student Number': 'student_number_3',
                                             'Tags': 'tags',
                                             'Article 2 Flag':'article_2_flag',
+                                            'Course Name':'course'
                                         }
     
-    #NEW RECORDS
+    #Buttons
     def act_set_import_new(self):
         self.wizard_type = "new"
         return self.import_excel_articles()
+    
+    def act_set_import_new_and_as_adviser(self):
+        self.ignore_instructor_privilege = True
+        return self.act_set_import_new()
 
+    def act_edit_existing_articles(self):#This is now part of advisers already
+        self.ignore_instructor_privilege = True
+        self.wizard_type = "edit"
+        return self.import_excel_articles() 
+
+    def act_upload_records(self):
+        if self.wizard_type == "new":
+            return self.upload_new_records_to_database()
+        elif self.wizard_type == "edit":
+            return self.upload_edit_records_to_database()
+
+    def act_upload_temporary_record(self):
+        if self.wizard_type == 'new':
+            return self.upload_process_for_new_record()
+        elif self.wizard_type == 'edit':
+            return self.upload_process_for_edit_record()
+
+    def act_import_article_wizard_part2(self):
+        if self.wizard_type == "null":return
+        if self.wizard_type == "new":
+            return self.process_new_data_for_part_2()
+        if self.wizard_type == "edit":
+            return self.process_edit_data_for_part_2()
+
+
+    #GENERAL PROCESSES
     def process_new_data_for_part_2(self):
         excel_df = self._get_wizard_df()
         new_article_list = []
         for index, row in excel_df.iterrows():
             #---------Static Article Information--------------
-            row_data_dictionary = self._get_initial_temp_data(row)
+            row_data_dictionary, ignore_list = self._get_initial_temp_data(row)
             #-------------------------------------------------
 
             #----------Excel to Official Column Information-------------
             for excel_column_record in self.excel_column_ids:
-                if not excel_column_record.official_record_id:
-                    continue    
-                row_data_dictionary[self.LABEL_TO_RECORD_DICTIONARY[excel_column_record.official_record_id.name]] = row[excel_column_record.name]
+                field_name = self.LABEL_TO_RECORD_DICTIONARY[excel_column_record.official_record_id.name]
+                skip_data = (not excel_column_record.official_record_id or 
+                             field_name in ignore_list or
+                             pd.isna(row[excel_column_record.name]))
+                if skip_data: continue
+
+                if field_name == 'course':
+                    row_data_dictionary[field_name] = 'T' if row[excel_column_record.name] == 'Thesis' else 'D'
+                    continue
+
+                if field_name in ['student_number_1','student_number_2','student_number_3']:
+                    row_data_dictionary[field_name] = str(int(row[excel_column_record.name]))#in case of float
+                    continue
+                
+                row_data_dictionary[field_name] = row[excel_column_record.name]
             new_article = self.env['article.wizard.publication'].create(row_data_dictionary)
-            # new_article._compute_data_and_errors()
             new_article_list.append(new_article.id)
             #------------------------------------------------------------
         #--------------Set all record relation-------------
@@ -119,11 +169,77 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
             'target': 'current', }
 
-    def act_upload_temporary_record(self):
-        if self.wizard_type == 'new':
-            return self.upload_process_for_new_record()
-        elif self.wizard_type == 'edit':
-            return self.upload_process_for_edit_record()
+    def process_edit_data_for_part_2(self):
+        boolean_dictionary = {
+            "No (both conformity and non conformity purposes)":0,
+            "Yes (New topic/redefense for a new topic)":1,
+            "No":"0",
+            "Yes":"1",
+        }
+        excel_df = self._get_wizard_df()
+        to_update_article_list = []
+        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
+        update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)"]
+        new_record_data = ["New Title Name","New Abstract","New Topic Tags"]
+        question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
+                            if excel_column_record.official_record_id.name in to_update_questions_list]
+        non_question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
+                                    if (excel_column_record.official_record_id.name not in to_update_questions_list) 
+                                    and excel_column_record.official_record_id]
+        for _, row in excel_df.iterrows():
+            #---------Static Article Information--------------
+            row_data_dictionary, ignore_list = self._get_initial_temp_data(row)
+            boolean_string_flags = list("0000")
+            #-------------------------------------------------
+            #------------Extract Questions To Update-----------
+            for column in question_columns:
+                boolean_index = to_update_questions_list.index(column.official_record_id.name)
+                boolean_string_flags[boolean_index] = str(boolean_dictionary.get(row[column.name], "0"))
+            boolean_string_flags = "".join(boolean_string_flags)
+            row_data_dictionary['edit_binary_string'] = boolean_string_flags
+            #------------Update/New Data ----------
+            not_important_header_list = update_data if int(boolean_string_flags[0]) else new_record_data
+            appropriate_non_question_columns = [column for column in non_question_columns 
+                                                if column.name not in not_important_header_list]
+            
+            for column in appropriate_non_question_columns:                  
+                field_name = self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]
+                if field_name in ignore_list: continue
+                # print("check plz",field_name)
+                skip_data = (not column.official_record_id or 
+                             field_name in ignore_list or
+                             pd.isna(row[column.name]))
+                if skip_data: continue
+
+                if field_name == 'course':
+                    row_data_dictionary[field_name] = 'T' if row[column.name] == 'Thesis' else 'D'
+                    continue
+
+                if field_name in ['student_number_1','student_number_2','student_number_3']:
+                    row_data_dictionary[field_name] = str(int(row[column.name]))#in case of float
+                    continue
+                row_data_dictionary[field_name] = row[column.name]
+
+            if not int(boolean_string_flags[0]):
+                row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
+                row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
+                row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
+            print(row_data_dictionary)
+            temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
+            # temporary_record._compute_data_and_errors()
+
+            to_update_article_list.append(temporary_record.id)
+        #--------------Set all record relation-------------
+        self.wizard_excel_extracted_record_ids = [(6, 0, to_update_article_list)]
+
+        return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 2', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'target': 'current', }
 
     def upload_process_for_new_record(self):
         records_with_related_authors = self.wizard_excel_extracted_record_ids.mapped('article_to_update_id')
@@ -166,13 +282,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             'target': 'new',
         }
 
-
-    def act_upload_records(self):
-        if self.wizard_type == "new":
-            return self.upload_new_records_to_database()
-        elif self.wizard_type == "edit":
-            return self.upload_edit_records_to_database()
-
     def upload_new_records_to_database(self):
         if not self.wizard_excel_extracted_record_ids or self.wizard_type == "null":
             return  # if blank
@@ -195,7 +304,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'author1': form_record.author1,
                 'author2': form_record.author2,
                 'author3': form_record.author3,
-                'adviser_ids': [(6, 0, [form_record_advisor.id])],
+                'adviser_ids': [(6, 0, [form_record_advisor.id])], # this is new, so replace is good
             }
             if not form_record.article_to_update_id:
                 record = self.env['article.publication'].create(row_record_dictionary)
@@ -259,75 +368,12 @@ class ArticleImportExcelWizard(models.TransientModel):
             'res_id': self.id,
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
             'target': 'current', }
-    #EXISTING RECORDS
-    def act_edit_existing_articles(self):
-        self.wizard_type = "edit"
-        return self.import_excel_articles() 
-    
-    def process_edit_data_for_part_2(self):
-        boolean_dictionary = {
-            "No (both conformity and non conformity purposes)":0,
-            "Yes (New topic/redefense for a new topic)":1,
-            "No":"0",
-            "Yes":"1",
-        }
-        excel_df = self._get_wizard_df()
-        to_update_article_list = []
-        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
-        update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)"]
-        new_record_data = ["New Title Name","New Abstract","New Topic Tags"]
-        question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
-                            if excel_column_record.official_record_id.name in to_update_questions_list]
-        non_question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
-                                    if (excel_column_record.official_record_id.name not in to_update_questions_list) 
-                                    and excel_column_record.official_record_id]
-        for _, row in excel_df.iterrows():
-            #---------Static Article Information--------------
-            row_data_dictionary = self._get_initial_temp_data(row)
-            boolean_string_flags = list("0000")
-            #-------------------------------------------------
-            #------------Extract Questions To Update-----------
-            for column in question_columns:
-                boolean_index = to_update_questions_list.index(column.official_record_id.name)
-                boolean_string_flags[boolean_index] = str(boolean_dictionary.get(row[column.name], "0"))
-            boolean_string_flags = "".join(boolean_string_flags)
-            # print(boolean_string_flags)
-            row_data_dictionary['edit_binary_string'] = boolean_string_flags
-            #------------Update/New Data ----------
-            not_important_header_list = update_data if int(boolean_string_flags[0]) else new_record_data
-            # print("testing:",not_important_header_list)
-            appropriate_non_question_columns = [column for column in non_question_columns 
-                                                if column.name not in not_important_header_list]
-            
-            for column in appropriate_non_question_columns:
-                row_data_dictionary[self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]] = row[column.name]
-
-            if not int(boolean_string_flags[0]):
-                row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
-                row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
-                row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
-            print(row_data_dictionary)
-            temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
-            # temporary_record._compute_data_and_errors()
-
-            to_update_article_list.append(temporary_record.id)
-        #--------------Set all record relation-------------
-        self.wizard_excel_extracted_record_ids = [(6, 0, to_update_article_list)]
-
-        return { 
-            'type': 'ir.actions.act_window', 
-            'name': 'Part 2', 
-            'view_mode': 'form', 
-            'res_model': 'article.import.excel.wizard',
-            'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
-            'target': 'current', }
 
     #Reusable Functions
     def import_excel_articles(self):
         if self.wizard_type == "null":return
         #------------------Setup---------------------
-        ms_forms_required_information_list = ['ID','Start time','Completion time','Email','Name','Last modified time']
+        ms_forms_required_information_list = ['ID','Id','Start time','Completion time','Email','Name','Last modified time']
         columns_needed = self.get_new_column_list()
         #--------------------------------------------
 
@@ -351,6 +397,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         columns = list(article_form_df.columns)
         for data in ms_forms_required_information_list:
             if not data in columns:
+                if data in ["Last modified time","ID","Id"]: continue
+                print(data)
                 raise UserError("This doesn't seem to be from MS Forms")
         #--------------------------------------------
 
@@ -385,9 +433,11 @@ class ArticleImportExcelWizard(models.TransientModel):
         official_column_names = [official_record.name for official_record in self.env['article.wizard.record.column'].browse(official_column_ids_list)]
 
         for excel_column_id in self.env['article.wizard.excel.column'].browse(excel_column_ids_list):
-            official_name = (self.DEFAULT_COLUMN_LINK_DICT_FOR_NEW_MODE.get(excel_column_id.name, None) 
+            excel_name = excel_column_id.name if excel_column_id.name[-1] != '1' else excel_column_id.name[:-1]
+            print(excel_name)
+            official_name = (self.DEFAULT_COLUMN_LINK_DICT_FOR_NEW_MODE.get(excel_name, None) 
                              if self.wizard_type == "new" else
-                             self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_column_id.name, None))
+                             self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_name, None))
             if official_name in official_column_names:
                 official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_wizard_id','=',self.id)])
                 if official_record: #not sure if needed since the first line (in this section) finds the colun names already
@@ -431,13 +481,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             'res_id': self.id,
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view').id, 'form')], 
             'target': 'current', }
-    
-    def act_import_article_wizard_part2(self):
-        if self.wizard_type == "null":return
-        if self.wizard_type == "new":
-            return self.process_new_data_for_part_2()
-        if self.wizard_type == "edit":
-            return self.process_edit_data_for_part_2()
 
     def get_new_column_list(self):
         if self.wizard_type == "new":
@@ -471,10 +514,15 @@ class ArticleImportExcelWizard(models.TransientModel):
                                 'import_wizard_id':self.id,
                             }
         
-        if self.user_privilege == "design_instructor":
-                record_dictionary['course'] = 'D'#############FIX THIS LATER
-        elif self.user_privilege == "thesis_instructor":
+        if self.user_privilege == "design_instructor" and not self.ignore_instructor_privilege:
+            record_dictionary['course'] = 'D'#############FIX THIS LATER
+            record_dictionary['instructor_privilege_flag'] = True
+        elif self.user_privilege == "thesis_instructor" and not self.ignore_instructor_privilege:
             record_dictionary['course'] = 'T'
-        elif self.user_privilege == "faculty_adviser":
+            record_dictionary['instructor_privilege_flag'] = True
+        elif self.user_privilege == "faculty_adviser" or self.ignore_instructor_privilege:
             record_dictionary['adviser'] = self.env.user.name
-        return record_dictionary
+            record_dictionary['instructor_privilege_flag'] = False
+        print("test",record_dictionary, list(record_dictionary.keys()))
+        return record_dictionary, list(record_dictionary.keys())
+    
