@@ -42,6 +42,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Topic Tag":"Tags",
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
+        "Is this for your article 2?":"Article 2 Flag",
     }
 
     DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE = {
@@ -59,6 +60,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Will You Update Title?":"For Title Update?",
         "Will You Update the Abstract/Description?":"For Abstract Update?",
         "Will you update the tags?":"For Tag Update?",
+        "Is this for your article 2?":"Article 2 Flag",
         #RELATED FIELDS FOR RECORDS
         "Updated Title Name":"Title",
         "Updated Abstract":"Abstract",
@@ -80,6 +82,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             '2nd Author Student Number': 'student_number_2',
                                             '3rd Author Student Number': 'student_number_3',
                                             'Tags': 'tags',
+                                            'Article 2 Flag':'article_2_flag',
                                         }
     
     #NEW RECORDS

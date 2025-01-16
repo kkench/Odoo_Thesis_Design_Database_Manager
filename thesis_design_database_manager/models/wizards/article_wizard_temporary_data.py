@@ -302,4 +302,15 @@ class ArticleWizardPublication(models.TransientModel):
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
         return True
     
+
+    def act_open_error_code(self):
+        self.ensure_one()
+        return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Error', 
+            'view_mode': 'form', 
+            'res_model': 'article.wizard.publication',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.view_article_wizard_publication_error_code_popup').id, 'form')], 
+            'target': 'new', }
     #################
