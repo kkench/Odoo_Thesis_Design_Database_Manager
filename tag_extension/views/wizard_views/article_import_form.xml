@@ -30,12 +30,13 @@
                             <page string="Changed Works">
                                 <field name="wizard_excel_extracted_record_ids" domain="[('error_code', '=', 7)]">
                                     <tree create="0" delete="0">
-                                        <field name="initial_id" string="ID"/>
+                                        <!-- <field name="initial_id" string="ID"/> -->
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course"/>
                                         <field name="tags" string="Tag Input"/> <!--Too Long -->
-                                        <field name="for_checking_tags_ids" widget="many2many_tags" string="To Be Created"/>
-                                        <field name="similar_tag_ids" widget="many2many_tags" string="Existing Tags Applied"/>
+                                        <field name="to_create_tag_ids" widget="many2many_tags" string="To Be Created"/>
+                                        <field name="similar_tag_ids" widget="many2many_tags" string="Similar Tags Applied"/>
+                                        <field name="existing_tag_ids" widget="many2many_tags" string="Existing Tags Applied"/>
                                         <!-- <field name="error_code" string="E.C."/> -->
                                     </tree>
                                 </field>

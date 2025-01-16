@@ -30,61 +30,72 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
             'target': 'current', }
 
-    def act_set_tags(self):       
-        for temp_record in self.wizard_check_tags_records_ids:
-            tags_record = [] 
-            similar_tag_names = [stag.name for stag in temp_record.similar_tag_ids]
-            new_tag_names = [ntag.name for ntag in temp_record.for_checking_tag_ids]
-            for n_tag in new_tag_names:
-               new_tag = self.env["article.tag"].create({'name': n_tag.name})
-               tags_record.append(new_tag.id)
-            similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
-            tags_record.append(similar_tag.id)
+    def set_similar_tags(self, temp_record):       
+        similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
+        similar_tag_names.append([tag.name for tag in temp_record.existing_tag_ids])
+        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+        print(type(similar_tag))
+        temp_record.similar_tag_ids = [(5,0,0)]
+       
+        return similar_tag
+    
+    def set_new_tags(self, temp_record):
+        tag_list = []
+        new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
+        for n_tag in new_tag_names:
+            tag_dict = {"name": n_tag}
+            tag_list.append(tag_dict)
+        new_tag = self.env["article.tag"].create(tag_list)
+        temp_record.to_create_tag_ids = [(5,0,0)]
+        return new_tag
+
+    def upload_new_records_to_database(self):
+        if not self.wizard_excel_extracted_record_ids or self.wizard_type == "null":
+            return  # if blank
+        record_created_list = []
+        record_overwritten_list = []
+        record_failed_list = []
+        record_updated_list = []
+
+        for form_record in self.wizard_excel_extracted_record_ids:
+            existing_tag_obj = self.set_similar_tags(form_record)
+            if form_record.error_code != 0:
+                record_failed_list.append(form_record.id)
+                continue
+            else:
+                new_tag_obj = self.set_new_tags(form_record)
+                
+            form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
+            row_record_dictionary = {
+                'custom_id': form_record.initial_id,
+                'name': form_record.name,
+                'state': 'proposal',
+                'publishing_state': 'not_published',
+                'course_name': "thesis" if form_record.course == "T" else "design",
+                'abstract': form_record.abstract,
+                'author1': form_record.author1,
+                'author2': form_record.author2,
+                'author3': form_record.author3,
+                'adviser_ids': [(6, 0, [form_record_advisor.id])],
+                'article_tag_ids': [(6, 0, )],
+            }
+            if not form_record.article_to_update_id:
+                record = self.env['article.publication'].create(row_record_dictionary)
+                record_created_list.append(record.id)
+            else:
+                record = form_record.article_to_update_id.write(row_record_dictionary)
+                record_overwritten_list.append(form_record.article_to_update_id.id)
             
+        self.created_article_record_ids = [(6, 0, record_created_list)]
+        self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
+        self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]
+        self.updated_article_records_ids = [(6, 0, record_updated_list)]
 
-            
-            
-
-
-    #def process_edit_data_for_part_2(self):
-
-    # def act_import_new_article_wizard_part3(self):
-    #run similarity check, abbreviation check then move to tag adjustment page
-        
-
-    # def process_new_data_for_part_2(self):
-    #     excel_df = self._get_wizard_df()
-    #     new_article_list = []
-    #     for_checking_list = []
-    #     for index, row in excel_df.iterrows():
-    #         #---------Static Article Information--------------
-    #         row_data_dictionary = self._get_initial_temp_data(row)
-    #         #-------------------------------------------------
-
-    #         #----------Excel to Official Column Information-------------
-    #         for excel_column_record in self.excel_column_ids:
-    #             if not excel_column_record.official_record_id:
-    #                 continue    
-    #             row_data_dictionary[self.LABEL_TO_RECORD_DICTIONARY[excel_column_record.official_record_id.name]] = row[excel_column_record.name]
-    #         new_article = self.env['article.wizard.publication'].create(row_data_dictionary)
-    #         changed = self.get_tag_changes(new_article)
-    #         if changed:
-    #             for_checking_list.append(new_article.id)
-    #         else:
-    #             new_article_list.append(new_article.id)
-    #         #------------------------------------------------------------
-    #     self.wizard_check_tags_records_ids = [(6, 0, for_checking_list)]
-    #     # temporarily fill it with changed IDs
-    #     self.wizard_excel_extracted_record_ids = [(6, 0, new_article_list)]
-    #     #for record in wizard_new_record_ids
-
-    #     return { 
-    #         'type': 'ir.actions.act_window', 
-    #         'name': 'Tag Checking', 
-    #         'view_mode': 'form', 
-    #         'res_model': 'article.import.excel.wizard',
-    #         'res_id': self.id,
-    #         'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')],  
-    #         'target': 'current', }
-        #Not sure if return will override super, but this will move part 2 to the tagging system
-        #Make sure to create the new view listed here
+        return {
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 3', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
+            'target': 'current', }

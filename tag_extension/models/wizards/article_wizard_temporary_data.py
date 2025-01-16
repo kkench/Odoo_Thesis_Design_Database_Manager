@@ -6,9 +6,9 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     _inherit = "article.wizard.publication"
     checking_wizard_id = fields.Many2one("article.import.excel.wizard")
-    for_checking_tags_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
+    to_create_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
     similar_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_similar_tags")
-
+    existing_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_existing_tags")
 
     def tags_are_valid(self):
         article_tags = self.excel_tags_to_odoo_tags(self.tags)
@@ -34,30 +34,35 @@ class ArticleImportExcelWizard(models.TransientModel):
     def check_similar_tags(self, keywords):
         similar_tags = []
         tags_to_create = []
+        existing_tags = []
         all_tags = self.env['article.tag'].search([])
         tag_names = [tag.name for tag in all_tags]
         for tag in keywords:
             found_tag = get_close_matches(tag, tag_names)
-            if found_tag or tag == "":
-                break
-            elif not found_tag:
+            print(found_tag)
+            if found_tag== "" or tag == "":
+                continue
+            if not found_tag:
                 created_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                 tags_to_create.append(created_tag.id)
-                # print(created_tag.name)
-            elif any(tag in tag_names for tag in found_tag):
-                continue
+                print(created_tag.name)
+            elif tag in found_tag:
+                existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                existing_tags.append(existing_tag.id)
             else:
                 sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                 similar_tags.append(sim_tag.id)
-        self.for_checking_tags_ids = [(6,0,tags_to_create)]
+                # print(sim_tag.name)
+        self.to_create_tag_ids = [(6,0,tags_to_create)]
         self.similar_tag_ids = [(6,0,similar_tags)]
+        self.existing_tag_ids = [(6,0,existing_tags)]
         return similar_tags
 
     def get_tag_changes(self, tag_list):
         # self.check_abbreviation(tag_list)
         sim = self.check_similar_tags(tag_list)
         # print(sim)
-        if (not sim and not self.for_checking_tags_ids.exists()):
+        if (not sim and not self.to_create_tag_ids.exists()):
             needs_change = False
         else:
             needs_change = True
