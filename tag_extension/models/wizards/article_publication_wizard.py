@@ -9,16 +9,8 @@ class ArticleImportExcelWizard(models.TransientModel):
     wizard_check_tags_records_ids = fields.One2many('article.wizard.publication','checking_wizard_id','List of Records for Checking')
 
     def process_new_data_for_part_2(self):
-       for_checking_list = []
        super().process_new_data_for_part_2()
-
-    #    for_sorting = self.env['article.wizard.publication'].search([('error_code','=','7')])
-    #    for_checking_list.append(for_sorting.id)
-    #    print(for_sorting.for_checking_tags_ids)
-    #    print("Here")
-    #    self.wizard_check_tags_records_ids = [(6,0,for_checking_list)]
-       
-
+    
        return { 
             'type': 'ir.actions.act_window', 
             'name': 'Part 2-2', 
@@ -27,6 +19,32 @@ class ArticleImportExcelWizard(models.TransientModel):
             'res_id': self.id,
             'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
+    
+    def act_go_to_view_part2(self):
+        return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 2', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'target': 'current', }
+
+    def act_set_tags(self):       
+        for temp_record in self.wizard_check_tags_records_ids:
+            tags_record = [] 
+            similar_tag_names = [stag.name for stag in temp_record.similar_tag_ids]
+            new_tag_names = [ntag.name for ntag in temp_record.for_checking_tag_ids]
+            for n_tag in new_tag_names:
+               new_tag = self.env["article.tag"].create({'name': n_tag.name})
+               tags_record.append(new_tag.id)
+            similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+            tags_record.append(similar_tag.id)
+            
+
+            
+            
+
 
     #def process_edit_data_for_part_2(self):
 

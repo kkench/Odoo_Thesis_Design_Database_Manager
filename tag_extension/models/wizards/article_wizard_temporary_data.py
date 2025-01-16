@@ -6,9 +6,9 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     _inherit = "article.wizard.publication"
     checking_wizard_id = fields.Many2one("article.import.excel.wizard")
-    for_checking_tags_ids = fields.Many2many("article.wizard.publication.tag")
+    for_checking_tags_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
+    similar_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_similar_tags")
 
-    tags_to_create = []
 
     def tags_are_valid(self):
         article_tags = self.excel_tags_to_odoo_tags(self.tags)
@@ -38,15 +38,19 @@ class ArticleImportExcelWizard(models.TransientModel):
         tag_names = [tag.name for tag in all_tags]
         for tag in keywords:
             found_tag = get_close_matches(tag, tag_names)
-            if not found_tag and tag != "":
+            if found_tag or tag == "":
+                break
+            elif not found_tag:
                 created_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                 tags_to_create.append(created_tag.id)
-                print(created_tag.name)
+                # print(created_tag.name)
             elif any(tag in tag_names for tag in found_tag):
                 continue
             else:
-                similar_tags.append(found_tag)
+                sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                similar_tags.append(sim_tag.id)
         self.for_checking_tags_ids = [(6,0,tags_to_create)]
+        self.similar_tag_ids = [(6,0,similar_tags)]
         return similar_tags
 
     def get_tag_changes(self, tag_list):
