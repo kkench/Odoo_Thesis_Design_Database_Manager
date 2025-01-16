@@ -32,6 +32,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         #regex for later to make abbreviation checking work better if no correction via menu is implemented
 
     def check_similar_tags(self, keywords):
+        #search duplicates
+        #link existing temporary tags to real tags
         similar_tags = []
         tags_to_create = []
         existing_tags = []
@@ -52,7 +54,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             else:
                 sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                 similar_tags.append(sim_tag.id)
-                # print(sim_tag.name)
+                print(sim_tag.name)
         self.to_create_tag_ids = [(6,0,tags_to_create)]
         self.similar_tag_ids = [(6,0,similar_tags)]
         self.existing_tag_ids = [(6,0,existing_tags)]

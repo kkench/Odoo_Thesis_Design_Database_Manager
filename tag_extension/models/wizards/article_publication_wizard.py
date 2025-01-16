@@ -32,10 +32,10 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     def set_similar_tags(self, temp_record):       
         similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
-        similar_tag_names.append([tag.name for tag in temp_record.existing_tag_ids])
+        # print(similar_tag_names)
+        similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
         similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
-        print(type(similar_tag))
-        temp_record.similar_tag_ids = [(5,0,0)]
+        # print(type(similar_tag))
        
         return similar_tag
     
@@ -46,7 +46,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             tag_dict = {"name": n_tag}
             tag_list.append(tag_dict)
         new_tag = self.env["article.tag"].create(tag_list)
-        temp_record.to_create_tag_ids = [(5,0,0)]
         return new_tag
 
     def upload_new_records_to_database(self):
@@ -58,13 +57,16 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_updated_list = []
 
         for form_record in self.wizard_excel_extracted_record_ids:
-            existing_tag_obj = self.set_similar_tags(form_record)
+            all_tags = []
+            tag_list = self.set_similar_tags(form_record)
+            all_tags.extend(tag_list)
             if form_record.error_code != 0:
                 record_failed_list.append(form_record.id)
                 continue
             else:
                 new_tag_obj = self.set_new_tags(form_record)
-                
+                all_tags.extend(new_tag_obj)
+            print(tag.name for tag in all_tags)
             form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,
@@ -77,7 +79,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'author2': form_record.author2,
                 'author3': form_record.author3,
                 'adviser_ids': [(6, 0, [form_record_advisor.id])],
-                'article_tag_ids': [(6, 0, )],
+                'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
             }
             if not form_record.article_to_update_id:
                 record = self.env['article.publication'].create(row_record_dictionary)
@@ -90,6 +92,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
         self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]
         self.updated_article_records_ids = [(6, 0, record_updated_list)]
+
+        #for record in created/overwritten
 
         return {
             'type': 'ir.actions.act_window', 
