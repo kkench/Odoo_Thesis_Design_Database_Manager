@@ -8,7 +8,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     checking_wizard_id = fields.Many2one("article.import.excel.wizard")
     to_create_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
     similar_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_similar_tags")
-    existing_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_existing_tags")
+    existing_tag_ids = fields.Many2many("article.tag", "article_wizard_pub_existing_tags")
 
     def tags_are_valid(self):
         article_tags = self.excel_tags_to_odoo_tags(self.tags)
@@ -31,37 +31,46 @@ class ArticleImportExcelWizard(models.TransientModel):
          #([A-Z\S]{2,}+) [A-Z] is all uppercase \S ignore all whitespace {2,}
         #regex for later to make abbreviation checking work better if no correction via menu is implemented
 
-    def check_similar_tags(self, keywords):       
+    def check_similar_tags(self, keywords):  
+            
         similar_tags = []
         tags_to_create = []
-        existing_tags = []
+        # existing_tags = []
         all_tags = self.env['article.tag'].search([])
         tag_names = [tag.name for tag in all_tags]
         for tag in keywords:
             found_tag = get_close_matches(tag, tag_names)
-            if self.check_duplicate_tags(): #search duplicates
-                break
-            else:
-                # print(found_tag)
-                if found_tag== "" or tag == "":
+            if found_tag == "" or tag == "":
                     continue
-                if not found_tag:
+            elif not found_tag:
                     created_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                     tags_to_create.append(created_tag.id)
-                    print(created_tag.name)
-                elif tag in found_tag:
-                    existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
-                    existing_tags.append(existing_tag.id)
+                    # print(created_tag.name)
+            elif tag in found_tag:
+                    # existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                    # existing_tags.append(existing_tag.id)
                     self.link_existing_tag(tag) #link existing temporary tags to real tags
-                else:
-                    sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
-                    similar_tags.append(sim_tag.id)
-                    self.link_existing_tag(tag)
+            else:
+                    dupli = self.check_duplicate_temp_tags(found_tag) #search duplicates
+                    if dupli:
+                        similar_tags.append(dupli.id)#link existing tags to real tags 
+                        continue
+                    else:
+                        sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                        similar_tags.append(sim_tag.id)
                     print(sim_tag.name)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
-            self.existing_tag_ids = [(6,0,existing_tags)]
+            # self.existing_tag_ids = [(6,0,existing_tags)]
         return similar_tags
+
+    def link_existing_tag(self, tag):
+        existing_tag = self.env['article.tag'].search([tag])
+        self.existing_tag_id = [(4,0,existing_tag.id)] #adjust the function in the iwzard as well
+
+    def check_duplicate_temp_tags(self, tag):
+        tag_flag = self.env["article.wizard.publication.tag"].search([('name','=',tag)])
+        return tag_flag
 
     def get_tag_changes(self, tag_list):
         # self.check_abbreviation(tag_list)

@@ -2,6 +2,7 @@ from odoo import models, fields, api
 
 class ArticleTag(models.Model):
     _inherit = "article.tag"
+    existing_temp_tag_call_list = fields.Many2many("article.wizard.publication")
     # abbv_ids = fields.One2many("article.tag.abb","definition_id",string="Abbreviated Tag")
 
 # class ArticleAbbreviatedTag(models.Model): #make this transient to resolve for user?
