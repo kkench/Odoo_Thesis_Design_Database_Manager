@@ -8,7 +8,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     checking_wizard_id = fields.Many2one("article.import.excel.wizard")
     to_create_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
     similar_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_similar_tags")
-    existing_tag_ids = fields.Many2many("article.tag", "article_wizard_pub_existing_tags")
+    existing_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_existing_tags")
 
     def tags_are_valid(self):
         article_tags = self.excel_tags_to_odoo_tags(self.tags)
@@ -35,7 +35,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             
         similar_tags = []
         tags_to_create = []
-        # existing_tags = []
+        existing_tags = []
         all_tags = self.env['article.tag'].search([])
         tag_names = [tag.name for tag in all_tags]
         for tag in keywords:
@@ -47,9 +47,9 @@ class ArticleImportExcelWizard(models.TransientModel):
                     tags_to_create.append(created_tag.id)
                     # print(created_tag.name)
             elif tag in found_tag:
-                    # existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
-                    # existing_tags.append(existing_tag.id)
-                    self.link_existing_tag(tag) #link existing temporary tags to real tags
+                    existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                    existing_tags.append(existing_tag.id)
+                    # self.link_existing_tag(tag) #link existing temporary tags to real tags
             else:
                     dupli = self.check_duplicate_temp_tags(found_tag) #search duplicates
                     if dupli:
@@ -61,7 +61,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                     print(sim_tag.name)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
-            # self.existing_tag_ids = [(6,0,existing_tags)]
+            self.existing_tag_ids = [(6,0,existing_tags)]
         return similar_tags
 
     def link_existing_tag(self, tag):
