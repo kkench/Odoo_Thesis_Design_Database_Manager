@@ -50,6 +50,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
         "Is this for your article 2?":"Article 2 Flag",
+        "Course?": "Course Name"
     }
 
     DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE = {
@@ -205,7 +206,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             for column in appropriate_non_question_columns:                  
                 field_name = self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]
                 if field_name in ignore_list: continue
-                # print("check plz",field_name)
                 skip_data = (not column.official_record_id or 
                              field_name in ignore_list or
                              pd.isna(row[column.name]))
@@ -224,7 +224,6 @@ class ArticleImportExcelWizard(models.TransientModel):
                 row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
                 row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
                 row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
-            print(row_data_dictionary)
             temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
             # temporary_record._compute_data_and_errors()
 
@@ -376,7 +375,6 @@ class ArticleImportExcelWizard(models.TransientModel):
         ms_forms_required_information_list = ['ID','Id','Start time','Completion time','Email','Name','Last modified time']
         columns_needed = self.get_new_column_list()
         #--------------------------------------------
-
         #-----------------Error Checks---------------
         if not self.excel_file:
             raise UserError("Please upload an Excel file.")
@@ -398,7 +396,6 @@ class ArticleImportExcelWizard(models.TransientModel):
         for data in ms_forms_required_information_list:
             if not data in columns:
                 if data in ["Last modified time","ID","Id"]: continue
-                print(data)
                 raise UserError("This doesn't seem to be from MS Forms")
         #--------------------------------------------
 
@@ -407,7 +404,6 @@ class ArticleImportExcelWizard(models.TransientModel):
         #       of the same name record already this will still make it less susceptible to errors if people are uploading at the same time
         #       Furthermore, transcient records will delete itself in due time anyway.
         excel_column_ids_list = []
-        # print(columns)
         for column in columns:
             if column in ms_forms_required_information_list:
                 continue  # Removes the MS headers
@@ -425,7 +421,6 @@ class ArticleImportExcelWizard(models.TransientModel):
                 record = possible_existing_record_id
             official_column_ids_list.append(record.id)
             name_check.append(record.name)
-        # print(name_check)
         self.official_record_column_ids = [(6, 0, official_column_ids_list)]
         #------------------------------------------
         
@@ -434,7 +429,6 @@ class ArticleImportExcelWizard(models.TransientModel):
 
         for excel_column_id in self.env['article.wizard.excel.column'].browse(excel_column_ids_list):
             excel_name = excel_column_id.name if excel_column_id.name[-1] != '1' else excel_column_id.name[:-1]
-            print(excel_name)
             official_name = (self.DEFAULT_COLUMN_LINK_DICT_FOR_NEW_MODE.get(excel_name, None) 
                              if self.wizard_type == "new" else
                              self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_name, None))
@@ -454,15 +448,15 @@ class ArticleImportExcelWizard(models.TransientModel):
                         'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view').id, 'form')], 
                         'target': 'current', }
 
-    @api.depends('excel_file')
+    @api.depends('excel_file','ignore_instructor_privilege')
     def _compute_user_privilege(self):
         for record in self:
             user = self.env.user
-            if user.has_group('thesis_design_database_manager.group_article_thesis_instructor'):
+            if user.has_group('thesis_design_database_manager.group_article_thesis_instructor') and not self.ignore_instructor_privilege:
                 record.user_privilege = "thesis_instructor"
-            elif user.has_group('thesis_design_database_manager.group_article_design_instructor'):
+            elif user.has_group('thesis_design_database_manager.group_article_design_instructor') and not self.ignore_instructor_privilege:
                 record.user_privilege = "design_instructor"
-            elif user.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
+            elif user.has_group('thesis_design_database_manager.group_article_faculty_adviser') or self.ignore_instructor_privilege:
                 record.user_privilege = "faculty_adviser"
             else:
                 record.user_privilege = None
@@ -514,15 +508,28 @@ class ArticleImportExcelWizard(models.TransientModel):
                                 'import_wizard_id':self.id,
                             }
         
-        if self.user_privilege == "design_instructor" and not self.ignore_instructor_privilege:
+        if self.user_privilege == "design_instructor":
             record_dictionary['course'] = 'D'#############FIX THIS LATER
             record_dictionary['instructor_privilege_flag'] = True
-        elif self.user_privilege == "thesis_instructor" and not self.ignore_instructor_privilege:
+        elif self.user_privilege == "thesis_instructor":
             record_dictionary['course'] = 'T'
             record_dictionary['instructor_privilege_flag'] = True
-        elif self.user_privilege == "faculty_adviser" or self.ignore_instructor_privilege:
+        elif self.user_privilege == "faculty_adviser":
             record_dictionary['adviser'] = self.env.user.name
             record_dictionary['instructor_privilege_flag'] = False
-        print("test",record_dictionary, list(record_dictionary.keys()))
         return record_dictionary, list(record_dictionary.keys())
     
+    def unlink(self):
+        #######################
+        for record in self:
+            #excel is custom per wizard
+            #official is reused so no need to unlink
+            #created,updated,and overwritten are official records already,dont unlink
+            #failed came from wizard_excel_extracted_record_ids, so it deletes itself
+            for excel_column in record.excel_column_ids:
+                excel_column.unlink()
+            for excel_extracted_record in record.wizard_excel_extracted_record_ids:
+                excel_extracted_record.unlink()
+        #####################
+        result = super(ArticleImportExcelWizard, self).unlink()
+        return result
