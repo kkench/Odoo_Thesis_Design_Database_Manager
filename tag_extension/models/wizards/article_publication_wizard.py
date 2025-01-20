@@ -20,6 +20,18 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
     
+    def process_edit_data_for_part_2(self):
+       super().process_edit_data_for_part_2()
+    
+       return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 2-2', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('tag_extension.article_import_excel_wizard_form_view_tags').id, 'form')], 
+            'target': 'current', }
+    
     def act_go_to_view_part2(self):
         return { 
             'type': 'ir.actions.act_window', 
@@ -47,7 +59,65 @@ class ArticleImportExcelWizard(models.TransientModel):
             tag_list.append(tag_dict)
         new_tag = self.env["article.tag"].create(tag_list)
         return new_tag
+    
+    # def upload_new_records_to_database(self):
+    #     super().upload_new_records_to_database()
 
+    #     for form_record in self.created_article_record_ids:
+    #         all_tags = []
+    #         tag_list = self.set_similar_tags(form_record)
+    #         all_tags.extend(tag_list)
+    #         new_tag_obj = self.set_new_tags(form_record)
+    #         all_tags.extend(new_tag_obj)
+    #         form_record.article_tag_ids = [(6,0,[tag.id for tag in all_tags])]
+        
+    #     for form_record in self.overwritten_article_record_ids:
+    #         all_tags = []
+    #         tag_list = self.set_similar_tags(form_record)
+    #         all_tags.extend(tag_list)
+    #         new_tag_obj = self.set_new_tags(form_record)
+    #         all_tags.extend(new_tag_obj)
+    #         form_record.article_tag_ids = [(6,0,[tag.id for tag in all_tags])]
+
+    #     return {
+    #         'type': 'ir.actions.act_window', 
+    #         'name': 'Part 3', 
+    #         'view_mode': 'form', 
+    #         'res_model': 'article.import.excel.wizard',
+    #         'res_id': self.id,
+    #         'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
+    #         'target': 'current', }
+
+    # def upload_edit_records_to_database(self):
+    #     super().upload_edit_records_to_database()
+
+    #     for form_record in self.overwritten_article_record_ids:
+    #         all_tags = []
+    #         tag_list = self.set_similar_tags(form_record)
+    #         all_tags.extend(tag_list)
+    #         new_tag_obj = self.set_new_tags(form_record)
+    #         all_tags.extend(new_tag_obj)
+    #         form_record.article_tag_ids = [(6,0,[tag.id for tag in all_tags])]
+        
+    #     for form_record in self.updated_article_record_ids:
+    #         all_tags = []
+    #         tag_list = self.set_similar_tags(form_record)
+    #         all_tags.extend(tag_list)
+    #         new_tag_obj = self.set_new_tags(form_record)
+    #         all_tags.extend(new_tag_obj)
+    #         form_record.article_tag_ids = [(6,0,[tag.id for tag in all_tags])]
+
+    #     return {
+    #         'type': 'ir.actions.act_window', 
+    #         'name': 'Part 3', 
+    #         'view_mode': 'form', 
+    #         'res_model': 'article.import.excel.wizard',
+    #         'res_id': self.id,
+    #         'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
+    #         'target': 'current', }
+
+    #Realized doesn't matter if this is super'd or not because end product will be combined into one module anyway
+    #Above methods don't work unless form_records are recalled so no point as well
     def upload_new_records_to_database(self):
         if not self.wizard_excel_extracted_record_ids or self.wizard_type == "null":
             return  # if blank
@@ -94,6 +164,56 @@ class ArticleImportExcelWizard(models.TransientModel):
         self.updated_article_records_ids = [(6, 0, record_updated_list)]
 
         #for record in created/overwritten
+
+        return {
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 3', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part3').id, 'form')], 
+            'target': 'current', }
+    
+    def upload_edit_records_to_database(self):
+        record_overwritten_list = []
+        record_failed_list = []
+        record_updated_list = []
+
+        for temp_record in self.wizard_excel_extracted_record_ids:
+            record_dictionary = {'custom_id': temp_record.initial_id,}
+            override_everything = int(temp_record.edit_binary_string[0])
+            update_title_flag = int(temp_record.edit_binary_string[1])
+            update_abstract_flag = int(temp_record.edit_binary_string[2])
+            update_tag_flag = int(temp_record.edit_binary_string[3])
+
+            all_tags = []
+            tag_list = self.set_similar_tags(temp_record)
+            all_tags.extend(tag_list)
+            new_tag_obj = self.set_new_tags(temp_record)
+            all_tags.extend(new_tag_obj)
+
+            if temp_record.error_code:
+                record_failed_list.append(temp_record.id)
+                continue
+            if update_title_flag or override_everything:
+                record_dictionary['name'] = temp_record.name
+            if update_abstract_flag or override_everything:
+                record_dictionary['abstract'] = temp_record.abstract
+            if update_tag_flag or override_everything:
+                record_dictionary['article_tag_ids'] = [(6, 0, [tag.id for tag in all_tags])] #input tag update here
+                #currently untested
+            if override_everything:
+                record_dictionary['state'] = 'proposal'
+                record_dictionary['publishing_state'] = 'not_published'
+            temp_record.article_to_update_id.write(record_dictionary)
+            if override_everything:
+                record_overwritten_list.append(temp_record.article_to_update_id.id)
+            else:
+                record_updated_list.append(temp_record.article_to_update_id.id)
+
+        self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
+        self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]
+        self.updated_article_records_ids = [(6, 0, record_updated_list)]
 
         return {
             'type': 'ir.actions.act_window', 

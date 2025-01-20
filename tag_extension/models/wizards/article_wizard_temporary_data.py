@@ -58,15 +58,16 @@ class ArticleImportExcelWizard(models.TransientModel):
                     else:
                         sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                         similar_tags.append(sim_tag.id)
-                    print(sim_tag.name)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
-        return similar_tags
+            print(similar_tags)
+        return similar_tags or existing_tags or tags_to_create
 
-    def link_existing_tag(self, tag):
-        existing_tag = self.env['article.tag'].search([tag])
-        self.existing_tag_id = [(4,0,existing_tag.id)] #adjust the function in the iwzard as well
+    #Decided not to incorporate because there's no functional difference, even for efficiency
+    # def link_existing_tag(self, tag):
+    #     existing_tag = self.env['article.tag'].search([tag])
+    #     self.existing_tag_ids = [(4,0,existing_tag.id)] #adjust the function in the iwzard as well
 
     def check_duplicate_temp_tags(self, tag):
         tag_flag = self.env["article.wizard.publication.tag"].search([('name','=',tag)])
