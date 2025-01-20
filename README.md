@@ -73,7 +73,7 @@ A database manager that updates the status of the studies of thesis/design group
                 "pip",
                 "install",
                 "pandas",
-                "openpyxl"
+                "openpyxl",
             ],
             "group": {
                 "kind": "build",

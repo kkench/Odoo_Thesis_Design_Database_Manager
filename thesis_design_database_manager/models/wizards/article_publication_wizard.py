@@ -418,7 +418,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         official_column_ids_list = []
         name_check = []
         for column in columns_needed:
-            possible_existing_record_id = self.env['article.wizard.record.column'].search([('name', '=', column)])
+            possible_existing_record_id = self.env['article.wizard.record.column'].search([('name', '=', column)],limit=1)
             if not possible_existing_record_id:
                 record = self.env['article.wizard.record.column'].create({'name': column})
             else: 
@@ -439,7 +439,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                              if self.wizard_type == "new" else
                              self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_name, None))
             if official_name in official_column_names:
-                official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_wizard_id','=',self.id)])
+                official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_wizard_id','=',self.id)],limit=1)
+                print(official_record)
                 if official_record: #not sure if needed since the first line (in this section) finds the colun names already
                     excel_column_id.official_record_id = official_record.id
         #------------------------------
