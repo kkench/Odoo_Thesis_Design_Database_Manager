@@ -14,13 +14,13 @@ class ArticlePublication(models.Model):
     state = fields.Selection(string="Course Status",
                              required=True,
                              selection=[
-                                 ("proposal", "For Proposal"),
-                                 ("proposal_approved", "Proposal Approved"),
-                                 ("proposal_redefense", "Proposal Redefense Required"),
-                                 ("proposal_conformity_of_revisions", "Proposal Conformity of Revisions"),
-                                 ("final_approved", "Article Approved"),
-                                 ("final_redefense", "Final Redefense Required"),
-                                 ("final_conformity_of_revisions", "Final Conformity of Revisions"),
+                                 ("proposal", "For Proposal"), #
+                                 ("proposal_approved", "Proposal Approved"),#
+                                 ("proposal_redefense", "Proposal Redefense Required"),#
+                                 ("proposal_minor_revisions", "Proposal Minor Revisions"),
+                                 ("final_approved", "Article Completed"),
+                                 ("final_redefense", "Final Redefense Required"),#
+                                 ("final_minor_revisions", "Minor Revisions"),
                              ],default="proposal")
 
     publishing_state = fields.Selection(string="Published Status",
@@ -72,7 +72,6 @@ class ArticlePublication(models.Model):
                         }
 
         for record in self:
-            print("GOT HERE")
             record.is_course_instructor = user_is_instructor_dictionary.get(record.course_name, False)
             record.is_article_adviser = user.id in record.adviser_ids.ids
 
@@ -119,6 +118,8 @@ class ArticlePublication(models.Model):
         return res
 
 
+    #----Actions-----
+
     def act_suggested_tags(self):
         if self.name:
             all_tags = self.env['article.tag'].search([])
@@ -151,3 +152,29 @@ class ArticlePublication(models.Model):
             'res_id': self.id,
             'target': 'new',
         }
+    
+    def act_accept_conformity(self):
+        if self.state == 'proposal_minor_revisions':
+            return self.write({'state':'proposal_approved'})
+        if self.state == 'final_minor_revisions':
+            return self.write({'state':'final_approved'})
+        
+    def act_approve_topic(self):
+        if self.state in ['proposal', 'proposal_redefense']:
+            return self.write({'state':'proposal_approved'})
+        if self.state in ['proposal_approved', 'final_redefense']:
+            return self.write({'state':'final_approved'})
+        
+    def act_redef_the_topic(self):
+        if self.state in ['proposal']:
+            return self.write({'state':'proposal_redefense'})
+        if self.state in ['proposal_approved']:
+            return self.write({'state':'final_redefense'})
+
+
+    def act_set_the_topic_for_revision(self):
+        if self.state in ['proposal', 'proposal_redefense']:
+            return self.write({'state':'proposal_minor_revisions'})
+        if self.state in ['proposal_approved', 'final_redefense']:
+            return self.write({'state':'final_minor_revisions'})
+        
