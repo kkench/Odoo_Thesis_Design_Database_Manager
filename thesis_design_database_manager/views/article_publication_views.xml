@@ -1,138 +1,145 @@
 <odoo>
-    <record id="article_publication_form_view" model="ir.ui.view">
-        <field name='name'>article.publication.form.view</field>
-        <field name='model'>article.publication</field>
-        <field name='arch' type='xml'>
-            <form string="Article Publication Form">
-                <sheet>
-                    <!--NOTE:readonly
+    <data>
+        <record id="article_publication_form_view" model="ir.ui.view">
+            <field name='name'>article.publication.form.view</field>
+            <field name='model'>article.publication</field>
+            <field name='arch' type='xml'>
+                <form string="Article Publication Form">
+                    <sheet>
+                        <!--NOTE:readonly
                     statement here are cumbersome, no better alternative that i could think off, 
                     an alternative idea is having two copies of the same form with different readonly capabilities-->
-                    <h1 style="width: 100%;">
-                        <field name="name"
-                            readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                    </h1>
-                    <field name="is_course_instructor" readonly="True" invisible="False" />
-                    <field name="is_article_adviser" readonly="True" invisible="False" />
-                    <group>
-                        <group>
-                            <field name="state"
+                        <h1 style="width: 100%;">
+                            <field name="name"
                                 readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                            <field name="publishing_state" invisible="course_name != 'thesis'"
-                                readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                            <field name="course_name" readonly="True" />
-                            <field name="adviser_ids" widget="many2many_tags"
-                                readonly="is_course_instructor == False"
-                                options="{'no_create': True}" />
-                        </group>
+                        </h1>
+                        <field name="is_course_instructor" readonly="True" invisible="False" />
+                        <field name="is_article_adviser" readonly="True" invisible="False" />
                         <group>
                             <group>
-                                <field name="author1" readonly="is_course_instructor == False" />
-                                <field name="author2" readonly="is_course_instructor == False" />
-                                <field name="author3" readonly="is_course_instructor == False"
-                                    invisible="course_name != 'design'" />
-                                <field name='custom_id' />
-                            </group>
-                        </group>
-                    </group>
-                            <button name="act_accept_conformity" string="Accept Conformity"
-                                type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                invisible="(state not in ['proposal_minor_revisions', 'final_minor_revisions']) or (is_course_instructor == False and is_article_adviser == False)"/>
-                            <button name="act_approve_topic" string="Approve Topic Proposal"
-                                type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                invisible="(state not in ['proposal', 'proposal_redefense']) or (is_course_instructor == False and is_article_adviser == False)"/>
-                            <button name="act_approve_topic" string="Approve Topic"
-                                type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                invisible="(state not in ['proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)"/>
-                            <button name="act_redef_the_topic" string="For Redefense"
-                                type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                invisible="(state not in ['proposal', 'proposal_approved']) or (is_course_instructor == False and is_article_adviser == False)"/>
-                            <button name="act_set_the_topic_for_revision" string="Accept With Minor Revisions"
-                                type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                invisible="(state not in ['proposal', 'proposal_redefense', 'proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)"/>
-
-                    <notebook>
-                        <page string="details">
-                            <h1 style="width: 100%;">
-                                <field name="article_tag_ids" widget="many2many_tags"
+                                <field name="state"
                                     readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                            </h1>
+                                <field name="publishing_state" invisible="course_name != 'thesis'"
+                                    readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                <field name="course_name" readonly="True" />
+                                <field name="adviser_ids" widget="many2many_tags"
+                                    readonly="is_course_instructor == False"
+                                    options="{'no_create': True}" />
+                            </group>
                             <group>
-                                <field name="abstract"
-                                    readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                                <field name="max_tag_similarity_score"
-                                    readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                                <button name="act_suggested_tags" type="object"
-                                    string="Get Suggested Tags" class="oe_highlight" />
+                                <group>
+                                    <field name="author1" readonly="1" />
+                                    <field name="author2" readonly="1" />
+                                    <field name="author3" readonly="1"
+                                        invisible="course_name != 'design'" />
+                                    <field name='custom_id' />
+                                    <button name="act_member_change" string="Change Member"
+                                        type="object" class="oe_highlight" style="margin: 4px 2px;"
+                                        invisible="is_course_instructor == False and is_article_adviser == False" />
+                                </group>
                             </group>
-                        </page>
-                        <page string="Similar Studies">
-                            <field name="related_article_ids">
-                                <tree default_order="title_similarity_score desc" create="0"
-                                    delete="0">
-                                    <button name="act_view_article" type="object" string="View"
-                                        class="oe_highlight" />
-                                    <field name="name" />
-                                    <field name="state" />
-                                    <field name="publishing_state" />
-                                    <field name="course_name" />
-                                    <field name="tag_similarity_score" />
-                                    <field name="title_similarity_score" />
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
+                        </group> <!--Dont
+                        know how to make spaces-->
+                        <button name="act_accept_conformity" string="Accept Conformity"
+                            type="object" class="oe_highlight" style="margin: 4px 2px;"
+                            invisible="(state not in ['proposal_minor_revisions', 'final_minor_revisions']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        <button name="act_approve_topic" string="Approve Topic Proposal"
+                            type="object" class="oe_highlight" style="margin: 4px 2px;"
+                            invisible="(state not in ['proposal', 'proposal_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        <button name="act_approve_topic" string="Approve Topic"
+                            type="object" class="oe_highlight" style="margin: 4px 2px;"
+                            invisible="(state not in ['proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        <button name="act_redef_the_topic" string="For Redefense"
+                            type="object" class="oe_highlight" style="margin: 4px 2px;"
+                            invisible="(state not in ['proposal', 'proposal_approved']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        <button name="act_set_the_topic_for_revision"
+                            string="Accept With Minor Revisions"
+                            type="object" class="oe_highlight" style="margin: 4px 2px;"
+                            invisible="(state not in ['proposal', 'proposal_redefense', 'proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        <notebook>
+                            <page string="details">
+                                <h1 style="width: 100%;">
+                                    <field name="article_tag_ids" widget="many2many_tags"
+                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                </h1>
+                                <group>
+                                    <field name="abstract"
+                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                    <field name="max_tag_similarity_score"
+                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                    <button name="act_suggested_tags" type="object"
+                                        string="Get Suggested Tags" class="oe_highlight" />
+                                </group>
+                            </page>
+                            <page string="Similar Studies">
+                                <field name="related_article_ids">
+                                    <tree default_order="title_similarity_score desc" create="0"
+                                        delete="0">
+                                        <button name="act_view_article" type="object" string="View"
+                                            class="oe_highlight" />
+                                        <field name="name" />
+                                        <field name="state" />
+                                        <field name="publishing_state" />
+                                        <field name="course_name" />
+                                        <field name="tag_similarity_score" />
+                                        <field name="title_similarity_score" />
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
 
-    <record id="article_publication_tree_view" model="ir.ui.view">
-        <field name='name'>article.publication.tree.view</field>
-        <field name='model'>article.publication</field>
-        <field name='arch' type='xml'>
-            <tree string="Article Publication List" import="true"> <!-- set import false after
+        <record id="article_publication_tree_view" model="ir.ui.view">
+            <field name='name'>article.publication.tree.view</field>
+            <field name='model'>article.publication</field>
+            <field name='arch' type='xml'>
+                <tree string="Article Publication List" import="true"> <!-- set import false after
                 finalizing import wizard-->
-                <field name='custom_id' />
-                <field name='name' />
-                <field name="state" />
-                <field name="publishing_state" />
-                <field name="course_name" />
-                <field name="article_tag_ids" widget="many2many_tags" />
-            </tree>
-        </field>
-    </record>
+                    <field name='custom_id' />
+                    <field name='name' />
+                    <field name="state" />
+                    <field name="publishing_state" />
+                    <field name="course_name" />
+                    <field name="article_tag_ids" widget="many2many_tags" />
+                </tree>
+            </field>
+        </record>
 
-    <record id="article_publication_view_action" model="ir.actions.act_window">
-        <field name="name">Article Publications</field>
-        <field name="res_model">article.publication</field>
-        <field name="view_mode">tree,form</field>
-        <field name="view_ids"
-            eval="[(5, 0, 0), 
+        <record id="article_publication_view_action" model="ir.actions.act_window">
+            <field name="name">Article Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create New Article Topics
-            </p>
-        </field>
-    </record>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create New Article Topics
+                </p>
+            </field>
+        </record>
 
-    <record id="article_publication_view_search" model="ir.ui.view">
-        <field name="name">article.publication.search.view</field>
-        <field name="model">article.publication</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="name" />
-                <separator />
-                <field name="state" />
-                <field name="publishing_state" />
-                <separator />
-                <field name="course_name" /><!-- add a search for design/thesis? not sure if needed
+        <record id="article_publication_view_search" model="ir.ui.view">
+            <field name="name">article.publication.search.view</field>
+            <field name="model">article.publication</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" />
+                    <separator />
+                    <field name="state" />
+                    <field name="publishing_state" />
+                    <separator />
+                    <field name="course_name" /><!-- add a search for design/thesis? not sure if
+                    needed
                 because it's based on bool already -->
-                <field name="article_tag_ids" />
-            </search>
-        </field>
-    </record>
+                    <field name="article_tag_ids" />
+                </search>
+            </field>
+        </record>
+    </data>
 </odoo>

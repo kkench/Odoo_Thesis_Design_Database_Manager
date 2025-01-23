@@ -18,6 +18,7 @@
         "views/article_advisor_view.xml",
         "views/wizard_views/debugging_views/for_debugging_only_view.xml",
         "views/wizard_views/article_import_article_popup_view.xml",
+        "views/article_member_change_publication_popup_view.xml",
         "views/wizard_views/article_import_form.xml",
         "views/article_menus.xml",
     ],

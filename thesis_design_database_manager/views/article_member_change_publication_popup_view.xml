@@ -1,0 +1,31 @@
+<odoo>
+    <data>
+        <record id="article_publication_member_change_form_view" model="ir.ui.view">
+            <field name="name">view.form.article.publication.member.change.form.view</field>
+            <field name="model">article.publication</field>
+            <field name="arch" type="xml">
+                <form string="Member Change">
+                    <field name="course_name" invisible="1"/>
+                    <sheet>
+                    <group>
+                        <group>
+                            <field name="author1" />
+                            <field name="author2" />
+                            <field name="author3" invisible="course_name == 'thesis'"/>
+                        </group>
+                        <group>
+                            <field name="latest_student_batch_yr" widget="integer" options="{'format': 0}"/>
+                            <field name="replacement_id" readonly="1" string="New ID"/>
+                            <field name="custom_id" readonly="1" string="Old ID"/>
+                        </group>
+                    </group>
+                    </sheet>
+                    <footer>
+                        <button string="Save Changes" type="object" class="btn-secondary" name="act_save_new_members"/>
+                        <button string="Discard" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
