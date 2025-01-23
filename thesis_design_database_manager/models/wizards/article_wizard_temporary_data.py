@@ -278,7 +278,6 @@ class ArticleWizardPublication(models.TransientModel):
             record.name = title
             
     def tags_are_valid(self):
-        #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
         return True
     
     def act_open_error_code(self):
