@@ -35,11 +35,10 @@
                                     <field name='custom_id' />
                                     <button name="act_member_change" string="Change Member"
                                         type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                        invisible="is_course_instructor == False and is_article_adviser == False" />
+                                        invisible="is_course_instructor == False" />
                                 </group>
                             </group>
-                        </group> <!--Dont
-                        know how to make spaces-->
+                        </group> <!--Dont know how to make spaces-->
                         <button name="act_accept_conformity" string="Accept Conformity"
                             type="object" class="oe_highlight" style="margin: 4px 2px;"
                             invisible="(state not in ['proposal_minor_revisions', 'final_minor_revisions']) or (is_course_instructor == False and is_article_adviser == False)" />

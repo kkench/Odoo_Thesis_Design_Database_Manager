@@ -1,6 +1,7 @@
 from odoo import api,fields,models
 from difflib import SequenceMatcher, get_close_matches
 from odoo.exceptions import UserError
+import re
 
 class ArticlePublication(models.Model):
     _name = "article.publication"
@@ -191,16 +192,15 @@ class ArticlePublication(models.Model):
             'views': [(self.env.ref('thesis_design_database_manager.article_publication_member_change_form_view').id, 'form')], 
             'target': 'new',
         }
-    
-    def act_save_new_members(self):
-        return {
-            'type': 'ir.actions.act_window_close'
-        }
 
     @api.onchange("author1","author2","author3","latest_student_batch_yr")
     def _compute_temp_id(self):
         if not (self.latest_student_batch_yr>=2010 and self.latest_student_batch_yr<2999): 
             self.replacement_id = "Year Ivalid"
+            return
+
+        if not self.is_author_name_valid(): 
+            self.replacement_id = "Name Invalid"
             return
 
         if not self.custom_id:
@@ -214,21 +214,51 @@ class ArticlePublication(models.Model):
                 _,_,course_code = split_id_list
                 article_string = None
 
+        self.arrange_lastname_alphabetically()
         temp_last_names = self._get_lastnames()
-        if temp_last_names == "Name Incorrect":
-            self.replacement_id = "Name Invalid; Incorrect Format"
-            return
         student_batch_num = str(self.latest_student_batch_yr)
         separator = '_'
         id_part_list = [part for part in [temp_last_names, student_batch_num, course_code, article_string] 
                         if part is not None]    
         self.replacement_id = separator.join(id_part_list)
 
-    #sample Thesis custom_id: CastilloMorales_2019_T_Art1
-    #sample Design custom_id: EscioMorales_2019_D
-
+    def act_save_new_members(self):
+        return self.write({
+            'custom_id':self.replacement_id,
+        })
+    
     def _get_lastnames(self):
-        
-        return "CastilloMorales" #temp
+        #will not account for arrangement of names
+        lastname_list = [name.split(",")[0] for name in [self.author1,self.author2,self.author3] if name]
+    
+        lastname_combination_string = "".join(lastname_list)
+        print(lastname_combination_string)
+        return lastname_combination_string
 
 
+    def arrange_lastname_alphabetically(self):
+        author_names = [name for name in [self.author1, self.author2, self.author3] if name]
+        sorted_names = sorted(author_names)
+
+        sorted_names.extend([None] * (3 - len(sorted_names)))
+        if sorted_names == [self.author1, self.author2, self.author3]:
+            return [self.author1, self.author2, self.author3]
+        else:
+            self.author1, self.author2, self.author3 = sorted_names
+            return sorted_names
+
+    @api.constrains("author1","author2","author3")
+    def _check_author_constrains(self):
+        if not self.is_author_name_valid():
+            raise UserError("Name has incorrect format")
+
+
+    def is_author_name_valid(self):
+        for record in self:
+            pattern_name = r'^[A-Z][a-z]+, ([A-Z][a-z]+ )+[A-Z]\.$'  # LN, FN MI
+            if not (record.author1 or record.author2 or record.author3): return False
+            for author_name in [record.author1, record.author2, record.author3]:
+                if not author_name: continue
+                if not re.match(pattern_name, author_name):
+                    return False
+        return True
