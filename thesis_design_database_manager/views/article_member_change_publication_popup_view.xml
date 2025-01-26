@@ -15,7 +15,7 @@
                         </group>
                         <group>
                             <field name="latest_student_batch_yr" widget="integer" options="{'format': 0}"/>
-                            <field name="replacement_id" readonly="1" string="New ID"/>
+                            <field name="replacement_identifier" readonly="1" string="New ID"/>
                             <field name="custom_id" readonly="1" string="Old ID"/>
                         </group>
                     </group>

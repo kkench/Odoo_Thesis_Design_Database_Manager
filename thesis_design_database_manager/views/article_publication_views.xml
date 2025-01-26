@@ -27,16 +27,14 @@
                                     options="{'no_create': True}" />
                             </group>
                             <group>
-                                <group>
-                                    <field name="author1" readonly="1" />
-                                    <field name="author2" readonly="1" />
-                                    <field name="author3" readonly="1"
-                                        invisible="course_name != 'design'" />
-                                    <field name='custom_id' />
-                                    <button name="act_member_change" string="Change Member"
-                                        type="object" class="oe_highlight" style="margin: 4px 2px;"
-                                        invisible="is_course_instructor == False" />
-                                </group>
+                                <field name="author1" readonly="1" />
+                                <field name="author2" readonly="1" />
+                                <field name="author3" readonly="1"
+                                    invisible="course_name != 'design'" />
+                                <field name='custom_id' />
+                                <button name="act_member_change" string="Change Member"
+                                    type="object" class="oe_highlight"
+                                    invisible="is_course_instructor == False" />
                             </group>
                         </group> <!--Dont know how to make spaces-->
                         <button name="act_accept_conformity" string="Accept Conformity"

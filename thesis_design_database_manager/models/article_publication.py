@@ -52,8 +52,9 @@ class ArticlePublication(models.Model):
         )
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
-    replacement_id = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
+    replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
     latest_student_batch_yr = fields.Integer("Latest Student ID Year From All Members")
+
     #-----Computable Information------
     is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
     is_course_instructor = fields.Boolean(string="The user is the instructor of the paper", compute="_compute_article_editability")
@@ -182,7 +183,7 @@ class ArticlePublication(models.Model):
             return self.write({'state':'final_minor_revisions'})
         
     def act_member_change(self):
-        self.replacement_id = None
+        self.replacement_identifier = None
         return {
             'type': 'ir.actions.act_window',
             'name': 'Member Change Form',
@@ -196,11 +197,11 @@ class ArticlePublication(models.Model):
     @api.onchange("author1","author2","author3","latest_student_batch_yr")
     def _compute_temp_id(self):
         if not (self.latest_student_batch_yr>=2010 and self.latest_student_batch_yr<2999): 
-            self.replacement_id = "Year Ivalid"
+            self.replacement_identifier = "Year Ivalid"
             return
 
         if not self.is_author_name_valid(): 
-            self.replacement_id = "Name Invalid"
+            self.replacement_identifier = "Name Invalid"
             return
 
         if not self.custom_id:
@@ -220,11 +221,11 @@ class ArticlePublication(models.Model):
         separator = '_'
         id_part_list = [part for part in [temp_last_names, student_batch_num, course_code, article_string] 
                         if part is not None]    
-        self.replacement_id = separator.join(id_part_list)
+        self.replacement_identifier = separator.join(id_part_list)
 
     def act_save_new_members(self):
         return self.write({
-            'custom_id':self.replacement_id,
+            'custom_id':self.replacement_identifier,
         })
     
     def _get_lastnames(self):
