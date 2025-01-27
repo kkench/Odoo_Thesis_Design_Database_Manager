@@ -40,6 +40,7 @@
                             <page string="NEW RECORDS">
                                 <field name="wizard_excel_extracted_record_ids">
                                     <tree create="0" delete="0" editable="bottom">
+                                        <field name="submission_datetime"/>
                                         <field name="initial_id" string="ID"/>
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course" readonly="1"/>
@@ -87,23 +88,16 @@
                         </h1>
                         <notebook>
                             <page string="Failed Records">
-                                <field name="failed_form_submissions_record_ids" options="{'no_open': True}">
+                                <field name="failed_form_submissions_record_ids" options="{'no_open': True}" default_order="name asc">
                                     <tree create="0" delete="0" editable="false">
-                                        <field name="initial_id" string="ID"/>
                                         <field name="name" string="Title"/>
-                                        <field name="course" string="Course"/>
-                                        <field name="author1" string="A1"/>
-                                        <field name="author2" string="A2"/>
-                                        <field name="author3" string="A3"/>
-                                        <field name="adviser" string="ADV"/>
-                                        <field name="student_number_1" string="SN1"/>
-                                        <field name="student_number_2" string="SN2"/>
-                                        <field name="student_number_3" string="SN3"/>
-                                        <field name="error_code" string="E.C."/>
+                                        <field name="uploader_name" string="Uploader Name"/>
+                                        <field name="uploader_email" string="Uploader Email"/>
+                                        <field name="error_comment" string="Comment"/>
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Registered Topic/Author">
+                            <page string="Registered Topics">
                                 <field name="created_article_record_ids">
                                     <tree create="0" delete="0">
                                         <field name="name" string="Title"/>
@@ -115,7 +109,7 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Authors for Proposal Redefense">
+                            <page string="Redefense Topics">
                                 <field name="overwritten_article_record_ids">
                                     <tree create="0" delete="0">
                                         <field name="name" string="Title"/>

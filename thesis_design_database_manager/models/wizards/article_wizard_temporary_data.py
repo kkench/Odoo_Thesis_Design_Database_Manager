@@ -32,6 +32,11 @@ class ArticleWizardPublication(models.TransientModel):
 
     import_wizard_id = fields.Many2one("article.import.excel.wizard")
 
+    submission_datetime = fields.Datetime("Time of Submission", readonly=True)
+    
+    def reset_record(record):
+        record.initial_id = None
+
     @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_wizard_id')
     def _compute_data_and_errors(self):
         ''' Error Codes:
@@ -46,56 +51,52 @@ class ArticleWizardPublication(models.TransientModel):
         8 - Cannot Search Adviser
         9 - Edit Mode, Record Not Searchable
         '''
-        def reset_record(record):
-            record.initial_id = None
-
         for record in self:
             record.error_comment = ""
             if not record.is_author_name_valid():
                 record.error_code = 1
                 record.error_comment = "One of the Author is not proper name format!"
-                reset_record(record)
+                record.reset_record()
                 continue             
             if not record.does_author_email_and_name_match(): 
                 record.error_code = 2
                 record.error_comment = "Uploader Error; Use Own Mapuan Email"
-                reset_record(record)
+                record.reset_record()
                 continue
             if record.course_is_unknown(): 
                 record.error_code = 3
                 record.error_comment = "No Course Given"
-                reset_record(record)
+                record.reset_record()
                 continue
             if not record.is_student_number_in_format():
                 record.error_code = 4
                 record.error_comment = "Student Number not Correct"
-                reset_record(record)
+                record.reset_record()
                 continue
             record.arrange_authors_alphabetically()
             record._update_initial_id()
             if record.course == "D" and (None in [record.author1,record.author2,record.author3]): # only max 2 authors for thesis
                 record.error_code = 5
                 record.error_comment = "2 Authors only for Thesis"
-                reset_record(record)
+                record.reset_record()
                 continue
             if record.record_has_duplicate_submission():
-                record.error_code = 6
-                record.error_comment = "Another Submission has been Made"
+                continue
             if not record.tags_are_valid():
                 record.error_code = 7
                 record.error_comment = "Tagging Error"   
-                reset_record(record)
+                record.reset_record()
                 continue
             record._check_for_existing_records()
             if record.import_wizard_id.wizard_type == "new":
                 if record._has_errors_for_new_articles(): #check if anything is wrong for new record
-                    reset_record(record)
+                    record.reset_record()
                     continue
                 if record.article_to_update_id:
                     record.error_comment = "Existing Title Exists, Will Overwrite"
             if record.import_wizard_id.wizard_type == "edit":
                 if record._has_errors_for_edit_articles():
-                    reset_record(record)
+                    record.reset_record()
                     continue
                 record.link_existing_record()
             record.error_code = 0
@@ -115,14 +116,25 @@ class ArticleWizardPublication(models.TransientModel):
 
     def record_has_duplicate_submission(self):
         # Search for existing records with the same name and initial_id
-        existing_temporary_data = self.env['article.wizard.publication'].search([
+        existing_temporary_data_ids = self.env['article.wizard.publication'].search([
             ('initial_id', '=', self.initial_id),
             ('id', '!=', self.id if isinstance(self.id, int) else None),  # Exclude the current record   
             ('import_wizard_id', '=', self.import_wizard_id.id),
         ])
-        if existing_temporary_data:
-            return True
+        if not existing_temporary_data_ids: return False
+        if not self.submission_datetime: return True
+        for existing_temporary_data_id in existing_temporary_data_ids:
+            if existing_temporary_data_id.error_code != 0 or not existing_temporary_data_id.submission_datetime: continue
+            if existing_temporary_data_id.submission_datetime > self.submission_datetime: #previous duplicate record is later
+                self.error_code = 6
+                self.error_comment = "Another Submission has been Made"
+                self.reset_record()
+                return True
+            existing_temporary_data_id.error_code = 6
+            existing_temporary_data_id.error_comment = "Another Submission has been Made"
+            existing_temporary_data_id.reset_record()
         return False
+
 
     def does_author_email_and_name_match(self):
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA

@@ -3,7 +3,8 @@ from odoo.exceptions import UserError
 import base64
 import io
 import pandas as pd # type: ignore #check readme for installation on launch.json
-import datetime
+from datetime import datetime, timedelta
+import pytz
 
 
 class ArticleImportExcelWizard(models.TransientModel):
@@ -490,23 +491,37 @@ class ArticleImportExcelWizard(models.TransientModel):
             new_article_column_list = [col for col in new_article_column_list if col != 'Adviser']
         return new_article_column_list
 
-    def excel_date_to_odoo_date(excel_date):
-        start_date = datetime.datetime(1900, 1, 1)
-        delta = datetime.timedelta(days=int(excel_date) - 2)
-        odoo_date = start_date + delta
-        return odoo_date.strftime('%Y-%m-%d')
+    def excel_date_to_odoo_datetime(self, excel_datetime):
+        start_date = datetime(1900, 1, 1)
+        if isinstance(excel_datetime, pd.Timestamp):
+            excel_datetime = excel_datetime.to_pydatetime()
+        delta = excel_datetime - start_date
+        odoo_datetime = start_date + delta
+
+        # Convert to UTC and then remove timezone info to make it naive
+        local_tz = pytz.timezone('Asia/Manila')  # Replace with your local timezone
+        local_datetime = local_tz.localize(odoo_datetime, is_dst=None)
+        utc_datetime = local_datetime.astimezone(pytz.utc)
+        naive_utc_datetime = utc_datetime.replace(tzinfo=None)
+
+        return naive_utc_datetime.strftime('%Y-%m-%d %H:%M:%S')
 
     def _get_wizard_df(self):
         df_data = base64.b64decode(self.wizard_article_form_df)
         return pd.read_pickle(io.BytesIO(df_data)) 
     
     def _get_initial_temp_data(self,row):
+        
+
         if not self.user_privilege:
             raise UserError("User has no privilege")
+        
+        date_time_completion = self.excel_date_to_odoo_datetime(row['Completion time'])
         record_dictionary = {
                                 'uploader_email':row['Email'],
                                 'uploader_name':row['Name'],
                                 'import_wizard_id':self.id,
+                                'submission_datetime':date_time_completion
                             }
         
         if self.user_privilege == "design_instructor":
