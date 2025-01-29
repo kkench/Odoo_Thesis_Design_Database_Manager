@@ -97,6 +97,12 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             'Article 2 Flag':'article_2_flag',
                                             'Course Name':'course'
                                         }
+    boolean_dictionary = {
+            "No (both conformity and non conformity purposes)":0,
+            "Yes (New topic/redefense for a new topic)":1,
+            "No":"0",
+            "Yes":"1",
+        }
     
     #Buttons
     def act_set_import_new(self):
@@ -156,7 +162,12 @@ class ArticleImportExcelWizard(models.TransientModel):
                 if field_name in ['student_number_1','student_number_2','student_number_3']:
                     row_data_dictionary[field_name] = str(int(row[excel_column_record.name]))#in case of float
                     continue
-                
+
+                if field_name == 'article_2_flag':
+                    row_data_dictionary[field_name] = self.boolean_dictionary[row[column.name]]
+                    # print(f"{field_name}: {row_data_dictionary[field_name]}")
+                    continue
+
                 row_data_dictionary[field_name] = row[excel_column_record.name]
             new_article = self.env['article.wizard.publication'].create(row_data_dictionary)
             new_article_list.append(new_article.id)
@@ -174,15 +185,9 @@ class ArticleImportExcelWizard(models.TransientModel):
             'target': 'current', }
 
     def process_edit_data_for_part_2(self):
-        boolean_dictionary = {
-            "No (both conformity and non conformity purposes)":0,
-            "Yes (New topic/redefense for a new topic)":1,
-            "No":"0",
-            "Yes":"1",
-        }
         excel_df = self._get_wizard_df()
         to_update_article_list = []
-        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?","Is this for your article 2?"]
+        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
         update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)"]
         new_record_data = ["New Title Name","New Abstract","New Topic Tags"]
         question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
@@ -190,9 +195,6 @@ class ArticleImportExcelWizard(models.TransientModel):
         non_question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
                                     if (excel_column_record.official_record_id.name not in to_update_questions_list) 
                                     and excel_column_record.official_record_id]
-        print("Appropriate Non: ")
-        list_of_n = [column.name for column in non_question_columns]
-        print(list_of_n)
         for _, row in excel_df.iterrows():
             #---------Static Article Information--------------
             row_data_dictionary, ignore_list = self._get_initial_temp_data(row)
@@ -201,7 +203,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             #------------Extract Questions To Update-----------
             for column in question_columns:
                 boolean_index = to_update_questions_list.index(column.official_record_id.name)
-                boolean_string_flags[boolean_index] = str(boolean_dictionary.get(row[column.name], "0"))
+                boolean_string_flags[boolean_index] = str(self.boolean_dictionary.get(row[column.name], "0"))
             boolean_string_flags = "".join(boolean_string_flags)
             row_data_dictionary['edit_binary_string'] = boolean_string_flags
             #------------Update/New Data ----------
@@ -215,14 +217,17 @@ class ArticleImportExcelWizard(models.TransientModel):
                 skip_data = (not column.official_record_id or 
                              field_name in ignore_list or
                              pd.isna(row[column.name]))
+                # print(field_name)
                 if skip_data: continue
-
                 if field_name == 'course':
                     row_data_dictionary[field_name] = 'T' if row[column.name] == 'Thesis' else 'D'
                     continue
-
                 if field_name in ['student_number_1','student_number_2','student_number_3']:
                     row_data_dictionary[field_name] = str(int(row[column.name]))#in case of float
+                    continue
+                if field_name == 'article_2_flag':
+                    row_data_dictionary[field_name] = int(self.boolean_dictionary[row[column.name]])
+                    # print(f"{field_name}: {row_data_dictionary[field_name]}")
                     continue
                 row_data_dictionary[field_name] = row[column.name]
 
@@ -230,8 +235,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
                 row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
                 row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
-            print("Row Data Dict: ")
-            print(row_data_dictionary)
+            # print("Row Data Dict: ")
+            # print(row_data_dictionary)
             temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
             # temporary_record._compute_data_and_errors()
 
@@ -450,7 +455,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                              self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_name, None))
             if official_name in official_column_names:
                 official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_wizard_id','=',self.id)],limit=1)
-                print(official_record)
+                # print(official_record)
                 if official_record: #not sure if needed since the first line (in this section) finds the colun names already
                     excel_column_id.official_record_id = official_record.id
         #------------------------------

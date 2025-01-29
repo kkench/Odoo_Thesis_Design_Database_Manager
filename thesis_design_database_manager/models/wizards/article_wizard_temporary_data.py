@@ -80,7 +80,7 @@ class ArticleWizardPublication(models.TransientModel):
                 continue
             record.arrange_authors_alphabetically()
             record._update_initial_id()
-            print(record.initial_id)
+            # print(record.initial_id)
             if record.course == "D" and (None in [record.author1,record.author2,record.author3]): # only max 2 authors for thesis
                 record.error_code = 5
                 record.error_comment = "2 Authors only for Thesis"
@@ -123,14 +123,14 @@ class ArticleWizardPublication(models.TransientModel):
 
     def record_has_duplicate_submission(self):
         # Search for existing records with the same name and initial_id
-        print(self.initial_id)
+        # print(self.initial_id)
         existing_temporary_data_ids = self.env['article.wizard.publication'].search([
             ('initial_id', '=', self.initial_id),
             ('id', '!=', self.id if isinstance(self.id, int) else None),  # Exclude the current record   
             ('import_wizard_id', '=', self.import_wizard_id.id),
         ])
-        print("The IDs are")
-        print(existing_temporary_data_ids)
+        # print("The IDs are")
+        # print(existing_temporary_data_ids)
         if not existing_temporary_data_ids: return False
         if not self.submission_datetime: return True
         for existing_temporary_data_id in existing_temporary_data_ids:
@@ -261,6 +261,7 @@ class ArticleWizardPublication(models.TransientModel):
             #-------------For Thesis Articles-----------------------
             if record.course == "T":
                 record.initial_id += "_Art2" if record.article_2_flag else "_Art1"
+            print(record.initial_id)
 
     def arrange_authors_alphabetically(self):
         # print("arranging now")
@@ -329,17 +330,17 @@ class ArticleWizardPublication(models.TransientModel):
         if int(binary_string[0]):  # Edit everything
             return True
         else:
-            print(bool(int(binary_string[1])),bool(int(binary_string[2])),bool(int(binary_string[3])))
+            # print(bool(int(binary_string[1])),bool(int(binary_string[2])),bool(int(binary_string[3])))
             # self.adviser = self.article_to_update_id.adviser_ids
             semicolon_separated_advisers = "" 
             for adviser_id in self.article_to_update_id.adviser_ids:
                 semicolon_separated_advisers += adviser_id.name if semicolon_separated_advisers == "" else f";{adviser_id.name}"
             self.adviser = semicolon_separated_advisers
             if not int(binary_string[1]):  # If not supposed to edit, copy it
-                print("title checked")
+                # print("title checked")
                 self.name = self.article_to_update_id.name
             if not int(binary_string[2]):
-                print("abstract checked")
+                # print("abstract checked")
                 self.abstract = self.article_to_update_id.abstract
             if int(binary_string[3]):
                 pass  
