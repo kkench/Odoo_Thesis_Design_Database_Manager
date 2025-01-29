@@ -3,6 +3,7 @@ from odoo.exceptions import UserError
 import base64
 import io
 import pandas as pd # type: ignore #check readme for installation on launch.json
+from difflib import SequenceMatcher, get_close_matches
 from datetime import datetime, timedelta
 import pytz
 
@@ -26,6 +27,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     updated_article_records_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
     overwritten_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_overwritten_rel',string="Overwritten Records")
     failed_form_submissions_record_ids = fields.Many2many("article.wizard.publication", 'article_import_excel_wizard_failed_rel',string="Failed Records")
+    wizard_check_tags_records_ids = fields.One2many('article.wizard.publication','checking_wizard_id','List of Records for Checking')
 
     ignore_instructor_privilege = fields.Boolean("As Adviser, not Instructor", default=False)
 
@@ -164,11 +166,11 @@ class ArticleImportExcelWizard(models.TransientModel):
 
         return { 
             'type': 'ir.actions.act_window', 
-            'name': 'Part 2', 
+            'name': 'Part 2-2', 
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
 
     def process_edit_data_for_part_2(self):
@@ -234,11 +236,11 @@ class ArticleImportExcelWizard(models.TransientModel):
 
         return { 
             'type': 'ir.actions.act_window', 
-            'name': 'Part 2', 
+            'name': 'Part 2-2', 
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
 
     def upload_process_for_new_record(self):
@@ -290,9 +292,15 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_failed_list = []
         record_updated_list = []
         for form_record in self.wizard_excel_extracted_record_ids:
+            all_tags = []
+            tag_list = self.set_similar_tags(form_record)
+            all_tags.extend(tag_list)
             if form_record.error_code != 0:
                 record_failed_list.append(form_record.id)
                 continue
+            else:
+                new_tag_obj = self.set_new_tags(form_record)
+                all_tags.extend(new_tag_obj)
             form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,
@@ -305,6 +313,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'author2': form_record.author2,
                 'author3': form_record.author3,
                 'adviser_ids': [(6, 0, [form_record_advisor.id])], # this is new, so replace is good
+                'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
             }
             if not form_record.article_to_update_id:
                 record = self.env['article.publication'].create(row_record_dictionary)
@@ -346,7 +355,8 @@ class ArticleImportExcelWizard(models.TransientModel):
             if update_abstract_flag or override_everything:
                 record_dictionary['abstract'] = temp_record.abstract
             if update_tag_flag or override_everything:
-                pass #input tag update here
+                record_dictionary['article_tag_ids'] = [(6, 0, [tag.id for tag in all_tags])] #input tag update here
+                #currently untested
             if override_everything:
                 record_dictionary['state'] = 'proposal'
                 record_dictionary['publishing_state'] = 'not_published'
@@ -549,3 +559,32 @@ class ArticleImportExcelWizard(models.TransientModel):
         #####################
         result = super(ArticleImportExcelWizard, self).unlink()
         return result
+    
+    ##### ADDED FROM EXTENSION #########
+    def act_go_to_view_part2(self):
+        return { 
+            'type': 'ir.actions.act_window', 
+            'name': 'Part 2', 
+            'view_mode': 'form', 
+            'res_model': 'article.import.excel.wizard',
+            'res_id': self.id,
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'target': 'current', }
+    
+    def set_similar_tags(self, temp_record):       
+        similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
+        # print(similar_tag_names)
+        similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
+        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+        # print(type(similar_tag))
+       
+        return similar_tag
+    
+    def set_new_tags(self, temp_record):
+        tag_list = []
+        new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
+        for n_tag in new_tag_names:
+            tag_dict = {"name": n_tag}
+            tag_list.append(tag_dict)
+        new_tag = self.env["article.tag"].create(tag_list)
+        return new_tag
