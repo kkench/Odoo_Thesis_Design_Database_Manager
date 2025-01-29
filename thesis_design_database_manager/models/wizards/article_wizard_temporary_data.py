@@ -80,12 +80,14 @@ class ArticleWizardPublication(models.TransientModel):
                 continue
             record.arrange_authors_alphabetically()
             record._update_initial_id()
+            print(record.initial_id)
             if record.course == "D" and (None in [record.author1,record.author2,record.author3]): # only max 2 authors for thesis
                 record.error_code = 5
                 record.error_comment = "2 Authors only for Thesis"
                 record.reset_record()
                 continue
-            if record.record_has_duplicate_submission():
+            duplicate_flag = record.record_has_duplicate_submission()
+            if duplicate_flag:
                 continue
             if not record.tags_are_valid():
                 record.error_code = 7
@@ -121,11 +123,14 @@ class ArticleWizardPublication(models.TransientModel):
 
     def record_has_duplicate_submission(self):
         # Search for existing records with the same name and initial_id
+        print(self.initial_id)
         existing_temporary_data_ids = self.env['article.wizard.publication'].search([
             ('initial_id', '=', self.initial_id),
             ('id', '!=', self.id if isinstance(self.id, int) else None),  # Exclude the current record   
             ('import_wizard_id', '=', self.import_wizard_id.id),
         ])
+        print("The IDs are")
+        print(existing_temporary_data_ids)
         if not existing_temporary_data_ids: return False
         if not self.submission_datetime: return True
         for existing_temporary_data_id in existing_temporary_data_ids:
@@ -295,11 +300,11 @@ class ArticleWizardPublication(models.TransientModel):
             record.name = title
             
     def tags_are_valid(self):
-        if self.tags:
+        if not self.tags:
+            invalid_tags = []
+        else:
             article_tags = self.excel_tags_to_odoo_tags(self.tags)
             invalid_tags = self.get_tag_changes(article_tags)
-        else:
-             invalid_tags = [""]
         return invalid_tags
     
     def act_open_error_code(self):
@@ -387,7 +392,7 @@ class ArticleWizardPublication(models.TransientModel):
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
-            print(similar_tags)
+            # print(similar_tags)
         return similar_tags or existing_tags or tags_to_create
     
      #Decided not to incorporate because there's no functional difference, even for efficiency
@@ -396,11 +401,12 @@ class ArticleWizardPublication(models.TransientModel):
     #     self.existing_tag_ids = [(4,0,existing_tag.id)] #adjust the function in the iwzard as well
 
     def check_duplicate_temp_tags(self, tag):
-        tag_flag = self.env["article.wizard.publication.tag"].search([('name','=',tag)])
+        tag_flag = self.env["article.wizard.publication.tag"].search([('name','in',tag)])
         return tag_flag
 
     def get_tag_changes(self, tag_list):
         # self.check_abbreviation(tag_list)
+        # print(tag_list)
         sim = self.check_similar_tags(tag_list)
         # print(sim)
         if (not sim and not self.to_create_tag_ids.exists()):

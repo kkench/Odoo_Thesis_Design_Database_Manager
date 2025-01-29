@@ -182,7 +182,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         }
         excel_df = self._get_wizard_df()
         to_update_article_list = []
-        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
+        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?","Is this for your article 2?"]
         update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)"]
         new_record_data = ["New Title Name","New Abstract","New Topic Tags"]
         question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
@@ -190,6 +190,9 @@ class ArticleImportExcelWizard(models.TransientModel):
         non_question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
                                     if (excel_column_record.official_record_id.name not in to_update_questions_list) 
                                     and excel_column_record.official_record_id]
+        print("Appropriate Non: ")
+        list_of_n = [column.name for column in non_question_columns]
+        print(list_of_n)
         for _, row in excel_df.iterrows():
             #---------Static Article Information--------------
             row_data_dictionary, ignore_list = self._get_initial_temp_data(row)
@@ -227,6 +230,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
                 row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
                 row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
+            print("Row Data Dict: ")
+            print(row_data_dictionary)
             temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
             # temporary_record._compute_data_and_errors()
 
