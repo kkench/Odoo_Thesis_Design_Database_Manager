@@ -49,7 +49,7 @@ class ArticleWizardPublication(models.TransientModel):
         6 - Duplicate Submission
         7 - Tags Stuff
         8 - Cannot Search Adviser
-        9 - Edit Mode, Record Not Searchable
+        9 -  
         '''
         for record in self:
             record.error_comment = ""

@@ -11,8 +11,11 @@ class ArticleImportExcelWizard(models.TransientModel):
     existing_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_existing_tags")
 
     def tags_are_valid(self):
-        article_tags = self.excel_tags_to_odoo_tags(self.tags)
-        invalid_tags = self.get_tag_changes(article_tags)
+        if self.tags:
+            article_tags = self.excel_tags_to_odoo_tags(self.tags)
+            invalid_tags = self.get_tag_changes(article_tags)
+        else:
+             invalid_tags = [""]
         return invalid_tags
 
     @staticmethod
