@@ -357,6 +357,13 @@ class ArticleImportExcelWizard(models.TransientModel):
             update_title_flag = int(temp_record.edit_binary_string[1])
             update_abstract_flag = int(temp_record.edit_binary_string[2])
             update_tag_flag = int(temp_record.edit_binary_string[3])
+
+            all_tags = []
+            tag_list = self.set_similar_tags(temp_record)
+            all_tags.extend(tag_list)
+            new_tag_obj = self.set_new_tags(temp_record)
+            all_tags.extend(new_tag_obj)
+            
             if temp_record.error_code:
                 record_failed_list.append(temp_record.id)
                 continue
