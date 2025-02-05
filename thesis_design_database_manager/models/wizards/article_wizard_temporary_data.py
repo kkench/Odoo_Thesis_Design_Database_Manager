@@ -178,12 +178,14 @@ class ArticleWizardPublication(models.TransientModel):
         # print(self.adviser.split(';'))
         for adviser_name in self.adviser.split(';'):
             adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
+            print(adviser)
             if adviser:
                 if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
                     continue
                 else:
                     return False
-        return True    
+                return True
+        return False
             
     def is_student_number_in_format(self):
         # THIS IS A COMPUTE FUNCTION, DON'T EDIT NON-STORED DATA
@@ -205,7 +207,9 @@ class ArticleWizardPublication(models.TransientModel):
     def _has_errors_for_new_articles(self):
         #the function that calls this will cycle the records already, keep it as 'self' 
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
+        print("for new records")
         if not self.adviser_is_searchable():
+            print("adviser is not searchable")
             self.error_code = 8
             self.error_comment = "Adviser is Not Found"
             return True
