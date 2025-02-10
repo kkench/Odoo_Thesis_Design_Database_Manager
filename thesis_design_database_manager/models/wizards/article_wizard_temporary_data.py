@@ -171,22 +171,41 @@ class ArticleWizardPublication(models.TransientModel):
         last_name, first_name_middle_initial = upper_name.split(', ')
         first_names, _ = first_name_middle_initial.rsplit(' ', 1)
         return first_names + " " + last_name
-    
+        
     def adviser_is_searchable(self):
-        #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
-        if not self.adviser:return False
-        # print(self.adviser.split(';'))
+        # THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
+        if not self.adviser:
+            return False
+
         for adviser_name in self.adviser.split(';'):
             adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
             print(adviser)
+
             if adviser:
                 if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
-                    continue
+                    continue  # Continue checking the next adviser if the group matches
                 else:
-                    return False
-                return True
-        return False
+                    return False  # Return False if the adviser does not have the required group
+            else:
+                return False  # Return False if no adviser found with the given name
+
+        return True  # Return True if all advisers have the required group
+
             
+    # def adviser_is_searchable(self):
+    #     #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
+    #     if not self.adviser:return False
+    #     # print(self.adviser.split(';'))
+    #     for adviser_name in self.adviser.split(';'):
+    #         adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
+    #         # print(adviser)
+    #         if adviser:
+    #             if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
+    #                 return True
+                
+    #         return False
+            
+
     def is_student_number_in_format(self):
         # THIS IS A COMPUTE FUNCTION, DON'T EDIT NON-STORED DATA
         student_list = [self.author1, self.author2, self.author3]
