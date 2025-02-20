@@ -42,6 +42,8 @@ class ArticlePublication(models.Model):
     author1 = fields.Char("Author 1",default=None)
     author2 = fields.Char("Author 2",default=None)
     author3 = fields.Char("Author 3",default=None)
+    source = fields.Text("Link / DOI", default=None)
+    
     adviser_ids = fields.Many2many(
         "res.users",
         "article_publication_res_users_rel",
@@ -227,6 +229,18 @@ class ArticlePublication(models.Model):
         return self.write({
             'custom_id':self.replacement_identifier,
         })
+
+    #for topic voiding, make action button that will change ID to group_voidtopic# 
+    def act_void_topic(self):
+        #add warning here
+        #if id == voided
+        #   break
+        #else:
+        #   unlink ID
+        #   last = self.env(search last voided ID tied to grp)
+        #   assign ID = last + 1
+        # voided topics cannot be reopened
+        
     
     def _get_lastnames(self):
         #will not account for arrangement of names
