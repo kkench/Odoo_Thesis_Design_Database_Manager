@@ -36,23 +36,29 @@
                                     type="object" class="oe_highlight"
                                     invisible="is_course_instructor == False" />
                             </group>
-                        </group> <!--Dont know how to make spaces-->
-                        <button name="act_accept_conformity" string="Accept Conformity"
-                            type="object" class="oe_highlight" style="margin: 4px 2px;"
-                            invisible="(state not in ['proposal_minor_revisions', 'final_minor_revisions']) or (is_course_instructor == False and is_article_adviser == False)" />
-                        <button name="act_approve_topic" string="Approve Topic Proposal"
-                            type="object" class="oe_highlight" style="margin: 4px 2px;"
-                            invisible="(state not in ['proposal', 'proposal_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
-                        <button name="act_approve_topic" string="Approve Topic"
-                            type="object" class="oe_highlight" style="margin: 4px 2px;"
-                            invisible="(state not in ['proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
-                        <button name="act_redef_the_topic" string="For Redefense"
-                            type="object" class="oe_highlight" style="margin: 4px 2px;"
-                            invisible="(state not in ['proposal', 'proposal_approved']) or (is_course_instructor == False and is_article_adviser == False)" />
-                        <button name="act_set_the_topic_for_revision"
-                            string="Accept With Minor Revisions"
-                            type="object" class="oe_highlight" style="margin: 4px 2px;"
-                            invisible="(state not in ['proposal', 'proposal_redefense', 'proposal_approved', 'final_redefense']) or (is_course_instructor == False and is_article_adviser == False)" />
+                        </group> 
+                        <div class="row" style="width: 100%;">
+                            <div class="col-lg-3 rounded-3 custom-hover-effect" 
+                            style="background-color: #6e9075; text-align: center;" 
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                                <button name="act_accept_defense" string="Accept Topic" type="object" class="oe_button"/>
+                            </div>
+                            <div class="col-lg-3 rounded-3 custom-hover-effect" 
+                            style="background-color: #d7b49e; text-align: center;" 
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                                <button name="act_minor_revisions_defense" string="Minor Revisions" type="object" class="oe_button"/>
+                            </div>
+                            <div class="col-lg-3 rounded-3 custom-hover-effect" 
+                            style="background-color: #578aad; text-align: center;" 
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                                <button name="act_redef_defense" string="Accept but Redef" type="object" class="oe_button"/>
+                            </div>
+                            <div class="col-lg-3 rounded-3 custom-hover-effect" 
+                            style="background-color: #ff474c; text-align: center;" 
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                                <button name="act_reject_defense" string="Reject" type="object" class="oe_button"/>
+                            </div>
+                        </div>
                         <notebook>
                             <page string="details">
                                 <h1 style="width: 100%;">

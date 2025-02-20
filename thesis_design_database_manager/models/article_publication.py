@@ -15,13 +15,18 @@ class ArticlePublication(models.Model):
     state = fields.Selection(string="Course Status",
                              required=True,
                              selection=[
-                                 ("proposal", "For Proposal"), #
-                                 ("proposal_approved", "Proposal Approved"),#
-                                 ("proposal_redefense", "Proposal Redefense Required"),#
-                                 ("proposal_minor_revisions", "Proposal Minor Revisions"),
-                                 ("final_approved", "Article Completed"),
-                                 ("final_redefense", "Final Redefense Required"),#
-                                 ("final_minor_revisions", "Minor Revisions"),
+                                ("draft", "Topic Drafted"), # registration
+                                ("proposal", "Topic Proposal"),# Need enlistment to get here
+                                ("proposal_redefense", "Proposal Redefense"),
+                                ("proposal_revision", "Proposal Revision"),
+                                ("in_progress", "Under Testing/Prototyping"),
+                                ("pre_final_defense", "For Final Defense Enlistment"),# Passing T2/D2 Enlistment
+                                ("final_defense", "For Final Defense"),# Need Enlistment to Get here
+                                ("final_redefense", "For Final Redefense"),
+                                ("final_revisions", "For Final Revision"),
+                                ("article_2_approval_request", "Awaiting Approval of Article 2"), #For Article 2 Only
+                                ("accepted", "Topic Complete"),
+                                ("rejected", "Rejected"),
                              ],default="proposal")
 
     publishing_state = fields.Selection(string="Published Status",
@@ -157,30 +162,50 @@ class ArticlePublication(models.Model):
             'views': [(self.env.ref('thesis_design_database_manager.article_publication_form_view').id, 'form')], 
         }
     
-    def act_accept_conformity(self):
-        if self.state == 'proposal_minor_revisions':
-            return self.write({'state':'proposal_approved'})
-        if self.state == 'final_minor_revisions':
-            return self.write({'state':'final_approved'})
+    def act_reject_defense(self):
+        return self.write({'state':'rejected'})
+
+    def act_accept_defense(self):
+        if self.state == 'proposal':
+            return self.write({'state':'in_progress'})
+        if self.state == 'final_defense':
+            return self.write({'state':'accepted'})
         
-    def act_approve_topic(self):
-        if self.state in ['proposal', 'proposal_redefense']:
-            return self.write({'state':'proposal_approved'})
-        if self.state in ['proposal_approved', 'final_redefense']:
-            return self.write({'state':'final_approved'})
-        
-    def act_redef_the_topic(self):
-        if self.state in ['proposal']:
+    def act_minor_revisions_defense(self):
+        if self.state == 'proposal':
+            return self.write({'state':'proposal_revision'})
+        if self.state == 'final_defense':
+            return self.write({'state':'final_revisions'})
+
+    def act_redef_defense(self):
+        if self.state == 'proposal':
             return self.write({'state':'proposal_redefense'})
-        if self.state in ['proposal_approved']:
+        if self.state == 'final_defense':
             return self.write({'state':'final_redefense'})
+        
+    # def act_accept_conformity(self):
+    #     if self.state == 'proposal_minor_revisions':
+    #         return self.write({'state':'proposal_approved'})
+    #     if self.state == 'final_minor_revisions':
+    #         return self.write({'state':'final_approved'})
+        
+    # def act_approve_topic(self):
+    #     if self.state in ['proposal', 'proposal_redefense']:
+    #         return self.write({'state':'proposal_approved'})
+    #     if self.state in ['proposal_approved', 'final_redefense']:
+    #         return self.write({'state':'final_approved'})
+        
+    # def act_redef_the_topic(self):
+    #     if self.state in ['proposal']:
+    #         return self.write({'state':'proposal_redefense'})
+    #     if self.state in ['proposal_approved']:
+    #         return self.write({'state':'final_redefense'})
 
-
-    def act_set_the_topic_for_revision(self):
-        if self.state in ['proposal', 'proposal_redefense']:
-            return self.write({'state':'proposal_minor_revisions'})
-        if self.state in ['proposal_approved', 'final_redefense']:
-            return self.write({'state':'final_minor_revisions'})
+    # def act_set_the_topic_for_revision(self):
+    #     if self.state in ['proposal', 'proposal_redefense']:
+    #         return self.write({'state':'proposal_minor_revisions'})
+    #     if self.state in ['proposal_approved', 'final_redefense']:
+    #         return self.write({'state':'final_minor_revisions'})
         
     def act_member_change(self):
         self.replacement_identifier = None
