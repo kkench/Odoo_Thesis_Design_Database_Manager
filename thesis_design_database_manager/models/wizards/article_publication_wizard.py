@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 import base64
-import io
+from io import BytesIO
 import pandas as pd # type: ignore #check readme for installation on launch.json
 from difflib import SequenceMatcher, get_close_matches
 from datetime import datetime, timedelta
@@ -14,15 +14,15 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     excel_file = fields.Binary(string='Excel File', required=True)
     file_name = fields.Char(string='File Name')
-    excel_column_ids = fields.One2many('article.wizard.excel.column','import_wizard_id','Excel Record')
-    official_record_column_ids = fields.One2many('article.wizard.record.column','import_wizard_id','Official Record')
+    excel_column_ids = fields.One2many('article.wizard.excel.column','import_article_wizard_id','Excel Record')
+    official_record_column_ids = fields.One2many('article.wizard.record.column','import_article_wizard_id','Official Record')
     wizard_article_form_df = fields.Binary(string='Wizard Article Form DataFrame')
     wizard_type = fields.Selection([
                                         ("null", "None Set"),
                                         ("new", "New Articles"),
                                         ("edit", "Edit Articles"),
                                     ],"Type of Wizard",default="null")
-    wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publication","import_wizard_id","Excel Records")
+    wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publication","import_article_wizard_id","Excel Records")
     created_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_created_rel',string="Successful Records")
     updated_article_records_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
     overwritten_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_overwritten_rel',string="Overwritten Records")
@@ -95,7 +95,6 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             '3rd Author Student Number': 'student_number_3',
                                             'Tags': 'tags',
                                             'Article 2 Flag':'article_2_flag',
-                                            'Course Name':'course'
                                         }
     boolean_dictionary = {
             "No (both conformity and non conformity purposes)":0,
@@ -398,25 +397,29 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     #Reusable Functions
     def import_excel_articles(self):
+        # region SETUP
         if self.wizard_type == "null":return
-        #------------------Setup---------------------
         ms_forms_required_information_list = ['ID','Id','Start time','Completion time','Email','Name','Last modified time']
         columns_needed = self.get_new_column_list()
-        #--------------------------------------------
-        #-----------------Error Checks---------------
+        # endregion
+
+        # region ERROR CHECKS
         if not self.excel_file:
             raise UserError("Please upload an Excel file.")
         if self.user_privilege is None:
             raise UserError("User Has No Authority to Add new Record")
-        #--------------------------------------------
+        # endregion
 
-        #-----------------Excel Reading--------------
-        excel_data = base64.b64decode(self.excel_file)
-        data_file = io.BytesIO(excel_data)
-        article_form_df = pd.read_excel(data_file)
-        
 
-        buffer = io.BytesIO() 
+        # region Excel Reading
+        try:
+            excel_data = base64.b64decode(self.excel_file)
+            data_file = BytesIO(excel_data)
+            article_form_df = pd.read_excel(data_file)
+        except:
+            raise UserError("File is not an excel file")
+    
+        buffer = BytesIO() 
         article_form_df.to_pickle(buffer) 
         self.wizard_article_form_df = base64.b64encode(buffer.getvalue())
 
@@ -425,9 +428,8 @@ class ArticleImportExcelWizard(models.TransientModel):
             if not data in columns:
                 if data in ["Last modified time","ID","Id"]: continue
                 raise UserError("This doesn't seem to be from MS Forms")
-        #--------------------------------------------
-
-        #--------Initiate Column Assignment (This is Default Values)---------- 
+        # endregion
+        # region Column Assignment (This is Default Values)
         #Note: This creates new transcient record columns each time, though it may have created multiple 
         #       of the same name record already this will still make it less susceptible to errors if people are uploading at the same time
         #       Furthermore, transcient records will delete itself in due time anyway.
@@ -450,9 +452,9 @@ class ArticleImportExcelWizard(models.TransientModel):
             official_column_ids_list.append(record.id)
             name_check.append(record.name)
         self.official_record_column_ids = [(6, 0, official_column_ids_list)]
-        #------------------------------------------
+        # endregion
         
-        #-------Get Default Column----------------
+        # region Get Default Column----------------
         official_column_names = [official_record.name for official_record in self.env['article.wizard.record.column'].browse(official_column_ids_list)]
 
         for excel_column_id in self.env['article.wizard.excel.column'].browse(excel_column_ids_list):
@@ -461,12 +463,12 @@ class ArticleImportExcelWizard(models.TransientModel):
                              if self.wizard_type == "new" else
                              self.DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE.get(excel_name, None))
             if official_name in official_column_names:
-                official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_wizard_id','=',self.id)],limit=1)
+                official_record = self.env['article.wizard.record.column'].search([('name', '=', official_name),('import_article_wizard_id','=',self.id)],limit=1)
                 # print(official_record)
                 if official_record: #not sure if needed since the first line (in this section) finds the colun names already
                     excel_column_id.official_record_id = official_record.id
-        #------------------------------
-        #-------------------------------
+        # endregion
+
         #----------Go to wizard Page 1-----------------
         return { 
                         'type': 'ir.actions.act_window', 
@@ -535,7 +537,7 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     def _get_wizard_df(self):
         df_data = base64.b64decode(self.wizard_article_form_df)
-        return pd.read_pickle(io.BytesIO(df_data)) 
+        return pd.read_pickle(BytesIO(df_data)) 
     
     def _get_initial_temp_data(self,row):
         
@@ -547,7 +549,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_dictionary = {
                                 'uploader_email':row['Email'],
                                 'uploader_name':row['Name'],
-                                'import_wizard_id':self.id,
+                                'import_article_wizard_id':self.id,
                                 'submission_datetime':date_time_completion
                             }
         

@@ -31,7 +31,7 @@ class ArticleWizardPublication(models.TransientModel):
     error_code = fields.Integer("Error Code Number", compute="_compute_data_and_errors", readonly=True, store=True)
     error_comment = fields.Char("Comments", compute="_compute_data_and_errors", readonly=True, store=True)
 
-    import_wizard_id = fields.Many2one("article.import.excel.wizard")
+    import_article_wizard_id = fields.Many2one("article.import.excel.wizard")
     checking_wizard_id = fields.Many2one("article.import.excel.wizard")
     to_create_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_new_tags")
     similar_tag_ids = fields.Many2many("article.wizard.publication.tag", "article_wizard_pub_similar_tags")
@@ -42,7 +42,7 @@ class ArticleWizardPublication(models.TransientModel):
     def reset_record(record):
         record.initial_id = None
 
-    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_wizard_id')
+    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_number_1', 'student_number_2', 'student_number_3', 'adviser','import_article_wizard_id')
     def _compute_data_and_errors(self):
         ''' Error Codes:
         0 - No Errors
@@ -95,13 +95,13 @@ class ArticleWizardPublication(models.TransientModel):
                 record.reset_record()
                 continue
             record._check_for_existing_records()
-            if record.import_wizard_id.wizard_type == "new":
+            if record.import_article_wizard_id.wizard_type == "new":
                 if record._has_errors_for_new_articles(): #check if anything is wrong for new record
                     record.reset_record()
                     continue
                 if record.article_to_update_id:
                     record.error_comment = "Existing Title Exists, Will Overwrite"
-            if record.import_wizard_id.wizard_type == "edit":
+            if record.import_article_wizard_id.wizard_type == "edit":
                 if record._has_errors_for_edit_articles():
                     record.reset_record()
                     continue
@@ -127,7 +127,7 @@ class ArticleWizardPublication(models.TransientModel):
         existing_temporary_data_ids = self.env['article.wizard.publication'].search([
             ('initial_id', '=', self.initial_id),
             ('id', '!=', self.id if isinstance(self.id, int) else None),  # Exclude the current record   
-            ('import_wizard_id', '=', self.import_wizard_id.id),
+            ('import_article_wizard_id', '=', self.import_article_wizard_id.id),
         ])
         # print("The IDs are")
         # print(existing_temporary_data_ids)
@@ -242,7 +242,7 @@ class ArticleWizardPublication(models.TransientModel):
             self.error_comment = "Cannot Find Existing Record"
             self.article_to_update_id = None
             return True
-        if self.import_wizard_id.user_privilege != "faculty_adviser": return False
+        if self.import_article_wizard_id.user_privilege != "faculty_adviser": return False
 
         for adviser in self.article_to_update_id.adviser_ids:
             if adviser.name in self.adviser.split(";"):

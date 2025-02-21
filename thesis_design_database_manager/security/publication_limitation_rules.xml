@@ -1,5 +1,5 @@
 <odoo>
-    <data noupdate="0"> <!--Update to 1 after running once-->
+    <data noupdate="1"> <!--Update to 1 after running once-->
         <record id="rule_adviser_access" model="ir.rule">
             <field name="name">Adviser Access Rule</field>
             <field name="model_id" ref="model_article_publication"/>
