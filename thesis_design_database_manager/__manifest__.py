@@ -13,6 +13,7 @@
     "data": [
         "security/groups.xml",
         "security/ir.model.access.csv",
+        "security/publication_limitation_rules.xml",
         "views/article_publication_views.xml",
         "views/article_tag_views.xml",
         "views/article_advisor_view.xml",

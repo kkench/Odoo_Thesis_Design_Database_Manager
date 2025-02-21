@@ -13,3 +13,11 @@
     background-color: #ffffff; /* Change this to your desired background color */
     color: #000000; /* Change this to your desired text color */
 }
+
+.custom-hover-effect {
+    transition: all 0.3s ease-in-out;
+    &:hover {
+        background-color: #acca90;
+        transform: scale(1.05);
+    }
+}
