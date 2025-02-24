@@ -89,7 +89,7 @@ class ArticleWizardPublication(models.TransientModel):
             duplicate_flag = record.record_has_duplicate_submission()
             if duplicate_flag:
                 continue
-            if not record.tags_are_valid():
+            if not record.tags_are_valid() and record.import_wizard_id.wizard_type != "edit":
                 record.error_code = 7
                 record.error_comment = "Tagging Error"   
                 record.reset_record()
