@@ -253,6 +253,15 @@ class ArticlePublication(models.Model):
             'custom_id':self.replacement_identifier,
         })
     
+    def act_void_topic(self):
+        #add warning here
+        if self.custom_id == "":
+            raise UserError("Topic is already voided.")
+        else:
+            return self.write({
+            'custom_id':"", 'state':"voided"
+        })
+    
     def _get_lastnames(self):
         #will not account for arrangement of names
         lastname_list = [name.split(",")[0] for name in [self.author1,self.author2,self.author3] if name]
