@@ -26,6 +26,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
     failed_to_search_records_ids = fields.Many2many("article.wizard.publication","article_enlistment_wizard_failed_relation",string="Failed Requests", readonly=True)
     wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publication","import_enlistment_wizard_id","Excel Records", readonly=True)
 
+    enlistment_id = fields.Many2one('article.enlistment','existing_enlistment',compute='_compute_check_for_existing')
     # endregion
 
     LABEL_TO_RECORD_DICTIONARY = {
@@ -134,11 +135,24 @@ class ArticleEnlistmentWizard(models.TransientModel):
 
     def act_view_enlistment_wizard_page3(self):
         self.ensure_one()
-        self.linked_enlistment_record_ids = [(5, 0, 0)]
+        if not self.enlistment_id:
+            self.enlistment_id = self.env['article.enlistment'].create({'term_week_year':self.term_week_year})
+
         self.failed_to_search_records_ids = [(5, 0, 0)]
         for record in self.wizard_excel_extracted_record_ids:
             if record.error_code == 0:
+                # region defense flag
+                if record.article_related_id.state in ['draft','proposal_redefense']:
+                    final_defense_flag = 0 
+                elif record.article_related_id.state in ['pre_final_defense','final_redefense']:
+                    final_defense_flag = 1
+                else:
+                    raise UserError("record went through relation, without error, call admin")
+                
+                # endregion
+                self.enlistment_id.enlisted_article_ids = [(4, record.article_related_id.id, 0)]
                 self.linked_enlistment_record_ids = [(4, record.article_related_id.id, 0)]
+                record.article_related_id.state = 'final_defense' if final_defense_flag else 'proposal'
             else:
                 self.failed_to_search_records_ids = [(4, record.id, 0)]
 
@@ -177,7 +191,13 @@ class ArticleEnlistmentWizard(models.TransientModel):
 
         return self.env['article.wizard.publication'].create(temp_data_dictionary)
 
-
+    @api.depends('term_week_year')
+    def _compute_check_for_existing(self):
+        for record in self:
+            existing_enlistment_id = record.env['article.enlistment'].search([('term_week_year', '=', record.term_week_year)], limit=1)
+            record.enlistment_id = existing_enlistment_id if existing_enlistment_id else None
+        return
+        
 
     def excel_date_to_odoo_datetime(self, excel_datetime):
         start_date = datetime(1900, 1, 1)

@@ -429,7 +429,7 @@ class ArticleWizardPublication(models.TransientModel):
         return similar_tags or existing_tags or tags_to_create
     
     def check_duplicate_temp_tags(self, tag):
-        tag_flag = self.env["article.wizard.publication.tag"].search([('name','in',tag)])
+        tag_flag = self.env["article.wizard.publication.tag"].search([('name','in',tag)], limit=1)
         return tag_flag
 
     def get_tag_changes(self, tag_list):
