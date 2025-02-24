@@ -149,7 +149,9 @@ class ArticleImportExcelWizard(models.TransientModel):
 
             #----------Excel to Official Column Information-------------
             for excel_column_record in self.excel_column_ids:
-                field_name = self.LABEL_TO_RECORD_DICTIONARY[excel_column_record.official_record_id.name]
+                field_name = self.LABEL_TO_RECORD_DICTIONARY.get(excel_column_record.official_record_id.name,False)
+                if not field_name:
+                    continue
                 skip_data = (not excel_column_record.official_record_id or 
                              field_name in ignore_list or
                              pd.isna(row[excel_column_record.name]))
