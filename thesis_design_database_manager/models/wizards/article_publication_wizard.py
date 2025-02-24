@@ -3,7 +3,7 @@ from odoo.exceptions import UserError
 import base64
 from io import BytesIO
 import pandas as pd # type: ignore #check readme for installation on launch.json
-from difflib import SequenceMatcher, get_close_matches
+# from difflib import SequenceMatcher, get_close_matches
 from datetime import datetime, timedelta
 import pytz
 
@@ -43,9 +43,9 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Author 1 (LN, FN MI. ; Alphabetically Arranged)":"1st Author",
         "Author 2 (LN, FN MI.)":"2nd Author",
         "Author 3 (LN, FN MI.)":"3rd Author",
-        "Author 1 Student Number":"1st Author Student Number",
-        "Author 2 Student Number":"2nd Author Student Number",
-        "Author 3 Student Number":"3rd Author Student Number",
+        "Author 1 Batch Year":"1st Author Batch Year",
+        "Author 2 Batch Year":"2nd Author Batch Year",
+        "Author 3 Batch Year":"3rd Author Batch Year",
         "Course?":"Course Name",
         "Topic Title":"Title",
         "Topic Description/Abstract":"Abstract",
@@ -61,9 +61,9 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Author 1 (LN, FN MI. ; Alphabetically Arranged)":"1st Author",
         "Author 2 (LN, FN MI.)":"2nd Author",
         "Author 3 (LN, FN MI.)":"3rd Author",
-        "Author 1 Student Number":"1st Author Student Number",
-        "Author 2 Student Number":"2nd Author Student Number",
-        "Author 3 Student Number":"3rd Author Student Number",
+        "Author 1 Batch Year":"1st Author Batch Year",
+        "Author 2 Batch Year":"2nd Author Batch Year",
+        "Author 3 Batch Year":"3rd Author Batch Year",
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
         #QUESTIONS FOR THINGS TO UPDATE
@@ -90,9 +90,9 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             '1st Author': 'author1',
                                             '2nd Author': 'author2',
                                             '3rd Author': 'author3',
-                                            '1st Author Student Number': 'student_number_1',
-                                            '2nd Author Student Number': 'student_number_2',
-                                            '3rd Author Student Number': 'student_number_3',
+                                            '1st Author Batch Year': 'student_batch_year_1',
+                                            '2nd Author Batch Year': 'student_batch_year_2',
+                                            '3rd Author Batch Year': 'student_batch_year_3',
                                             'Tags': 'tags',
                                             'Article 2 Flag':'article_2_flag',
                                         }
@@ -158,7 +158,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                     row_data_dictionary[field_name] = 'T' if row[excel_column_record.name] == 'Thesis' else 'D'
                     continue
 
-                if field_name in ['student_number_1','student_number_2','student_number_3']:
+                if field_name in ['student_batch_year_1','student_batch_year_2','student_batch_year_3']:
                     row_data_dictionary[field_name] = str(int(row[excel_column_record.name]))#in case of float
                     continue
 
@@ -221,7 +221,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 if field_name == 'course':
                     row_data_dictionary[field_name] = 'T' if row[column.name] == 'Thesis' else 'D'
                     continue
-                if field_name in ['student_number_1','student_number_2','student_number_3']:
+                if field_name in ['student_batch_year_1','student_batch_year_2','student_batch_year_3']:
                     row_data_dictionary[field_name] = str(int(row[column.name]))#in case of float
                     continue
                 if field_name == 'article_2_flag':
@@ -253,7 +253,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             'target': 'current', }
 
     def upload_process_for_new_record(self):
-        records_with_related_authors = self.wizard_excel_extracted_record_ids.mapped('article_to_update_id')
+        records_with_related_authors = self.wizard_excel_extracted_record_ids.mapped('article_related_id')
         if not records_with_related_authors: return self.upload_new_records_to_database()
 
         authors_to_rewrite = ""
@@ -324,12 +324,13 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'adviser_ids': [(6, 0, [form_record_advisor.id])], # this is new, so replace is good
                 'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
             }
-            if not form_record.article_to_update_id:
+            print(row_record_dictionary)
+            if not form_record.article_related_id:
                 record = self.env['article.publication'].create(row_record_dictionary)
                 record_created_list.append(record.id)
             else:
-                record = form_record.article_to_update_id.write(row_record_dictionary)
-                record_overwritten_list.append(form_record.article_to_update_id.id)
+                record = form_record.article_related_id.write(row_record_dictionary)
+                record_overwritten_list.append(form_record.article_related_id.id)
             
         self.created_article_record_ids = [(6, 0, record_created_list)]
         self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
@@ -376,11 +377,11 @@ class ArticleImportExcelWizard(models.TransientModel):
             if override_everything:
                 record_dictionary['state'] = 'proposal'
                 record_dictionary['publishing_state'] = 'not_published'
-            temp_record.article_to_update_id.write(record_dictionary)
+            temp_record.article_related_id.write(record_dictionary)
             if override_everything:
-                record_overwritten_list.append(temp_record.article_to_update_id.id)
+                record_overwritten_list.append(temp_record.article_related_id.id)
             else:
-                record_updated_list.append(temp_record.article_to_update_id.id)
+                record_updated_list.append(temp_record.article_related_id.id)
 
         self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
         self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]

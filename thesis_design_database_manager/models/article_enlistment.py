@@ -4,5 +4,8 @@ from odoo.exceptions import UserError
 class ArticleEnlistmentGroup(models.Model):
     _name = "article.enlistment"
     _description = "Students who wish to undergo defense"
+    _rec_name = 'term_week_year'
     
-    name = fields.Char("TERM, SCHOOL-YEAR, AND WEEK")
+    term_week_year = fields.Char("TERM, SCHOOL-YEAR, AND WEEK")
+
+    

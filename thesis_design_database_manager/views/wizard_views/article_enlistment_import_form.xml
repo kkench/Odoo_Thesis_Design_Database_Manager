@@ -7,8 +7,9 @@
                 <form string="Import EXCEL FORM">
                     <sheet>
                         <h1>
-                            Article Import Wizard Part 1/3 
+                            Article Enlist Wizard Part 1/3 
                             <button string="Retry" type="object" name="act_view_enlistment_wizard_page1" class="btn-primary"/>
+                            <button string="Next Page" type="object" name="act_view_enlistment_wizard_page2" class="btn-primary"/>
                         </h1>
                         <field name="excel_column_ids">
                             <tree editable="inline" create="0" delete="0">
@@ -22,6 +23,83 @@
                 </form>
             </field>
             <field name="priority" eval="1"/>
+        </record>
+
+        <record id="article_import_enlistment_wizard_form_view_part2" model="ir.ui.view">
+            <field name="name">article.import.enlistment.wizard.form.view.part2</field>
+            <field name="model">article.enlistment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Import Enlist FORM">
+                    <sheet>
+                        <h1>
+                            Article Enlist Wizard Part 2/3 
+                            <!-- <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/>  -->
+                            <button string="Upload to Database" type="object" name="act_view_enlistment_wizard_page3" class="btn-primary"/>
+                        </h1>
+                        <notebook>
+                            <page string="NEW RECORDS">
+                                <field name="wizard_excel_extracted_record_ids">
+                                    <tree create="0" delete="0" editable="bottom">
+                                        <field name="submission_datetime"/>
+                                        <field name="initial_id" string="ID"/>
+                                        <field name="name" string="Title"/>
+                                        <field name="course" string="Course" readonly="1"/>
+                                        <field name="author1" string="A1"/>
+                                        <field name="author2" string="A2"/>
+                                        <field name="author3" string="A3"/>
+                                        <field name="adviser" string="ADV"/>
+                                        <field name="student_batch_year_1" string="SN1" /> 
+                                        <field name="student_batch_year_2" string="SN2"/>
+                                        <field name="student_batch_year_3" string="SN3"/>
+                                        <field name="error_code" string="E.C."/>
+                                        <field name="error_comment" column_invisible="true"/>
+                                        <button name="act_open_error_code" type="object" string="Comments" class="btn-primary" invisible="not error_comment"/>
+                                        <button name="act_open_existing_record" type="object" string="View Record" class="btn-primary"/>
+                                    </tree>
+                                </field>
+                            </page>                           
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="article_import_enlistment_wizard_form_view_part3" model="ir.ui.view">
+            <field name="name">article.import.enlistment.wizard.form.view.part3</field>
+            <field name="model">article.enlistment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Import Enlist FORM">
+                    <sheet>
+                        <h1>
+                            Article Enlist Wizard Part 3/3 
+                        </h1>
+                        <notebook>
+                            <page string="For Defense Topics">
+                                <field name="linked_enlistment_record_ids">
+                                    <tree create="0" delete="0">
+                                        <field name="name" string="Title"/>
+                                        <field name="course_name" string="Course"/>
+                                        <field name="author1" string="A1"/>
+                                        <field name="author2" string="A2"/>
+                                        <field name="author3" string="A3"/>
+                                        <field name="adviser_ids" string="ADV"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Failed Records">
+                                <field name="failed_to_search_records_ids" options="{'no_open': True}" default_order="name asc">
+                                    <tree create="0" delete="0" editable="false">
+                                        <field name="name" string="Title"/>
+                                        <field name="uploader_name" string="Uploader Name"/>
+                                        <field name="uploader_email" string="Uploader Email"/>
+                                        <field name="error_comment" string="Comment"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
         </record>
     </data>
 </odoo>

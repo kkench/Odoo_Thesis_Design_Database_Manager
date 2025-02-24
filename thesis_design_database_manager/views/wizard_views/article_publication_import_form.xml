@@ -1,5 +1,12 @@
 <odoo>
     <data>
+        <record id="debug_button" model="ir.actions.act_window">
+            <field name="name">Debug</field>
+            <field name="res_model">article.import.excel.wizard</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>
+        </record>
+        
         <record id="article_import_excel_wizard_form_view" model="ir.ui.view">
             <field name="name">article.import.excel.wizard.form.view</field>
             <field name="model">article.import.excel.wizard</field>
@@ -48,9 +55,9 @@
                                         <field name="author2" string="A2"/>
                                         <field name="author3" string="A3"/>
                                         <field name="adviser" string="ADV"/>
-                                        <field name="student_number_1" string="SN1" /> 
-                                        <field name="student_number_2" string="SN2"/>
-                                        <field name="student_number_3" string="SN3"/>
+                                        <field name="student_batch_year_1" string="SN1" /> 
+                                        <field name="student_batch_year_2" string="SN2"/>
+                                        <field name="student_batch_year_3" string="SN3"/>
                                         <field name="error_code" string="E.C."/>
                                         <field name="error_comment" column_invisible="true"/>
                                         <button name="act_open_error_code" type="object" string="Comments" class="btn-primary" invisible="not error_comment"/>
@@ -188,5 +195,6 @@
                 </form>
             </field>
         </record>
+
     </data>
 </odoo>
