@@ -55,6 +55,8 @@ class ArticlePublication(models.Model):
         string="Advisers",
         domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])], required=True
         )
+    
+    popup_message = fields.Char("Warning", readonly=True)
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
@@ -253,8 +255,18 @@ class ArticlePublication(models.Model):
             'custom_id':self.replacement_identifier,
         })
     
+    def act_void_topic_confirm(self):
+        return {
+            'name': 'Upload Confirmation',
+            'type': 'ir.actions.act_window',
+            'res_model': 'article.import.excel.wizard',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'view_id': self.env.ref('thesis_design_database_manager.article_publication_voiding_confirmation_popup_form').id,
+            'target': 'new',
+        }
+    
     def act_void_topic(self):
-        #add warning here
         if self.custom_id == "":
             raise UserError("Topic is already voided.")
         else:

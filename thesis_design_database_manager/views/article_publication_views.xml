@@ -35,6 +35,9 @@
                                 <button name="act_member_change" string="Change Member"
                                     type="object" class="oe_highlight"
                                     invisible="is_course_instructor == False" />
+                                <button name="act_void_topic_confirm" string="Void Topic"
+                                    type="object" class="oe_highlight"
+                                    invisible="is_course_instructor == False" />
                             </group>
                         </group> 
                         <div class="row" style="width: 100%;">
@@ -124,6 +127,22 @@
                 <p class="o_view_nocontent_smiling_face">
                     Create New Article Topics
                 </p>
+            </field>
+        </record>
+
+        <record id="article_publication_voiding_confirmation_popup_form" model="ir.ui.view">
+            <field name="name">article.publication.voiding.confirmation.popup.form</field>
+            <field name="model">article.publication</field>
+            <field name="arch" type="xml">
+                <form string="Voiding Confirmation">
+                    <group>
+                        <field name="popup_message"/>
+                    </group>
+                    <footer>
+                        <button string="Confirm" type="object" name="act_void_topic" class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
             </field>
         </record>
 
