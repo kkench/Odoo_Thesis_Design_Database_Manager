@@ -3,12 +3,13 @@
     <menuitem id="article_menu_root" name="Article Publications" action="article_publication_view_action" sequence="1">
         <menuitem name="View Publication List" id="article_publication_menu" action="article_publication_view_action" sequence="2"/>
         <menuitem name="My Advisees" id="open_current_user_form_menu" action="action_open_current_user_form" sequence="3" groups="thesis_design_database_manager.group_article_faculty_adviser"/>    
-        <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="4" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="5" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+        <!-- <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="4" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
+        <!-- <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="5" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
         <menuitem name="Import New with Excel" id="article_import_new_records_menu" action="article_import_excel_new_wizard_popup_action" sequence="6" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
         <menuitem name="Edit Old Record with Excel" id="article_import_edit_records_menu" action="article_import_excel_edit_wizard_popup_action" sequence="7" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
         <menuitem name="Enlistment Import" id="article_import_enlistment_menu" action="article_enlistment_import_excel_new_wizard_popup_action" sequence="8" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <menuitem name="Debug Button" id="article_tag_test" action="debug_options" sequence="9" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+        <!-- <menuitem name="Debug Button" id="article_tag_test" action="debug_options" sequence="9" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
+        <menuitem name="Enlistments" id="article_enlistment_view_menu" action="article_enlistment_view" sequence="10" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
         <!-- <menuitem name="Import CSV Debugging Tree View" id="article_debug_import_menu" action="action_article_import_excel_wizard" sequence="8"/> -->
     </menuitem>
 </odoo>
