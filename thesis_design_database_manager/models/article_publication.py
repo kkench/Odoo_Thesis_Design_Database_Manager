@@ -10,7 +10,7 @@ class ArticlePublication(models.Model):
         ("check_title", "UNIQUE(name)", "Title must be unique.")
     ]
     #-------Form Requirements--------
-    custom_id = fields.Char(string='Custom ID', readonly=True, required=True, default=None)
+    custom_id = fields.Char(string='Custom ID', required=True, default=None)
     name = fields.Char(string="Article Title", required=True)
     state = fields.Selection(string="Course Status",
                              required=True,
@@ -27,6 +27,7 @@ class ArticlePublication(models.Model):
                                 ("article_2_approval_request", "Awaiting Approval of Article 2"), #For Article 2 Only
                                 ("accepted", "Topic Complete"),
                                 ("rejected", "Rejected"),
+                                ("voided", "Voided"),
                              ],default="proposal")
 
     publishing_state = fields.Selection(string="Published Status",
@@ -259,7 +260,7 @@ class ArticlePublication(models.Model):
         return {
             'name': 'Upload Confirmation',
             'type': 'ir.actions.act_window',
-            'res_model': 'article.import.excel.wizard',
+            'res_model': 'article.publication',
             'view_mode': 'form',
             'res_id': self.id,
             'view_id': self.env.ref('thesis_design_database_manager.article_publication_voiding_confirmation_popup_form').id,
