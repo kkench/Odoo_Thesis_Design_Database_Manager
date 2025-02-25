@@ -58,6 +58,7 @@ class ArticlePublication(models.Model):
         )
     
     popup_message = fields.Char("Warning", readonly=True)
+    doi = fields.Char("DOI", default=None)
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")

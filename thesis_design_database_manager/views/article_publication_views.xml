@@ -31,6 +31,7 @@
                                 <field name="author2" readonly="1" />
                                 <field name="author3" readonly="1"
                                     invisible="course_name != 'design'" />
+                                <field name='doi' widget="url"/>
                                 <field name='custom_id' />
                                 <button name="act_member_change" string="Change Member"
                                     type="object" class="oe_highlight"
@@ -110,6 +111,7 @@
                     <field name="state" />
                     <field name="publishing_state" />
                     <field name="course_name" />
+                    <field name="doi" widget="url"/>
                     <field name="article_tag_ids" widget="many2many_tags" />
                 </tree>
             </field>
