@@ -53,7 +53,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
         "Is this for your article 2?":"Article 2 Flag",
-        "Course?": "Course Name"
+        "Course?": "Course Name",
+        "DOI?": "DOI",
     }
 
     DEFAULT_COLUMN_LINK_DICT_FOR_EDITING_MODE = {
@@ -72,6 +73,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Will You Update the Abstract/Description?":"For Abstract Update?",
         "Will you update the tags?":"For Tag Update?",
         "Is this for your article 2?":"Article 2 Flag",
+        "Adding DOI / Link to paper?":"For DOI Update?",
         #RELATED FIELDS FOR RECORDS
         "Updated Title Name":"Title",
         "Updated Abstract":"Abstract",
@@ -79,7 +81,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         "New Title Name":"Title",
         "New Abstract":"Abstract",
         "New Topic Tags":"Tags",
-        "Course?": "Course Name"
+        "Course?": "Course Name",
+        "DOI?": "DOI",
     }
 
     LABEL_TO_RECORD_DICTIONARY = {
@@ -95,6 +98,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             '3rd Author Batch Year': 'student_batch_year_3',
                                             'Tags': 'tags',
                                             'Article 2 Flag':'article_2_flag',
+                                            'DOI': 'doi',
                                         }
     boolean_dictionary = {
             "No (both conformity and non conformity purposes)":0,
@@ -188,8 +192,8 @@ class ArticleImportExcelWizard(models.TransientModel):
     def process_edit_data_for_part_2(self):
         excel_df = self._get_wizard_df()
         to_update_article_list = []
-        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
-        update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)"]
+        to_update_questions_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?","For DOI Update?"]
+        update_data = ["Updated Title Name","Updated Abstract","Updated Tags (Include Former Tags)","DOI?"]
         new_record_data = ["New Title Name","New Abstract","New Topic Tags"]
         question_columns = [excel_column_record for excel_column_record in self.excel_column_ids 
                             if excel_column_record.official_record_id.name in to_update_questions_list]
@@ -199,7 +203,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         for _, row in excel_df.iterrows():
             #---------Static Article Information--------------
             row_data_dictionary, ignore_list = self._get_initial_temp_data(row)
-            boolean_string_flags = list("0000")
+            boolean_string_flags = list("00000")
             #-------------------------------------------------
             #------------Extract Questions To Update-----------
             for column in question_columns:
@@ -236,6 +240,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 row_data_dictionary['name'] = row_data_dictionary.get('name',None) if boolean_string_flags[1] else None
                 row_data_dictionary['abstract'] = row_data_dictionary.get('abstract',None) if boolean_string_flags[2] else None
                 row_data_dictionary['tags'] = row_data_dictionary.get('tags',None)if boolean_string_flags[3] else None
+                row_data_dictionary['doi'] = row_data_dictionary.get('doi',None)if boolean_string_flags[4] else None
+            # print("Row Data Dict: ")
             # print("Row Data Dict: ")
             # print(row_data_dictionary)
             temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
@@ -359,6 +365,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             update_title_flag = int(temp_record.edit_binary_string[1])
             update_abstract_flag = int(temp_record.edit_binary_string[2])
             update_tag_flag = int(temp_record.edit_binary_string[3])
+            update_doi_flag = int(temp_record.edit_binary_string[4])
 
             all_tags = []
             tag_list = self.set_similar_tags(temp_record)
@@ -375,7 +382,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 record_dictionary['abstract'] = temp_record.abstract
             if update_tag_flag or override_everything:
                 record_dictionary['article_tag_ids'] = [(6, 0, [tag.id for tag in all_tags])] #input tag update here
-                #currently untested
+            if update_doi_flag or override_everything:
+                record_dictionary['doi'] = temp_record.doi
             if override_everything:
                 record_dictionary['state'] = 'proposal'
                 record_dictionary['publishing_state'] = 'not_published'

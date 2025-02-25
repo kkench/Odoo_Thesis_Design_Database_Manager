@@ -44,6 +44,7 @@ class ArticlePublication(models.Model):
                                                 ],
                                     default="thesis")
     abstract = fields.Text(string="Abstract", required=True)
+    doi = fields.Char(string="DOI", default=None)
     date_registered = fields.Date(string="Day of Registration") 
     author1 = fields.Char("Author 1",default=None)
     author2 = fields.Char("Author 2",default=None)
@@ -58,7 +59,7 @@ class ArticlePublication(models.Model):
         )
     
     popup_message = fields.Char("Warning", readonly=True)
-    doi = fields.Char("DOI", default=None)
+    
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
