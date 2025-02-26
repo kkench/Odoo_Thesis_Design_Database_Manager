@@ -28,7 +28,7 @@ class ArticlePublication(models.Model):
                                 ("accepted", "Topic Complete"),
                                 ("rejected", "Rejected"),
                                 ("voided", "Voided"),
-                             ],default="proposal")
+                             ],default="draft")
 
     publishing_state = fields.Selection(string="Published Status",
                                         selection=[
