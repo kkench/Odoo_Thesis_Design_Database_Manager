@@ -10,7 +10,7 @@ class ArticlePublication(models.Model):
         ("check_title", "UNIQUE(name)", "Title must be unique.")
     ]
     #-------Form Requirements--------
-    custom_id = fields.Char(string='Custom ID', readonly=True, required=True, default=None)
+    custom_id = fields.Char(string='Custom ID', required=True, default=None)
     name = fields.Char(string="Article Title", required=True)
     state = fields.Selection(string="Course Status",
                              required=True,
@@ -27,8 +27,8 @@ class ArticlePublication(models.Model):
                                 ("article_2_approval_request", "Awaiting Approval of Article 2"), #For Article 2 Only
                                 ("accepted", "Topic Complete"),
                                 ("rejected", "Rejected"),
-                                ("void", "Voided (Functions are not yet present)"),
-                             ],default="draft")
+                                ("voided", "Voided"),
+                             ],default="proposal")
 
     publishing_state = fields.Selection(string="Published Status",
                                         selection=[
@@ -58,6 +58,7 @@ class ArticlePublication(models.Model):
         )
     
     popup_message = fields.Char("Warning", readonly=True)
+    doi = fields.Char("DOI", default=None)
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
@@ -238,7 +239,7 @@ class ArticlePublication(models.Model):
         return {
             'name': 'Upload Confirmation',
             'type': 'ir.actions.act_window',
-            'res_model': 'article.import.excel.wizard',
+            'res_model': 'article.publication',
             'view_mode': 'form',
             'res_id': self.id,
             'view_id': self.env.ref('thesis_design_database_manager.article_publication_voiding_confirmation_popup_form').id,
@@ -253,6 +254,17 @@ class ArticlePublication(models.Model):
             return self.write({
             'custom_id':"", 'state':"voided"
         })
+    
+    def act_redirect_doi(self):
+        self.ensure_one()
+        doi_string = "https://doi.org/" + self.doi
+        return {
+            'name': 'Go to Link',
+            'res_model': 'ir.actions.act_url',
+            'type': 'ir.actions.act_url',
+            'target': 'new',
+            'url': doi_string,
+        }
 
     def act_deny_topic_defense(self):
         # self.ensure_one()

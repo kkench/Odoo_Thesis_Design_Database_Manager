@@ -34,7 +34,7 @@
                         <h1>
                             Article Import Wizard Part 2/3 
                             <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
-                            <button string="Upload to Database" type="object" name="act_upload_temporary_record" class="btn-primary"/>
+                            <button string="Confirm" type="object" name="act_go_to_view_tags" class="btn-primary"/>
                         </h1>
                         <notebook>
                             <page string="NEW RECORDS">
@@ -86,12 +86,12 @@
                         <h1>
                             Article Import Wizard Tag Verification
                             <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
-                            <button string="Confirm" type="object" name="act_go_to_view_part2" class="btn-primary"/>
+                            <button string="Upload to Database" type="object" name="act_upload_temporary_record" class="btn-primary"/>
                         </h1>
                         <h2>The following tags will be generated for the articles as shown below:</h2>
                         <notebook>
                             <page string="Changed Works">
-                                <field name="wizard_excel_extracted_record_ids" domain="[('error_code', '=', 7)]">
+                                <field name="wizard_excel_extracted_record_ids" domain="[('error_code', '=', 0)]">
                                     <tree create="0" delete="0">
                                         <!-- <field name="initial_id" string="ID"/> -->
                                         <field name="name" string="Title"/>

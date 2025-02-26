@@ -31,6 +31,8 @@
                                 <field name="author2" readonly="1" />
                                 <field name="author3" readonly="1"
                                     invisible="course_name != 'design'" />
+                                <field name="doi"/>
+                                <button name='act_redirect_doi' string="Link" invisible="doi==True"/>
                                 <field name='custom_id' />
                                 <button name="act_member_change" string="Change Member"
                                     type="object" class="oe_highlight"
@@ -109,6 +111,8 @@
                     <field name="state" />
                     <field name="publishing_state" />
                     <field name="course_name" />
+                    <field name="doi" column_invisible='True'/>
+                    <button name='act_redirect_doi' type="object" string="Link" invisible="doi==True" class="oe_highlight"/>
                     <field name="article_tag_ids" widget="many2many_tags" />
                 </tree>
             </field>
@@ -139,7 +143,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('state', '!=', 'void')]</field>
+            <field name="domain">[('state', '!=', 'voided')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Create New Article Topics
@@ -155,7 +159,23 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'thesis')]</field>
+            <field name="domain">[('course_name', '=', 'thesis'),('state', '!=', 'voided')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create New Article Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_voided_view_action" model="ir.actions.act_window">
+            <field name="name">Voided Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('state', '=', 'voided')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Create New Article Topics
@@ -171,7 +191,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'design')]</field>
+            <field name="domain">[('course_name', '=', 'design'),('state', '!=', 'voided')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     For Defense Topics
@@ -187,7 +207,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'thesis'),'|',('state', '!=', 'proposal'),('state', '!=', 'final_defense')]</field>
+            <field name="domain">[('course_name', '=', 'thesis'),'|',('state', '=', 'proposal'),('state', '=', 'final_defense')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     For Defense Topics
@@ -203,7 +223,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'design'),'|',('state', '!=', 'proposal'),('state', '!=', 'final_defense')]</field>
+            <field name="domain">[('course_name', '=', 'design'),'|',('state', '=', 'proposal'),('state', '=', 'final_defense')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     For Defense Topics
@@ -219,7 +239,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'thesis'),'|',('state', '!=', 'proposal_revision'),('state', '!=', 'final_revisions')]</field>
+            <field name="domain">[('course_name', '=', 'thesis'),'|',('state', '=', 'proposal_revision'),('state', '=', 'final_revisions')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     For Defense Topics
@@ -235,7 +255,7 @@
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
                                 (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="domain">[('course_name', '!=', 'design'),'|',('state', '!=', 'proposal_revision'),('state', '!=', 'final_revisions')]</field>
+            <field name="domain">[('course_name', '=', 'design'),'|',('state', '=', 'proposal_revision'),('state', '=', 'final_revisions')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     For Defense Topics

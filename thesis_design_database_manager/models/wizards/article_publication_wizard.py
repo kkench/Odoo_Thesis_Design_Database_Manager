@@ -178,11 +178,11 @@ class ArticleImportExcelWizard(models.TransientModel):
 
         return { 
             'type': 'ir.actions.act_window', 
-            'name': 'Part 2-2', 
+            'name': 'Part 2', 
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
             'target': 'current', }
 
     def process_edit_data_for_part_2(self):
@@ -247,11 +247,11 @@ class ArticleImportExcelWizard(models.TransientModel):
 
         return { 
             'type': 'ir.actions.act_window', 
-            'name': 'Part 2-2', 
+            'name': 'Part 2', 
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
             'target': 'current', }
 
     def upload_process_for_new_record(self):
@@ -581,14 +581,14 @@ class ArticleImportExcelWizard(models.TransientModel):
         return result
     
     ##### ADDED FROM EXTENSION #########
-    def act_go_to_view_part2(self):
+    def act_go_to_view_tags(self):
         return { 
             'type': 'ir.actions.act_window', 
-            'name': 'Part 2', 
+            'name': 'Part 2-2', 
             'view_mode': 'form', 
             'res_model': 'article.import.excel.wizard',
             'res_id': self.id,
-            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_part2').id, 'form')], 
+            'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
     
     def set_similar_tags(self, temp_record):       

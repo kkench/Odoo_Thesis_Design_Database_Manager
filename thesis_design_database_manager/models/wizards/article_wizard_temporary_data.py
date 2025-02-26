@@ -89,12 +89,8 @@ class ArticleWizardPublication(models.TransientModel):
             duplicate_flag = record.record_has_duplicate_submission()
             if duplicate_flag:
                 continue
-            # if record.tags_are_invalid() and not record.import_enlistment_wizard_id:
-            #     record.error_code = 7
-            #     record.error_comment = "Tagging Error"   
-            #     record.reset_record()
-            #     continue
             record._check_for_existing_records()
+
 
             #wizard_specific_checks
             if record.import_article_wizard_id:
@@ -110,12 +106,14 @@ class ArticleWizardPublication(models.TransientModel):
                         continue
                     record.link_existing_record_for_editing()
                 record.error_code = 0
+                record._process_tags()
                 record.clear_newline_from_abstract_and_title()
             elif record.import_enlistment_wizard_id:
                 record._process_enlistment()
             else:
                 record.error_code = 999
                 record.error_comment = "no wizard attached"
+
         return
 
     ###FOR ERROR CHECKING (_compute_data_and_errors())
@@ -329,13 +327,13 @@ class ArticleWizardPublication(models.TransientModel):
             title = re.sub(r'\s{2,}', ' ', title)
             record.name = title
             
-    def tags_are_invalid(self):
+    def _process_tags(self):
         if not self.tags:
             invalid_tags = []
         else:
             article_tags = self.excel_tags_to_odoo_tags(self.tags)
             invalid_tags = self.get_tag_changes(article_tags)
-        return invalid_tags
+        return
     
     def act_open_error_code(self):
         self.ensure_one()
