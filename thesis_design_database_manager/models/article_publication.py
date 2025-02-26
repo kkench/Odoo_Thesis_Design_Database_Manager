@@ -254,6 +254,17 @@ class ArticlePublication(models.Model):
             return self.write({
             'custom_id':"", 'state':"voided"
         })
+    
+    def act_redirect_doi(self):
+        self.ensure_one()
+        doi_string = "https://doi.org/" + self.doi
+        return {
+            'name': 'Go to Link',
+            'res_model': 'ir.actions.act_url',
+            'type': 'ir.actions.act_url',
+            'target': 'new',
+            'url': doi_string,
+        }
 
     def act_deny_topic_defense(self):
         # self.ensure_one()
