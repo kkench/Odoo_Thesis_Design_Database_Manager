@@ -13,8 +13,8 @@
                             <field name="name"
                                 readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
                         </h1>
-                        <field name="is_course_instructor" readonly="True" invisible="False" />
-                        <field name="is_article_adviser" readonly="True" invisible="False" />
+                        <field name="is_course_instructor" readonly="True" invisible="True" />
+                        <field name="is_article_adviser" readonly="True" invisible="True" />
                         <group>
                             <group>
                                 <field name="state"
