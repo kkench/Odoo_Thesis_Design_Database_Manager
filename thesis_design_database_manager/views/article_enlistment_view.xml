@@ -1,17 +1,5 @@
 <odoo>
     <data>
-        <!-- Window Action -->
-        <record id="article_enlistment_view" model="ir.actions.act_window">
-            <field name="name">Enlist Articles</field>
-            <field name="res_model">article.enlistment</field>
-            <field name="view_mode">tree,form</field>
-            <field name="target">current</field>
-            <field name="view_ids"
-                eval="[(5, 0, 0), 
-                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_enlistment_tree_view')}), 
-                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_enlistment_form_view')})]" />
-        </record>
-
         <!-- Form View -->
         <record id="article_enlistment_form_view" model="ir.ui.view">
             <field name="name">article.enlistment.form.view</field>
@@ -49,5 +37,18 @@
                 </tree>
             </field>
         </record>
+        
+        <!-- Window Action -->
+        <record id="article_enlistment_view" model="ir.actions.act_window">
+            <field name="name">Enlist Articles</field>
+            <field name="res_model">article.enlistment</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_enlistment_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_enlistment_form_view')})]" />
+        </record>
+
     </data>
 </odoo>
