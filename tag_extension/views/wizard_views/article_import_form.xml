@@ -28,8 +28,8 @@
                         <h2>The following tags will be generated for the articles as shown below:</h2>
                         <notebook>
                             <page string="Changed Works">
-                                <field name="wizard_excel_extracted_record_ids" domain="[('error_code', '=', 7)]">
-                                    <tree create="0" delete="0">
+                                <field name="wizard_excel_extracted_record_ids" >
+                                    <tree create="0" delete="0" domain="[('error_code', '=', '0')]">
                                         <!-- <field name="initial_id" string="ID"/> -->
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course"/>

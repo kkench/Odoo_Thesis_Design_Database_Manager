@@ -14,7 +14,8 @@ class ArticleEnlistmentGroup(models.Model):
                                                 ("design", "Design"),
                                                 ("thesis", "Thesis")
                                                 ],
-                                    default="thesis")
-    _sql_constraints = [
-        ("check_name", "UNIQUE(term_week_year_course)", "error, already existing enlistment group.")
-    ]
+                                    default="thesis",
+                                    readonly=True)
+    # _sql_constraints = [
+    #     ("check_name", "UNIQUE(term_week_year_course)", "error, already existing enlistment group.")
+    # ]

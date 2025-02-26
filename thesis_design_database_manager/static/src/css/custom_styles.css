@@ -21,3 +21,13 @@
         transform: scale(1.05);
     }
 }
+
+.underline-field input {
+    text-decoration: underline;
+}
+
+.underline-box input {
+    border: none;
+    border-bottom: 2px solid #5b1841;
+    outline: none;
+}

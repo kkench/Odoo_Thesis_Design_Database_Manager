@@ -26,7 +26,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
     failed_to_search_records_ids = fields.Many2many("article.wizard.publication","article_enlistment_wizard_failed_relation",string="Failed Requests", readonly=True)
     wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publication","import_enlistment_wizard_id","Excel Records", readonly=True)
 
-    enlistment_id = fields.Many2one('article.enlistment','existing_enlistment',compute='_compute_check_for_existing')
+    enlistment_id = fields.Many2one('article.enlistment','existing_enlistment')
     # endregion
 
     LABEL_TO_RECORD_DICTIONARY = {
@@ -142,9 +142,14 @@ class ArticleEnlistmentWizard(models.TransientModel):
                 return 'design'
             else:
                 raise UserError('You are not permitted to create enlistments')
+            
         self.ensure_one()
+        course_name = _get_course_name()
+        if not self.term_week_year_course: raise UserError("No Name Input")
+
+        self.enlistment_id = self.env['article.enlistment'].search([('term_week_year_course', '=', self.term_week_year_course + f"_{'T' if course_name == 'thesis' else 'D'}")])
         if not self.enlistment_id:
-            course_name = _get_course_name()
+            print(course_name)
             self.enlistment_id = self.env['article.enlistment'].create({'term_week_year_course':self.term_week_year_course+f"_{'T' if course_name == 'thesis' else 'D'}",
                                                                         'course_name':course_name})
 
@@ -200,13 +205,6 @@ class ArticleEnlistmentWizard(models.TransientModel):
             temp_data_dictionary[field_name] = row[column.name]
 
         return self.env['article.wizard.publication'].create(temp_data_dictionary)
-
-    @api.depends('term_week_year_course')
-    def _compute_check_for_existing(self):
-        for record in self:
-            existing_enlistment_id = record.env['article.enlistment'].search([('term_week_year_course', '=', record.term_week_year_course)], limit=1)
-            record.enlistment_id = existing_enlistment_id if existing_enlistment_id else None
-        return
         
 
     def excel_date_to_odoo_datetime(self, excel_datetime):

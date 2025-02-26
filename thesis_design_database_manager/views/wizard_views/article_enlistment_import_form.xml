@@ -8,10 +8,11 @@
                     <sheet>
                         <h1>
                             Article Enlist Wizard Part 1/3
-                            <button string="Retry" type="object" name="act_view_enlistment_wizard_page1" class="btn-primary"/>
+                            <!-- <button string="Retry" type="object" name="act_view_enlistment_wizard_page1" class="btn-primary"/> -->
                             <button string="Next Page" type="object" name="act_view_enlistment_wizard_page2" class="btn-primary"/>
+                            <!-- <field name="course_name"/> -->
                         </h1>
-                        <field name="term_week_year_course"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <field name="excel_column_ids">
                             <tree editable="inline" create="0" delete="0">
                                 <field name="name"/>
@@ -36,8 +37,9 @@
                             Article Enlist Wizard Part 2/3 
                             <!-- <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/>  -->
                             <button string="Upload to Database" type="object" name="act_view_enlistment_wizard_page3" class="btn-primary"/>
+                            <!-- <field name="course_name"/> -->
                         </h1>
-                        <field name="term_week_year_course"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <notebook>
                             <page string="NEW RECORDS">
                                 <field name="wizard_excel_extracted_record_ids">
@@ -55,8 +57,9 @@
                                         <field name="student_batch_year_3" string="SN3"/>
                                         <field name="error_code" string="E.C."/>
                                         <field name="error_comment" column_invisible="true"/>
-                                        <button name="act_open_error_code" type="object" string="Comments" class="btn-primary" invisible="not error_comment"/>
-                                        <button name="act_open_existing_record" type="object" string="View Record" class="btn-primary"/>
+                                        <field name="article_related_id" column_invisible="true"/>
+                                        <button name="act_open_error_code" type="object" string="Comments" class="btn-primary" invisible="error_code == 0"/>
+                                        <button name="act_open_existing_record" type="object" string="View Article" class="btn-primary" invisible="not article_related_id"/>
                                     </tree>
                                 </field>
                             </page>                           
@@ -73,9 +76,10 @@
                 <form string="Import Enlist FORM">
                     <sheet>
                         <h1>
-                            Article Enlist Wizard Part 3/3 
+                            Article Enlist Wizard Part 3/3
+                            <!-- <field name="course_name"/> -->
                         </h1>
-                        <field name="term_week_year_course"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <notebook>
                             <page string="For Defense Topics">
                                 <field name="linked_enlistment_record_ids">
