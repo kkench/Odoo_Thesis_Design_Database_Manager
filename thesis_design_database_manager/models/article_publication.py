@@ -10,7 +10,7 @@ class ArticlePublication(models.Model):
         ("check_title", "UNIQUE(name)", "Title must be unique.")
     ]
     #-------Form Requirements--------
-    custom_id = fields.Char(string='Custom ID', required=True, default=None)
+    custom_id = fields.Char(string='Custom ID', required=True, default='None', readonly=True)
     name = fields.Char(string="Article Title", required=True)
     state = fields.Selection(string="Course Status",
                              required=True,
