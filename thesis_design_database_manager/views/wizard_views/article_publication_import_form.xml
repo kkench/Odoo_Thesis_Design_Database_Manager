@@ -1,12 +1,5 @@
 <odoo>
     <data>
-        <!-- <record id="debug_options" model="ir.actions.act_window">
-            <field name="name">Debug</field>
-            <field name="res_model">article.enlistment</field>
-            <field name="view_mode">tree,form</field>
-            <field name="target">current</field>
-        </record>
-         -->
         <record id="article_import_excel_wizard_form_view" model="ir.ui.view">
             <field name="name">article.import.excel.wizard.form.view</field>
             <field name="model">article.import.excel.wizard</field>

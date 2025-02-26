@@ -27,7 +27,8 @@ class ArticlePublication(models.Model):
                                 ("article_2_approval_request", "Awaiting Approval of Article 2"), #For Article 2 Only
                                 ("accepted", "Topic Complete"),
                                 ("rejected", "Rejected"),
-                             ],default="proposal")
+                                ("void", "Voided (Functions are not yet present)"),
+                             ],default="draft")
 
     publishing_state = fields.Selection(string="Published Status",
                                         selection=[

@@ -8,7 +8,7 @@
                 <form string="Import EXCEL FORM">
                     <sheet>
                         <h1>
-                            Enlistment of:  <field name="term_week_year"/>
+                            Enlistment of:  <field name="term_week_year_course"/>
                         </h1>
                         <field name="enlisted_article_ids" editable="false">
                             <tree create="0" delete="0" decoration-danger="state != 'proposal' and state != 'final_defense'">
@@ -31,7 +31,7 @@
             <field name="model">article.enlistment</field>
             <field name="arch" type="xml">
                 <tree string="Import EXCEL FORM">
-                    <field name="term_week_year"/>
+                    <field name="term_week_year_course"/>
                     <field name="enlisted_article_ids">
                     </field>
                 </tree>
@@ -44,6 +44,30 @@
             <field name="res_model">article.enlistment</field>
             <field name="view_mode">tree,form</field>
             <field name="target">current</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_enlistment_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_enlistment_form_view')})]" />
+        </record>
+
+        <record id="article_t_enlistment_view" model="ir.actions.act_window">
+            <field name="name">Thesis Enlist Articles</field>
+            <field name="res_model">article.enlistment</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>
+            <field name="domain">[('course_name', '!=', 'thesis')]</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_enlistment_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_enlistment_form_view')})]" />
+        </record>
+
+        <record id="article_d_enlistment_view" model="ir.actions.act_window">
+            <field name="name">Design Enlist Articles</field>
+            <field name="res_model">article.enlistment</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>
+            <field name="domain">[('course_name', '!=', 'design')]</field>
             <field name="view_ids"
                 eval="[(5, 0, 0), 
                                 (0, 0, {'view_mode': 'tree', 'view_id': ref('article_enlistment_tree_view')}), 

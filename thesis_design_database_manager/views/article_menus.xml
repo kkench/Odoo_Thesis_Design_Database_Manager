@@ -1,15 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="article_menu_root" name="Article Publications" action="article_publication_view_action" sequence="1">
-        <menuitem name="View Publication List" id="article_publication_menu" action="article_publication_view_action" sequence="2"/>
-        <menuitem name="My Advisees" id="open_current_user_form_menu" action="action_open_current_user_form" sequence="3" groups="thesis_design_database_manager.group_article_faculty_adviser"/>    
-        <!-- <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="4" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
-        <!-- <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="5" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
-        <menuitem name="Import New with Excel" id="article_import_new_records_menu" action="article_import_excel_new_wizard_popup_action" sequence="6" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <menuitem name="Edit Old Record with Excel" id="article_import_edit_records_menu" action="article_import_excel_edit_wizard_popup_action" sequence="7" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <menuitem name="Enlistment Import" id="article_import_enlistment_menu" action="article_enlistment_import_excel_new_wizard_popup_action" sequence="8" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <!-- <menuitem name="Debug Button" id="article_tag_test" action="debug_options" sequence="9" groups="thesis_design_database_manager.group_article_faculty_adviser"/> -->
-        <menuitem name="Enlistments" id="article_enlistment_view_menu" action="article_enlistment_view" sequence="10" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-        <!-- <menuitem name="Import CSV Debugging Tree View" id="article_debug_import_menu" action="action_article_import_excel_wizard" sequence="8"/> -->
+        <menuitem name="Publications" id="article_publication_dropdown" sequence="5">
+            <menuitem name="All Publications" id="article_publication_menu" action="article_publication_view_action" sequence="5"/>
+            <menuitem name="Thesis Publications" id="article_thesis_menu" action="article_publication_thesis_view_action" sequence="10"/>
+            <menuitem name="Design Publications" id="article_design_menu" action="article_publication_design_view_action" sequence="15"/> 
+            <menuitem name="My Advisees" id="open_current_user_form_menu" action="action_open_current_user_form" sequence="20" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+            <menuitem name="Topics For Thesis Defense" id="article_defense_menu" action="article_publication_t_defense_view_action" sequence="25" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
+            <menuitem name="Topics For Thesis Defense" id="article_defense_menu" action="article_publication_d_defense_view_action" sequence="26" groups="thesis_design_database_manager.group_article_design_instructor"/>
+            <menuitem name="Conformity Topics (Thesis)" id="article_t_conformity_menu" action="article_publication_t_conformity_view_action" sequence="30" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
+            <menuitem name="Conformity Topics (Design)" id="article_d_conformity_menu" action="article_publication_d_conformity_view_action" sequence="35" groups="thesis_design_database_manager.group_article_design_instructor"/>
+        </menuitem>
+        <menuitem name="Update Database" id="article_update_dropdown" sequence="10">
+            <menuitem name="Register New Topics" id="article_import_new_records_menu" action="article_import_excel_new_wizard_popup_action" sequence="5" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+            <menuitem name="Edit Old Record with Excel" id="article_import_edit_records_menu" action="article_import_excel_edit_wizard_popup_action" sequence="10" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+            <menuitem name="Enlist Topics for Defense" id="article_import_enlistment_menu" action="article_enlistment_import_excel_new_wizard_popup_action" sequence="15" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+        </menuitem>
+        <menuitem name="Configurations" id="article_configuration_dropdown" sequence="15">
+            <menuitem name="Adviser List" id="article_adviser_menu" action="action_open_faculty_list" sequence="5"/>
+            <menuitem name="Tag List" id="article_tag_menu" action="article_tag_view_action" sequence="10" groups="thesis_design_database_manager.group_article_thesis_instructor,thesis_design_database_manager.group_article_design_instructor"/>
+            <menuitem name="Enlistment (Thesis)" id="article_t_enlistment_menu" action="article_t_enlistment_view" sequence="20" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
+            <menuitem name="Enlistment (Design)" id="article_d_enlistment_menu" action="article_d_enlistment_view" sequence="25" groups="thesis_design_database_manager.group_article_design_instructor"/>
+        </menuitem>
     </menuitem>
 </odoo>
+
+
+<!-- 
+root
+    publications
+        all publications
+        thesis publications
+        design publications
+        my advisees
+        topics for defense
+    update database
+        Register New Topics
+        Edit Existing Topics
+        Enlist Topics for Defense
+    Configurations
+        Faculty Advisers
+        Tag List
+        thesis enlist
+        design enlist
+        Enlistment List
+        Clear Wizard Cache
+        Shutdown RPI
+root
+ -->

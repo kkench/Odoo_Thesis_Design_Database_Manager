@@ -54,7 +54,7 @@ class ArticleWizardPublication(models.TransientModel):
         6 - Duplicate Submission
         7 - Tags Stuff
         8 - Cannot Search Adviser
-        9 - Enlistment Error
+        9+ - Enlistment Error
         '''
         for record in self:
             record.error_comment = ""
@@ -89,11 +89,11 @@ class ArticleWizardPublication(models.TransientModel):
             duplicate_flag = record.record_has_duplicate_submission()
             if duplicate_flag:
                 continue
-            if not record.tags_are_valid() and not record.import_enlistment_wizard_id:
-                record.error_code = 7
-                record.error_comment = "Tagging Error"   
-                record.reset_record()
-                continue
+            # if record.tags_are_invalid() and not record.import_enlistment_wizard_id:
+            #     record.error_code = 7
+            #     record.error_comment = "Tagging Error"   
+            #     record.reset_record()
+            #     continue
             record._check_for_existing_records()
 
             #wizard_specific_checks
@@ -125,11 +125,12 @@ class ArticleWizardPublication(models.TransientModel):
         if not record.article_related_id:
             record.error_code = 9
             record.error_comment = "Existing Study Cannot Be Found in Database"
+            return
         if not (record.article_related_id.state == 'draft'
                 or record.article_related_id.state == 'proposal_redefense'
                 or record.article_related_id.state == 'pre_final_defense'
                 or record.article_related_id.state == 'final_redefense'):
-            record.error_code = 9
+            record.error_code = 10
             record.error_comment = "Existing Study is Not Ready For Defense"
         return
 
@@ -328,8 +329,7 @@ class ArticleWizardPublication(models.TransientModel):
             title = re.sub(r'\s{2,}', ' ', title)
             record.name = title
             
-    def tags_are_valid(self):
-        return True
+    def tags_are_invalid(self):
         if not self.tags:
             invalid_tags = []
         else:
