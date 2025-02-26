@@ -100,7 +100,7 @@
                                         <field name="to_create_tag_ids" widget="many2many_tags" string="To Be Created"/>
                                         <field name="similar_tag_ids" widget="many2many_tags" string="Similar Tags Applied"/>
                                         <field name="existing_tag_ids" widget="many2many_tags" string="Existing Tags Applied"/>
-                                        <!-- <field name="error_code" string="E.C."/> -->
+                                        <!-- <field name="error_code" string="E.C." column_invisible="True"/> -->
                                     </tree>
                                 </field>
                             </page>                           
