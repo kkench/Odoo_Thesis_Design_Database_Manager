@@ -329,7 +329,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 record = self.env['article.publication'].create(row_record_dictionary)
                 record_created_list.append(record.id)
             else:
-                record = form_record.article_related_id.write(row_record_dictionary)
+                record = form_record.article_related_id.act_void_topic()
+                record = self.env['article.publication'].create(row_record_dictionary)
                 record_overwritten_list.append(form_record.article_related_id.id)
             
         self.created_article_record_ids = [(6, 0, record_created_list)]
