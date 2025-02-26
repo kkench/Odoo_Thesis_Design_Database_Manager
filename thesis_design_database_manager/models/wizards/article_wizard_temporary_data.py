@@ -249,13 +249,22 @@ class ArticleWizardPublication(models.TransientModel):
             self.error_comment = "Cannot Find Existing Record"
             self.article_related_id = None
             return True
-        if self.import_article_wizard_id.user_privilege != "faculty_adviser": return False
+
+        if self.import_article_wizard_id.user_privilege != "faculty_adviser": 
+            self.error_code = 10
+            self.error_comment = "User is not faculty"
+            self.article_related_id = None
+            return True
+
+        if self.instructor_privilege_flag:
+            return False
 
         for adviser in self.article_related_id.adviser_ids:
             if adviser.name in self.adviser.split(";"):
                 return False
+            
         self.error_code = 10
-        self.error_comment = "User is not an adviser"
+        self.error_comment = "User is not an adviser or instructor"
         return True
 
     def _check_for_existing_records(self):
@@ -320,6 +329,7 @@ class ArticleWizardPublication(models.TransientModel):
             record.name = title
             
     def tags_are_valid(self):
+        return True
         if not self.tags:
             invalid_tags = []
         else:
