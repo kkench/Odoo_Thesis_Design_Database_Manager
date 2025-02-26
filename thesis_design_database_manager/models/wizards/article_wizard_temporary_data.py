@@ -94,7 +94,10 @@ class ArticleWizardPublication(models.TransientModel):
             #     record.error_comment = "Tagging Error"   
             #     record.reset_record()
             #     continue
+            article_tags = record.excel_tags_to_odoo_tags(record.tags)
+            record.check_similar_tags(article_tags)
             record._check_for_existing_records()
+
 
             #wizard_specific_checks
             if record.import_article_wizard_id:

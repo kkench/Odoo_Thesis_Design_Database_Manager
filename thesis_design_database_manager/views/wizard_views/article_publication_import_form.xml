@@ -34,7 +34,7 @@
                         <h1>
                             Article Import Wizard Part 2/3 
                             <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
-                            <button string="Upload to Database" type="object" name="act_go_to_view_tags" class="btn-primary"/>
+                            <button string="Confirm" type="object" name="act_go_to_view_tags" class="btn-primary"/>
                         </h1>
                         <notebook>
                             <page string="NEW RECORDS">
@@ -86,7 +86,7 @@
                         <h1>
                             Article Import Wizard Tag Verification
                             <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
-                            <button string="Confirm" type="object" name="act_upload_temporary_record" class="btn-primary"/>
+                            <button string="Upload to Database" type="object" name="act_upload_temporary_record" class="btn-primary"/>
                         </h1>
                         <h2>The following tags will be generated for the articles as shown below:</h2>
                         <notebook>
