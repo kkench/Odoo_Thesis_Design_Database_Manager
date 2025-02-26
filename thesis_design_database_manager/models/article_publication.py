@@ -21,14 +21,14 @@ class ArticlePublication(models.Model):
                                 ("proposal_revision", "Proposal Revision"),
                                 ("in_progress", "Under Testing/Prototyping"),
                                 ("pre_final_defense", "For Final Defense Enlistment"),# Passing T2/D2 Enlistment
-                                ("final_defense", "For Final Defense"),# Need Enlistment to Get here
+                                ("final_defense", "Final Defense"),# Need Enlistment to Get here
                                 ("final_redefense", "For Final Redefense"),
                                 ("final_revisions", "For Final Revision"),
                                 ("article_2_approval_request", "Awaiting Approval of Article 2"), #For Article 2 Only
                                 ("accepted", "Topic Complete"),
                                 ("rejected", "Rejected"),
                                 ("voided", "Voided"),
-                             ],default="proposal")
+                             ],default="draft")
 
     publishing_state = fields.Selection(string="Published Status",
                                         selection=[

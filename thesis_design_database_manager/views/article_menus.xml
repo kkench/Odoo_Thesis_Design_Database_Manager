@@ -6,8 +6,8 @@
             <menuitem name="Thesis Publications" id="article_thesis_menu" action="article_publication_thesis_view_action" sequence="10"/>
             <menuitem name="Design Publications" id="article_design_menu" action="article_publication_design_view_action" sequence="15"/> 
             <menuitem name="My Advisees" id="open_current_user_form_menu" action="action_open_current_user_form" sequence="20" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
-            <menuitem name="Topics For Thesis Defense" id="article_defense_menu" action="article_publication_t_defense_view_action" sequence="25" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
-            <menuitem name="Topics For Thesis Defense" id="article_defense_menu" action="article_publication_d_defense_view_action" sequence="26" groups="thesis_design_database_manager.group_article_design_instructor"/>
+            <menuitem name="Topics For Thesis Defense" id="article_t_defense_menu" action="article_publication_t_defense_view_action" sequence="25" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
+            <menuitem name="Topics For Design Defense" id="article_d_defense_menu" action="article_publication_d_defense_view_action" sequence="26" groups="thesis_design_database_manager.group_article_design_instructor"/>
             <menuitem name="Conformity Topics (Thesis)" id="article_t_conformity_menu" action="article_publication_t_conformity_view_action" sequence="30" groups="thesis_design_database_manager.group_article_thesis_instructor"/>
             <menuitem name="Conformity Topics (Design)" id="article_d_conformity_menu" action="article_publication_d_conformity_view_action" sequence="35" groups="thesis_design_database_manager.group_article_design_instructor"/>
             <menuitem name="Voided Topics" id="article_voided_menu" action="article_publication_voided_view_action" sequence="40"/>        
