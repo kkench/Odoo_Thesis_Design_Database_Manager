@@ -99,7 +99,6 @@
             </field>
         </record>
 
-
         <record id="article_publication_tree_view" model="ir.ui.view">
             <field name='name'>article.publication.tree.view</field>
             <field name='model'>article.publication</field>
@@ -114,21 +113,6 @@
                     <field name="doi" widget="url"/>
                     <field name="article_tag_ids" widget="many2many_tags" />
                 </tree>
-            </field>
-        </record>
-
-        <record id="article_publication_view_action" model="ir.actions.act_window">
-            <field name="name">Article Publications</field>
-            <field name="res_model">article.publication</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_ids"
-                eval="[(5, 0, 0), 
-                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
-                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    Create New Article Topics
-                </p>
             </field>
         </record>
 
@@ -148,6 +132,119 @@
             </field>
         </record>
 
+
+        <record id="article_publication_view_action" model="ir.actions.act_window">
+            <field name="name">Article Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('state', '!=', 'void')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create New Article Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_thesis_view_action" model="ir.actions.act_window">
+            <field name="name">Thesis Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'thesis')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create New Article Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_design_view_action" model="ir.actions.act_window">
+            <field name="name">Design Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'design')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    For Defense Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_t_defense_view_action" model="ir.actions.act_window">
+            <field name="name">Thesis Defense Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'thesis'),'|',('state', '!=', 'proposal'),('state', '!=', 'final_defense')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    For Defense Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_d_defense_view_action" model="ir.actions.act_window">
+            <field name="name">Design Defense Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'design'),'|',('state', '!=', 'proposal'),('state', '!=', 'final_defense')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    For Defense Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_t_conformity_view_action" model="ir.actions.act_window">
+            <field name="name">Thesis Conformity Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'thesis'),'|',('state', '!=', 'proposal_revision'),('state', '!=', 'final_revisions')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    For Defense Topics
+                </p>
+            </field>
+        </record>
+
+        <record id="article_publication_d_conformity_view_action" model="ir.actions.act_window">
+            <field name="name">Design Conformity Publications</field>
+            <field name="res_model">article.publication</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0), 
+                                (0, 0, {'view_mode': 'tree', 'view_id': ref('article_publication_tree_view')}), 
+                                (0, 0, {'view_mode': 'form', 'view_id': ref('article_publication_form_view')})]" />
+            <field name="domain">[('course_name', '!=', 'design'),'|',('state', '!=', 'proposal_revision'),('state', '!=', 'final_revisions')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    For Defense Topics
+                </p>
+            </field>
+        </record>
+
         <record id="article_publication_view_search" model="ir.ui.view">
             <field name="name">article.publication.search.view</field>
             <field name="model">article.publication</field>
@@ -158,9 +255,7 @@
                     <field name="state" />
                     <field name="publishing_state" />
                     <separator />
-                    <field name="course_name" /><!-- add a search for design/thesis? not sure if
-                    needed
-                because it's based on bool already -->
+                    <field name="course_name" />
                     <field name="article_tag_ids" />
                 </search>
             </field>

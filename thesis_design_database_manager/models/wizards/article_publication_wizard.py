@@ -316,8 +316,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,
                 'name': form_record.name,
-                'state': 'proposal',
-                'publishing_state': 'not_published',
                 'course_name': "thesis" if form_record.course == "T" else "design",
                 'abstract': form_record.abstract,
                 'author1': form_record.author1,

@@ -187,29 +187,6 @@ class ArticlePublication(models.Model):
         if self.state == 'final_defense':
             return self.write({'state':'final_redefense'})
         
-    # def act_accept_conformity(self):
-    #     if self.state == 'proposal_minor_revisions':
-    #         return self.write({'state':'proposal_approved'})
-    #     if self.state == 'final_minor_revisions':
-    #         return self.write({'state':'final_approved'})
-        
-    # def act_approve_topic(self):
-    #     if self.state in ['proposal', 'proposal_redefense']:
-    #         return self.write({'state':'proposal_approved'})
-    #     if self.state in ['proposal_approved', 'final_redefense']:
-    #         return self.write({'state':'final_approved'})
-        
-    # def act_redef_the_topic(self):
-    #     if self.state in ['proposal']:
-    #         return self.write({'state':'proposal_redefense'})
-    #     if self.state in ['proposal_approved']:
-    #         return self.write({'state':'final_redefense'})
-
-    # def act_set_the_topic_for_revision(self):
-    #     if self.state in ['proposal', 'proposal_redefense']:
-    #         return self.write({'state':'proposal_minor_revisions'})
-    #     if self.state in ['proposal_approved', 'final_redefense']:
-    #         return self.write({'state':'final_minor_revisions'})
         
     def act_member_change(self):
         self.replacement_identifier = None
@@ -258,6 +235,7 @@ class ArticlePublication(models.Model):
         })
     
     def act_void_topic_confirm(self):
+        self.ensure_one()
         return {
             'name': 'Upload Confirmation',
             'type': 'ir.actions.act_window',
@@ -269,12 +247,26 @@ class ArticlePublication(models.Model):
         }
     
     def act_void_topic(self):
+        self.ensure_one()
         if self.custom_id == "":
             raise UserError("Topic is already voided.")
         else:
             return self.write({
             'custom_id':"", 'state':"voided"
         })
+
+    def act_deny_topic_defense(self):
+        # self.ensure_one()
+        for record in self:
+            print("Naming:",record.name)
+            if record.state == 'proposal':
+                record.write({'state': 'draft'})
+                print("test1")
+            elif record.state == 'final_defense':
+                print("test2")
+                record.write({'state': 'pre_final_defense'})
+            else:
+                raise UserError('Topic is Not in Defense')
     
     def _get_lastnames(self):
         #will not account for arrangement of names

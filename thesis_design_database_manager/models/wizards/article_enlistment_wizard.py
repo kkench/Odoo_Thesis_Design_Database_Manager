@@ -10,11 +10,11 @@ import re
 class ArticleEnlistmentWizard(models.TransientModel):
     _name = "article.enlistment.wizard"
     _description = "A wizard form for taking excel sheets of people who want to apply for defense"
-    _rec_name = 'term_week_year'
+    _rec_name = 'term_week_year_course'
     
     # region FIELDS 
     # term_year will be used as the name later for the enlistment object
-    term_week_year = fields.Char(string='TERM/WEEK/SY')
+    term_week_year_course = fields.Char(string='TERM/WEEK/SY')
     excel_file = fields.Binary(string='Imported Excel File')
     failed_record_excel_files = fields.Binary(string='Left Over Records from Excel')
     excel_dataframe_binary = fields.Binary(string='Wizard Enlistment DataFrame')
@@ -134,9 +134,19 @@ class ArticleEnlistmentWizard(models.TransientModel):
             'target': 'current', }
 
     def act_view_enlistment_wizard_page3(self):
+        def _get_course_name():
+            user = self.env.user
+            if user.has_group('thesis_design_database_manager.group_article_thesis_instructor'):
+                return 'thesis'
+            elif user.has_group('thesis_design_database_manager.group_article_design_instructor'):
+                return 'design'
+            else:
+                raise UserError('You are not permitted to create enlistments')
         self.ensure_one()
         if not self.enlistment_id:
-            self.enlistment_id = self.env['article.enlistment'].create({'term_week_year':self.term_week_year})
+            course_name = _get_course_name()
+            self.enlistment_id = self.env['article.enlistment'].create({'term_week_year_course':self.term_week_year_course+f"_{'T' if course_name == 'thesis' else 'D'}",
+                                                                        'course_name':course_name})
 
         self.failed_to_search_records_ids = [(5, 0, 0)]
         for record in self.wizard_excel_extracted_record_ids:
@@ -191,10 +201,10 @@ class ArticleEnlistmentWizard(models.TransientModel):
 
         return self.env['article.wizard.publication'].create(temp_data_dictionary)
 
-    @api.depends('term_week_year')
+    @api.depends('term_week_year_course')
     def _compute_check_for_existing(self):
         for record in self:
-            existing_enlistment_id = record.env['article.enlistment'].search([('term_week_year', '=', record.term_week_year)], limit=1)
+            existing_enlistment_id = record.env['article.enlistment'].search([('term_week_year_course', '=', record.term_week_year_course)], limit=1)
             record.enlistment_id = existing_enlistment_id if existing_enlistment_id else None
         return
         
