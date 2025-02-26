@@ -32,7 +32,6 @@
                                 <field name="author3" readonly="1"
                                     invisible="course_name != 'design'" />
                                 <field name="doi"/>
-                                <button name='act_redirect_doi' string="Link" invisible="doi==True"/>
                                 <field name='custom_id' />
                                 <button name="act_member_change" string="Change Member"
                                     type="object" class="oe_highlight"
@@ -40,6 +39,8 @@
                                 <button name="act_void_topic_confirm" string="Void Topic"
                                     type="object" class="oe_highlight"
                                     invisible="is_course_instructor == False" />
+                                <button name='act_redirect_doi' type="object" string="Link" 
+                                    invisible="doi==False" class="oe_highlight"/>
                             </group>
                         </group> 
                         <div class="row" style="width: 100%;">
@@ -112,7 +113,7 @@
                     <field name="publishing_state" />
                     <field name="course_name" />
                     <field name="doi" column_invisible='True'/>
-                    <button name='act_redirect_doi' type="object" string="Link" invisible="doi==True" class="oe_highlight"/>
+                    <button name='act_redirect_doi' type="object" string="Link" invisible="doi==False" class="oe_highlight"/>
                     <field name="article_tag_ids" widget="many2many_tags" />
                 </tree>
             </field>
