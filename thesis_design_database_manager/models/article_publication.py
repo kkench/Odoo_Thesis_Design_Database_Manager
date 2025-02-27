@@ -210,7 +210,7 @@ class ArticlePublication(models.Model):
             self.replacement_identifier = "Name Invalid"
             return
 
-        if not self.custom_id:
+        if self.custom_id == 'None':
             course_code = 'T' if self.course_name == "thesis" else 'D'
             article_string = 'art1' if course_code == 'T' else None
         else:
