@@ -321,6 +321,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'author1': form_record.author1,
                 'author2': form_record.author2,
                 'author3': form_record.author3,
+                'article2_flag': form_record.article_2_flag,
                 'adviser_ids': [(6, 0, [form_record_advisor.id])], # this is new, so replace is good
                 'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
             }

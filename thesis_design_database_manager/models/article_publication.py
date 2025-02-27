@@ -48,6 +48,7 @@ class ArticlePublication(models.Model):
     author1 = fields.Char("Author 1",default=None)
     author2 = fields.Char("Author 2",default=None)
     author3 = fields.Char("Author 3",default=None)
+    article2_flag = fields.Boolean("Is an Article 2",default=False)
     adviser_ids = fields.Many2many(
         "res.users",
         "article_publication_res_users_rel",
@@ -62,7 +63,7 @@ class ArticlePublication(models.Model):
 
     article_tag_ids = fields.Many2many("article.tag", "article_publication_ids", string="Tags",)
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
-    latest_student_batch_yr = fields.Integer("Latest Student ID Year From All Members")
+    latest_student_batch_yr = fields.Integer("Latest Batch Year From All Members")
 
     #-----Computable Information------
     is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
@@ -200,7 +201,7 @@ class ArticlePublication(models.Model):
             'target': 'new',
         }
 
-    @api.onchange("author1","author2","author3","latest_student_batch_yr")
+    @api.onchange("author1","author2","author3","latest_student_batch_yr","article2_flag")
     def _compute_temp_id(self):
         if not (self.latest_student_batch_yr>=2010 and self.latest_student_batch_yr<2999): 
             self.replacement_identifier = "Year Ivalid"
@@ -210,16 +211,11 @@ class ArticlePublication(models.Model):
             self.replacement_identifier = "Name Invalid"
             return
 
-        if self.custom_id == 'None':
-            course_code = 'T' if self.course_name == "thesis" else 'D'
-            article_string = 'art1' if course_code == 'T' else None
+        course_code = 'T' if self.course_name == "thesis" else 'D'
+        if course_code == 'T':
+            article_string = 'Art2' if self.article2_flag else 'Art1'
         else:
-            split_id_list = self.custom_id.split("_")
-            if 'T' in split_id_list:
-                _,_,course_code,article_string = split_id_list
-            else:
-                _,_,course_code = split_id_list
-                article_string = None
+            article_string = None
 
         self.arrange_lastname_alphabetically()
         temp_last_names = self._get_lastnames()
@@ -230,6 +226,8 @@ class ArticlePublication(models.Model):
         self.replacement_identifier = separator.join(id_part_list)
 
     def act_save_new_members(self):
+        if self.env['article.publication'].search([('custom_id', '=', self.replacement_identifier)]):
+            raise UserError("Students have already existing records")
         return self.write({
             'custom_id':self.replacement_identifier,
         })
