@@ -113,6 +113,7 @@
                     <field name="publishing_state" />
                     <field name="course_name" />
                     <field name="doi" column_invisible='True'/>
+                    <field name='authors' column_invisible='True'/>
                     <button name='act_redirect_doi' type="object" string="Link" invisible="doi==False" class="oe_highlight"/>
                     <field name="article_tag_ids" widget="many2many_tags" />
                 </tree>
@@ -270,12 +271,8 @@
             <field name="arch" type="xml">
                 <search>
                     <field name="name" />
-                    <separator />
-                    <field name="state" />
-                    <field name="publishing_state" />
-                    <separator />
-                    <field name="course_name" />
                     <field name="article_tag_ids" />
+                    <field name="authors" string="Author"/>
                 </search>
             </field>
         </record>

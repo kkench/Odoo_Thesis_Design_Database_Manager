@@ -86,8 +86,8 @@ class ArticleWizardPublication(models.TransientModel):
                 record.error_comment = "2 Authors only for Thesis"
                 record.reset_record()
                 continue
-            duplicate_flag = record.record_has_duplicate_submission()
-            if duplicate_flag:
+            if record.record_has_duplicate_submission():
+                #the if function already processes the record if there is duplicate submission
                 continue
             record._check_for_existing_records()
 
@@ -238,8 +238,17 @@ class ArticleWizardPublication(models.TransientModel):
             self.error_code = 8
             self.error_comment = "Adviser is Not Found"
             return True
+        if self.record_has_the_same_title_as_existing():
+                self.error_code = 10
+                self.error_comment = "Title Already Exists on Database"
+                return True
         return False
     
+    def record_has_the_same_title_as_existing(self):
+        if self.env['article.publication'].search([('name', '=', self.name)], limit=1):
+            return True
+        return False
+
     def _has_errors_for_edit_articles(self):
         #self is already a single instance
         #this assumes wizard is on edit mode
@@ -249,21 +258,24 @@ class ArticleWizardPublication(models.TransientModel):
             self.article_related_id = None
             return True
 
-        if self.import_article_wizard_id.user_privilege != "faculty_adviser": 
-            self.error_code = 10
-            self.error_comment = "User is not faculty"
-            self.article_related_id = None
-            return True
 
         if self.instructor_privilege_flag:
             return False
 
-        for adviser in self.article_related_id.adviser_ids:
-            if adviser.name in self.adviser.split(";"):
-                return False
+
+        #####REMOVE COMMENT WHEN ADVISERS ARE ALLOWED TO EDIT THE PAPERS
+        # if self.import_article_wizard_id.user_privilege != "faculty_adviser": 
+        #     self.error_code = 10
+        #     self.error_comment = "User is not faculty"
+        #     self.article_related_id = None
+        #     return True
+
+        # for adviser in self.article_related_id.adviser_ids:
+        #     if adviser.name in self.adviser.split(";"):
+        #         return False
             
         self.error_code = 10
-        self.error_comment = "User is not an adviser or instructor"
+        self.error_comment = "User is not an instructor"
         return True
 
     def _check_for_existing_records(self):

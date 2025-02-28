@@ -7,7 +7,7 @@
                 <form string="Import xls" create="false">
                     <group>
                         <field name="excel_file" filename="file_name"/>
-                    </group>
+                        <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>                    </group>
                     <footer>
                         <button string="Enlist Records" type="object" name="act_view_enlistment_wizard_page1" class="btn-primary"/>
                     </footer>

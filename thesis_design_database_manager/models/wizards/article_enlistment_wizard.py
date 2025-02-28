@@ -14,7 +14,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
     
     # region FIELDS 
     # term_year will be used as the name later for the enlistment object
-    term_week_year_course = fields.Char(string='TERM/WEEK/SY')
+    term_week_year_course = fields.Char(string='TERM/WEEK/SY', required=True)
     excel_file = fields.Binary(string='Imported Excel File')
     failed_record_excel_files = fields.Binary(string='Left Over Records from Excel')
     excel_dataframe_binary = fields.Binary(string='Wizard Enlistment DataFrame')

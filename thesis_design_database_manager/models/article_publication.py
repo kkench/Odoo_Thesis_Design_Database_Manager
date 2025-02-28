@@ -65,6 +65,7 @@ class ArticlePublication(models.Model):
     replacement_identifier = fields.Char("Replacement ID After Member Change", compute="_compute_temp_id")
     latest_student_batch_yr = fields.Integer("Latest Batch Year From All Members")
 
+    authors = fields.Char("Authors", compute="_compute_combined_authors", store=True)
     #-----Computable Information------
     is_article_adviser = fields.Boolean(string="The user is the adviser of the paper", compute="_compute_article_editability")
     is_course_instructor = fields.Boolean(string="The user is the instructor of the paper", compute="_compute_article_editability")
@@ -75,6 +76,14 @@ class ArticlePublication(models.Model):
     
     max_title_similarity_score = fields.Integer("Max Similarity Score", readonly=True, default=0)
     title_similarity_score = fields.Float("Title Similarity Score", readonly=True, compute="_compute_related_studies")
+
+
+    @api.depends('author1','author2','author3')
+    def _compute_combined_authors(self):
+        for record in self:
+            # if not (record.id and isinstance(record.id, int)):
+            #     continue
+            record.authors = ' '.join(filter(None, [record.author1, record.author2, record.author3]))
 
     @api.depends("course_name","adviser_ids")
     def _compute_article_editability(self):

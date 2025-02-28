@@ -25,7 +25,7 @@ class ArticleImportExcelWizard(models.TransientModel):
     wizard_excel_extracted_record_ids = fields.One2many("article.wizard.publication","import_article_wizard_id","Excel Records")
     created_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_created_rel',string="Successful Records")
     updated_article_records_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
-    overwritten_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_overwritten_rel',string="Overwritten Records")
+    voided_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_voided_rel',string="Voided Records")
     failed_form_submissions_record_ids = fields.Many2many("article.wizard.publication", 'article_import_excel_wizard_failed_rel',string="Failed Records")
     wizard_check_tags_records_ids = fields.One2many('article.wizard.publication','checking_wizard_id','List of Records for Checking')
 
@@ -262,7 +262,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         for related_records in records_with_related_authors:
             authors_to_rewrite += f", {related_records.custom_id.split('_')[0]}" if authors_to_rewrite != "" else related_records.custom_id.split('_')[0]
         
-        self.popup_message = "Related authors' paper status will reset and will be overwritten: " + authors_to_rewrite
+        self.popup_message = "Related authors' paper status will have to re-propose  and previous studies will be voided: " + authors_to_rewrite
 
         return {
             'name': 'Upload Confirmation',
@@ -299,7 +299,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         if not self.wizard_excel_extracted_record_ids or self.wizard_type == "null":
             return  # if blank
         record_created_list = []
-        record_overwritten_list = []
+        record_voided_list = []
         record_failed_list = []
         record_updated_list = []
         for form_record in self.wizard_excel_extracted_record_ids:
@@ -330,12 +330,13 @@ class ArticleImportExcelWizard(models.TransientModel):
                 record = self.env['article.publication'].create(row_record_dictionary)
                 record_created_list.append(record.id)
             else:
-                record = form_record.article_related_id.act_void_topic()
+                form_record.article_related_id.act_void_topic()
                 record = self.env['article.publication'].create(row_record_dictionary)
-                record_overwritten_list.append(form_record.article_related_id.id)
+                record_voided_list.append(form_record.article_related_id.id)
+                record_created_list.append(record.id)
             
         self.created_article_record_ids = [(6, 0, record_created_list)]
-        self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
+        self.voided_article_record_ids = [(6, 0, record_voided_list)]
         self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]
         self.updated_article_records_ids = [(6, 0, record_updated_list)]
 
@@ -349,7 +350,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             'target': 'current', }
 
     def upload_edit_records_to_database(self):
-        record_overwritten_list = []
+        record_voided_list = []
         record_failed_list = []
         record_updated_list = []
 
@@ -381,11 +382,11 @@ class ArticleImportExcelWizard(models.TransientModel):
                 record_dictionary['publishing_state'] = 'not_published'
             temp_record.article_related_id.write(record_dictionary)
             if override_everything:
-                record_overwritten_list.append(temp_record.article_related_id.id)
+                record_voided_list.append(temp_record.article_related_id.id)
             else:
                 record_updated_list.append(temp_record.article_related_id.id)
 
-        self.overwritten_article_record_ids = [(6, 0, record_overwritten_list)]
+        self.voided_article_record_ids = [(6, 0, record_voided_list)]
         self.failed_form_submissions_record_ids = [(6, 0, record_failed_list)]
         self.updated_article_records_ids = [(6, 0, record_updated_list)]
 
@@ -557,7 +558,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                             }
         
         if self.user_privilege == "design_instructor":
-            record_dictionary['course'] = 'D'#############FIX THIS LATER
+            record_dictionary['course'] = 'D'#############there couldve been a way faster way, but i didnt account for the new stuff
             record_dictionary['instructor_privilege_flag'] = True
         elif self.user_privilege == "thesis_instructor":
             record_dictionary['course'] = 'T'

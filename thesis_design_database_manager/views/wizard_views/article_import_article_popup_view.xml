@@ -9,9 +9,10 @@
                     <field name="user_privilege"/>
                 </group>
                 <footer>
-                    <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege != 'faculty_adviser'"/>
-                    <button string="Import New Articles As Instructor" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/>
-                    <button string="Import New Articles As Adviser" type="object" name="act_set_import_new_and_as_adviser" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/>
+                    <!-- The comments here are for when you want to enable faculty to import new topics -->
+                    <!-- <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege != 'faculty_adviser'"/> -->
+                    <button string="Import New Articles" type="object" name="act_set_import_new" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/>
+                    <!-- <button string="Import New Articles As Adviser" type="object" name="act_set_import_new_and_as_adviser" class="btn-primary" invisible="user_privilege == 'faculty_adviser'"/> -->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
@@ -35,7 +36,7 @@
                     <field name="excel_file" filename="file_name"/>
                 </group>
                 <footer>
-                    <button string="Import Edits for Old Articles" type="object" name="act_edit_existing_articles" class="btn-primary"/>
+                    <button string="Import Edits" type="object" name="act_edit_existing_articles" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

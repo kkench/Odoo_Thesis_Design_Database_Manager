@@ -142,8 +142,8 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Redefense Topics">
-                                <field name="overwritten_article_record_ids">
+                            <page string="Voided Topics">
+                                <field name="voided_article_record_ids">
                                     <tree create="0" delete="0">
                                         <field name="name" string="Title"/>
                                         <field name="course_name" string="Course"/>
