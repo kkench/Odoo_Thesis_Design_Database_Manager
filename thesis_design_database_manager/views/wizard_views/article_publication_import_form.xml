@@ -7,7 +7,7 @@
                 <form string="Import EXCEL FORM">
                     <sheet>
                         <h1>
-                            Article Import Wizard Part 1/3 <button string="Confirm Column Selection; Proceed to Next Step" type="object" name="act_import_article_wizard_part2" class="btn-primary"/>
+                            Article Import Wizard Part 1/3 <button string="Retry" type="object" name="import_excel_articles_part1" class="btn-primary"/><button string="Confirm Column Selection; Proceed to Next Step" type="object" name="act_import_article_wizard_part2" class="btn-primary"/>
                         </h1>
                         <!-- <field name="excel_file" filename="file_name" invisible="true"/> -->
                         <field name="user_privilege"/>

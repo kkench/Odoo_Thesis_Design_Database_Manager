@@ -61,7 +61,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
     
     def act_view_enlistment_wizard_page1(self):
         #scan the columns
-        FORMS_COLUMN_CHECK_LIST = ['ID','Start time','Completion time','Email','Name','Last modified time']
+        FORMS_COLUMN_CHECK_LIST = ['ID','Start time','Completion time','Email','Name']
         FORMS_COLUMN_TO_REMOVE = [column for column in FORMS_COLUMN_CHECK_LIST if column not in ['Email','Name']]
         if not self.excel_file: 
             raise UserError("Please upload an Excel file.")
@@ -79,15 +79,13 @@ class ArticleEnlistmentWizard(models.TransientModel):
 
         excel_column_list = list(enlistment_form_df.columns)
         for checking_column in FORMS_COLUMN_CHECK_LIST:
-            if checking_column.lower() == 'id': #ID randomizes in capital, idk why might look into normalization
-                continue
-            if checking_column not in excel_column_list:
+            if checking_column not in [item.lower() for item in excel_column_list]:
                 raise UserError("File is not an MS Forms Excel")
 
         self.excel_column_ids = [(5, 0, 0)]
         self.official_record_column_ids = [(5, 0, 0)]
         for column in excel_column_list:
-            if (column in FORMS_COLUMN_TO_REMOVE) or (column.lower == 'id'):
+            if column.lower() not in [item.lower() for item in FORMS_COLUMN_TO_REMOVE]:
                 continue
             
             record_excel_column = self.env['article.wizard.excel.column'].create({'name': column})
@@ -100,7 +98,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
                     official_record_column = self._get_official_column(expected_column)
                     self.official_record_column_ids = [(4, official_record_column.id, 0)]
                     record_excel_column.official_record_id = official_record_column
-                    break
+                    continue
         return {
             'type': 'ir.actions.act_window', 
             'name': 'Part 1', 
@@ -200,6 +198,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
                                 'course':instructor_type,
                             }
         for column in self.excel_column_ids:
+            if not column.official_record_id.name: continue
             field_name = self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]
             print(field_name,row[column.name])
             temp_data_dictionary[field_name] = row[column.name]
