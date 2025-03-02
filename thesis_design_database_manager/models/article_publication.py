@@ -199,6 +199,8 @@ class ArticlePublication(models.Model):
         
         
     def act_member_change(self):
+        if self.state == "voided":
+            raise UserError("This topic is already voided. Members cannot be changed.")
         self.replacement_identifier = None
         return {
             'type': 'ir.actions.act_window',
@@ -259,7 +261,7 @@ class ArticlePublication(models.Model):
             raise UserError("Topic is already voided.")
         else:
             return self.write({
-            'custom_id':"", 'state':"voided"
+            'custom_id':"Voided", 'state':"voided"
         })
     
     def act_redirect_doi(self):
