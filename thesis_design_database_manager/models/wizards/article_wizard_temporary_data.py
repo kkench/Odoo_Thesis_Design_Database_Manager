@@ -41,7 +41,7 @@ class ArticleWizardPublication(models.TransientModel):
     def reset_record(record):
         record.initial_id = None
 
-    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_batch_year_1', 'student_batch_year_2', 'student_batch_year_3', 'adviser','import_article_wizard_id')
+    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_batch_year_1', 'student_batch_year_2', 'student_batch_year_3', 'adviser','import_article_wizard_id','name')
     def _compute_data_and_errors(self):
         ''' Error Codes:
         0 - No Errors
@@ -127,7 +127,7 @@ class ArticleWizardPublication(models.TransientModel):
                 or record.article_related_id.state == 'proposal_redefense'
                 or record.article_related_id.state == 'pre_final_defense'
                 or record.article_related_id.state == 'final_redefense'):
-            record.error_code = 10
+            record.error_code = 11
             record.error_comment = "Existing Study is Not Ready For Defense"
         return
 
@@ -238,7 +238,7 @@ class ArticleWizardPublication(models.TransientModel):
             self.error_comment = "Adviser is Not Found"
             return True
         if self.record_has_the_same_title_as_existing():
-                self.error_code = 10
+                self.error_code = 12
                 self.error_comment = "Title Already Exists on Database"
                 return True
         return False
