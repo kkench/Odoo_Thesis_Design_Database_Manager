@@ -34,6 +34,8 @@
             <form string="Import CSV" create="false">
                 <group>
                     <field name="excel_file" filename="file_name"/>
+                    <field name="update_conformity_flag"/>
+                    <field name="user_privilege"/>
                 </group>
                 <footer>
                     <button string="Import Edits" type="object" name="act_edit_existing_articles" class="btn-primary"/>

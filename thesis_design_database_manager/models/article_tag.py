@@ -4,7 +4,7 @@ class ArticleTag(models.Model):
     _name = "article.tag"
     _description = "Tags for Scanning Similarities"
     _sql_constraints = [
-        ("check_name", "UNIQUE(name)", "Name must be unique.")
+        ("check_name", "UNIQUE(name)", "Duplicate Tag Name Detected")
     ] #probably add check for something like "CNN", "cnn" and "Convolutional Neural Network"
 
     name = fields.Char(string='Name', required=True)

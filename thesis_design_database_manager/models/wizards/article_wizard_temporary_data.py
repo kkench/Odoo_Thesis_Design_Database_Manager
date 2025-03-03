@@ -19,7 +19,6 @@ class ArticleWizardPublication(models.TransientModel):
     student_batch_year_1 = fields.Char("Student 1 Batch Year", default=None)
     student_batch_year_2 = fields.Char("Student 2 Batch Year", default=None)
     student_batch_year_3 = fields.Char("Student 3 Batch Year", default=None)
-    instructor_privilege_flag = fields.Boolean("Adviser Mode/Instructor (0/1)")# delete when you cant find a use case
     
     article_2_flag = fields.Boolean("Check if Article 2",default=False)
     article_related_id = fields.Many2one("article.publication","If Author has already existing ID",compute="_compute_data_and_errors",store=True)
@@ -257,22 +256,12 @@ class ArticleWizardPublication(models.TransientModel):
             self.error_comment = "Cannot Find Existing Record"
             self.article_related_id = None
             return True
+        
+        is_proper_instructor = ((self.import_article_wizard_id.user_privilege == 'thesis_instructor' and self.course == 'T') or
+            (self.import_article_wizard_id.user_privilege == 'design_instructor' and self.course == 'D'))
 
-
-        if self.instructor_privilege_flag:
+        if is_proper_instructor:
             return False
-
-
-        #####REMOVE COMMENT WHEN ADVISERS ARE ALLOWED TO EDIT THE PAPERS
-        # if self.import_article_wizard_id.user_privilege != "faculty_adviser": 
-        #     self.error_code = 10
-        #     self.error_comment = "User is not faculty"
-        #     self.article_related_id = None
-        #     return True
-
-        # for adviser in self.article_related_id.adviser_ids:
-        #     if adviser.name in self.adviser.split(";"):
-        #         return False
             
         self.error_code = 10
         self.error_comment = "User is not an instructor"
