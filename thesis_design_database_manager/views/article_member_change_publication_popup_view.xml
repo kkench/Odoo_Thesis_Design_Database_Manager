@@ -9,8 +9,8 @@
                     <sheet>
                     <group>
                         <group>
-                            <field name="author1" placeholder="LN, FN. MI (Mendoza, Lui G.)"/>
-                            <field name="author2" placeholder="LN, FN. MI (Torres, Elena J.)"/>
+                            <field name="author1" placeholder="LN, FN. MI (Mendoza, Lui M.)"/>
+                            <field name="author2" placeholder="LN, FN. MI (Torres, Elena Anne J.)"/>
                             <field name="author3" placeholder="LN, FN. MI (Dela Cruz, Juan G.)" invisible="course_name == 'thesis'"/>
                             <field name="article2_flag" invisible="course_name != 'thesis'" string="Is it Article 2?"/>
                         </group>

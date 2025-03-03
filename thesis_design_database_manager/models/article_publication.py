@@ -197,6 +197,11 @@ class ArticlePublication(models.Model):
         if self.state == 'final_defense':
             return self.write({'state':'final_redefense'})
         
+    def act_initial_proto_demo(self):
+        if self.state == 'in_progress':
+            return self.write({'state':'pre_final_defense'})
+
+        
         
     def act_member_change(self):
         self.replacement_identifier = None
@@ -244,7 +249,7 @@ class ArticlePublication(models.Model):
     def act_void_topic_confirm(self):
         self.ensure_one()
         return {
-            'name': 'Upload Confirmation',
+            'name': 'Void Topic',
             'type': 'ir.actions.act_window',
             'res_model': 'article.publication',
             'view_mode': 'form',
@@ -252,7 +257,7 @@ class ArticlePublication(models.Model):
             'view_id': self.env.ref('thesis_design_database_manager.article_publication_voiding_confirmation_popup_form').id,
             'target': 'new',
         }
-    
+        
     def act_void_topic(self):
         self.ensure_one()
         if self.custom_id == "":

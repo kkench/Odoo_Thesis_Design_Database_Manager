@@ -64,6 +64,11 @@
                             invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
                                 <button name="act_reject_defense" string="Reject" type="object" class="oe_button"/>
                             </div>
+                            <div class="col-lg-3 rounded-3 custom-hover-effect" 
+                            style="background-color: #d7b49e; text-align: center;" 
+                            invisible="(state not in ['in_progress']) or (is_course_instructor == False and is_article_adviser == False)">
+                                <button name="act_initial_proto_demo" string="Prototype Checked" type="object" class="oe_button"/>
+                            </div>
                         </div>
                         <notebook>
                             <page string="details">
