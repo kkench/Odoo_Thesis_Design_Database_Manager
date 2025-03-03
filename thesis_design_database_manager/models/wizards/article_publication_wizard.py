@@ -518,14 +518,22 @@ class ArticleImportExcelWizard(models.TransientModel):
         creating_tags = []
         similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
         similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
+        if temp_record.duplicate_temp_to_create_ids:
+            duplicate_temp_tags = [tag.name for tag in temp_record.duplicate_temp_to_create_ids]
+            for d_tag in duplicate_temp_tags:
+                if self.env["article.tag"].search([('name','=', n_tag)],limit=1):
+                    similar_tag_names.append(n_tag)
+                else:
+                    tag_dict = {"name": d_tag}
+                    creating_tags.append(tag_dict)         
+                    
 
         new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
-
         for n_tag in new_tag_names:
             dupli = self.env["article.tag"].search([('name','=', n_tag)],limit=1) #second redundancy check if there is a tag that was new and is shared by multiple new entries
             if dupli:
-                print("There is a duplicate: ")
-                print(dupli.name)
+                # print("There is a duplicate: ")
+                # print(dupli.name)
                 similar_tag_names.append(n_tag)
             else:
                 tag_dict = {"name": n_tag}
