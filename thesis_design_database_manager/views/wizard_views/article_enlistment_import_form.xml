@@ -12,7 +12,7 @@
                             <button string="Next Page" type="object" name="act_view_enlistment_wizard_page2" class="btn-primary"/>
                             <!-- <field name="course_name"/> -->
                         </h1>
-                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="2T10W20242025" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <field name="excel_column_ids">
                             <tree editable="inline" create="0" delete="0">
                                 <field name="name"/>
@@ -39,7 +39,7 @@
                             <button string="Upload to Database" type="object" name="act_view_enlistment_wizard_page3" class="btn-primary"/>
                             <!-- <field name="course_name"/> -->
                         </h1>
-                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="2T10W20242025" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <notebook>
                             <page string="NEW RECORDS">
                                 <field name="wizard_excel_extracted_record_ids">
@@ -79,7 +79,7 @@
                             Article Enlist Wizard Part 3/3
                             <!-- <field name="course_name"/> -->
                         </h1>
-                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="TERM/WEEK" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
+                        TERM/WEEK/YEAR: (E.G.: 2T10W2425) <field name="term_week_year_course" placeholder="2T10W20242025" string='TERM/WEEK/YEAR: (E.G.: 2T10W20242025)' class="underline-box"/>
                         <notebook>
                             <page string="For Defense Topics">
                                 <field name="linked_enlistment_record_ids">

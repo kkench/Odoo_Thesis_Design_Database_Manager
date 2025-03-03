@@ -257,7 +257,7 @@ class ArticleWizardPublication(models.TransientModel):
             self.article_related_id = None
             return True
         
-        is_proper_instructor = self.import_article_wizard_id and ((self.import_article_wizard_id.user_privilege == 'thesis_instructor' and self.course == 'T') or
+        is_proper_instructor = ((self.import_article_wizard_id.user_privilege == 'thesis_instructor' and self.course == 'T') or
             (self.import_article_wizard_id.user_privilege == 'design_instructor' and self.course == 'D'))
 
         if is_proper_instructor:

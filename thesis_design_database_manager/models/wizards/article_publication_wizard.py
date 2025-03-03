@@ -38,7 +38,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             ('faculty_adviser', 'Faculty Adviser')
                                         ], string='User Privilege', compute='_compute_user_privilege', store=True)
 
-
+    update_conformity_flag = fields.Boolean("Update All Conformity on This Form??",default=True)
     DEFAULT_COLUMN_LINK_DICT = { #EXCEL : OFFICIAL
         "Author 1":"1st Author",
         "Author 2":"2nd Author",
@@ -150,8 +150,9 @@ class ArticleImportExcelWizard(models.TransientModel):
         self.excel_column_ids = [(5, 0, 0)]
         self.official_record_column_ids = [(5, 0, 0)]
         for column in excel_column_list:
-            # print(f"{column.lower()} in {[item.lower() for item in FORMS_COLUMN_TO_REMOVE]}:{column.lower() in [item.lower() for item in FORMS_COLUMN_TO_REMOVE]}")
             if column.lower() in [item.lower() for item in FORMS_COLUMN_TO_REMOVE]:
+                continue
+            if column.lower() == 'Last modified time'.lower(): #this sometimes comes up and sometimes does not; weird form thing
                 continue
             record_excel_column = self.env['article.wizard.excel.column'].create({'name': column})
             self.excel_column_ids = [(4, record_excel_column.id, 0)]
@@ -163,7 +164,6 @@ class ArticleImportExcelWizard(models.TransientModel):
                         continue
                     if ('title' in record_excel_column.name.lower()) and  ('title' not in expected_column.lower()): 
                         continue
-                    # print(expected_column.lower())
                     official_record_column = self._get_official_column(expected_column,self.DEFAULT_COLUMN_LINK_DICT)
                     self.official_record_column_ids = [(4, official_record_column.id, 0)]
                     record_excel_column.official_record_id = official_record_column
@@ -172,7 +172,6 @@ class ArticleImportExcelWizard(models.TransientModel):
             if self.wizard_type == 'edit':
                 for expected_column in tuple(self.QUESTIONS_FOR_EDIT_MODE.keys()) :
                     if expected_column.lower() in record_excel_column.name.lower():
-                        # print(expected_column.lower())
                         official_record_column = self._get_official_column(expected_column,self.QUESTIONS_FOR_EDIT_MODE)
                         self.official_record_column_ids = [(4, official_record_column.id, 0)]
                         record_excel_column.official_record_id = official_record_column
@@ -406,6 +405,11 @@ class ArticleImportExcelWizard(models.TransientModel):
             if override_everything:
                 record_dictionary['state'] = 'draft'
                 record_dictionary['publishing_state'] = 'not_published'
+            if self.update_conformity_flag:
+                if temp_record.article_related_id.state == 'proposal_revision':
+                    record_dictionary['state'] = 'in_progress'
+                if temp_record.article_related_id.state == 'final_revisions':
+                    record_dictionary['state'] = 'accepted'
             temp_record.article_related_id.write(record_dictionary)
             if override_everything:
                 record_voided_list.append(temp_record.article_related_id.id)
