@@ -25,6 +25,7 @@
                                 <field name="adviser_ids" widget="many2many_tags"
                                     readonly="is_course_instructor == False"
                                     options="{'no_create': True}" />
+                                <field name="onedrive"/>
                             </group>
                             <group>
                                 <field name="author1" readonly="1" />
@@ -81,8 +82,6 @@
                                         readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
                                     <field name="max_tag_similarity_score"
                                         readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
-                                    <button name="act_suggested_tags" type="object"
-                                        string="Get Suggested Tags" class="oe_highlight" />
                                 </group>
                             </page>
                             <page string="Similar Studies">

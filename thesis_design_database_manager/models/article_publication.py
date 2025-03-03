@@ -44,6 +44,7 @@ class ArticlePublication(models.Model):
                                                 ],
                                     default="thesis")
     abstract = fields.Text(string="Abstract", required=True)
+    onedrive = fields.Text(string="Onedrive Link")
     date_registered = fields.Date(string="Day of Registration") 
     author1 = fields.Char("Author 1",default=None)
     author2 = fields.Char("Author 2",default=None)
@@ -121,6 +122,12 @@ class ArticlePublication(models.Model):
                 self.related_article_ids = [(5, 0, 0)]
         else:
             self.related_article_ids = [(5, 0, 0)]
+    @api.onchange('doi')
+    def _onchange_doi_status(self):
+        if self.doi:
+            self.publishing_state = "published"
+        elif not self.doi:
+            self.publishing_state = "not_published"
     
     @api.constrains('author3')
     def _check_author3_eligability(self):

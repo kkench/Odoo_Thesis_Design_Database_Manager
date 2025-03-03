@@ -419,8 +419,8 @@ class ArticleWizardPublication(models.TransientModel):
             duplicate = self.env["article.wizard.publication.tag"].search([('name', '=', tag)],limit=1)
             if found_tag == "" or tag == "":
                     continue
-            if duplicate and not found_tag: #first redundancy check
-                    duplicate_temps.append(duplicate.id)
+            # if duplicate and not found_tag: #first redundancy check
+            #         duplicate_temps.append(duplicate.id)
             elif not found_tag:
                     created_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                     tags_to_create.append(created_tag.id)
@@ -434,7 +434,7 @@ class ArticleWizardPublication(models.TransientModel):
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
-            self.duplicate_temp_to_create_ids = [(6,0,duplicate_temps)]
+            # self.duplicate_temp_to_create_ids = [(6,0,duplicate_temps)]
             # print(similar_tags)
         return similar_tags or existing_tags or tags_to_create
     
@@ -449,6 +449,9 @@ class ArticleWizardPublication(models.TransientModel):
     
 class ArticleWizardTempTags(models.TransientModel):
     _name = "article.wizard.publication.tag"
+    _sql_constraints = [
+        ("check_name", "UNIQUE(name)", "Temp tag check")
+    ] 
 
     name = fields.Char("Tag Name")
     article_wizard_publication_ids = fields.Many2many("article.wizard.publication")
