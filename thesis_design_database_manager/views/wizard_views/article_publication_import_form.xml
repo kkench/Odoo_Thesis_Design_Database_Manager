@@ -35,6 +35,7 @@
                             Article Import Wizard Part 2/3 
                             <button string="Go Back" type="object" name="act_import_return_article_wizard_part1" class="btn-primary"/> 
                             <button string="Confirm" type="object" name="act_go_to_view_tags" class="btn-primary"/>
+                            <field name="user_privilege"/>
                         </h1>
                         <notebook>
                             <page string="NEW RECORDS">
@@ -117,7 +118,8 @@
                 <form string="Import EXCEL FORM">
                     <sheet>
                         <h1>
-                            Article Import Wizard Part 3/3 
+                            Article Import Wizard Part 3/3
+                            <field name="user_privilege"/>
                         </h1>
                         <notebook>
                             <page string="Failed Records">

@@ -112,15 +112,12 @@ class ArticleEnlistmentWizard(models.TransientModel):
         #scan for the row
         enlistment_form_df = self._get_dataframe()
         column_names = enlistment_form_df.columns.tolist()
-        # print([column.name for column in self.official_record_column_ids])
-        # print([column.name for column in self.excel_column_ids])
 
         list_of_record_ids = []
         for index, row in enlistment_form_df.iterrows():
             row_record = self._process_row(row)
             list_of_record_ids.append(row_record.id)
         self.wizard_excel_extracted_record_ids = [(6, 0, list_of_record_ids)]
-        # print(self.wizard_excel_extracted_record_ids)
 
         return {
             'type': 'ir.actions.act_window', 

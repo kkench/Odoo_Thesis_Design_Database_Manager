@@ -85,13 +85,6 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             'Uploader Email': 'uploader_email',
                                             'Uploader Name': 'uploader_name',
                                         }
-    boolean_dictionary = {
-            "No (both conformity and non conformity purposes)":0,
-            "Yes (New topic/redefense for a new topic)":1,
-            "No":0,
-            "Yes":1,
-        }
-    
     #Buttons
     def act_set_import_new(self):
         self.wizard_type = "new"
@@ -101,8 +94,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         self.ignore_instructor_privilege = True
         return self.act_set_import_new()
 
-    def act_edit_existing_articles(self):#This is now part of advisers already
-        self.ignore_instructor_privilege = True
+    def act_edit_existing_articles(self):#This now only takes care of instructors as only the people allowed to edit
+        # self.ignore_instructor_privilege = True
         self.wizard_type = "edit"
         return self.import_excel_articles_part1() 
 
@@ -212,7 +205,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 if not column.official_record_id: continue                 
                 field_name = self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]
                 if field_name == 'article_2_flag': 
-                    row_data_dictionary[field_name] = self.boolean_dictionary.get(row[column.name],False)
+                    row_data_dictionary[field_name] = 1 if 'yes' in row[column.name].lower() else 0#self.boolean_dictionary.get(row[column.name],False)
                     continue
                 row_data_dictionary[field_name] = row[column.name]
 
@@ -232,9 +225,7 @@ class ArticleImportExcelWizard(models.TransientModel):
 
     def process_edit_data_for_part_2(self):
         excel_df = self._get_wizard_df()
-        print(self.user_privilege)
         instructor_type = 'T' if self.user_privilege == 'thesis_instructor' else 'D'
-        print(instructor_type)
         question_list = ["For Redefense?","For Title Update?","For Abstract Update?","For Tag Update?"]
         
         to_update_article_list = []
@@ -247,30 +238,39 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'course':instructor_type,
             }
             binary_string = list('0000')
+            print(f"ROW: :{row['Id']}")
             for column in self.excel_column_ids:
-                if not column.official_record_id: continue
-                if column.official_record_id.name in question_list:#the order is based on the edit_binary_string codes (see temporary data comment)
-                    index_in_string = question_list.index(column.official_record_id.name)
-                    binary_string[index_in_string] = self.boolean_dictionary.get(row[column.name],False)
-                    row_data_dictionary['edit_binary_string'][index_in_string]
+                if not column.official_record_id: 
                     continue
-                field_name = self.LABEL_TO_RECORD_DICTIONARY[column.official_record_id.name]
+                
+                excel_column_name = column.name
+                data = row[excel_column_name]
+                official_column_name = column.official_record_id.name
+
+                if pd.isna(data):
+                    continue
+            
+                if official_column_name in question_list:
+                    index_in_string = question_list.index(official_column_name)
+                    input_column_value = '1' if 'yes' in data.lower() else '0'
+                    binary_string[index_in_string] = input_column_value
+                    continue
+
+                field_name = self.LABEL_TO_RECORD_DICTIONARY[official_column_name]
                 if field_name == 'article_2_flag':
-                    row_data_dictionary[field_name] = self.boolean_dictionary.get(row[column.name],False)
+                    row_data_dictionary[field_name] = 1 if 'yes' in data.lower() else 0
                     continue
-            
-                row_data_dictionary[field_name] = row[column.name]
-            
-            # print(binary_string)
-            # print(row_data_dictionary)
-            
+                
+                if 'batch' in field_name: #need to be str, not integer; for regex and later id
+                    data = str(int(data))#remove float decimals
+                    
+                row_data_dictionary[field_name] = data
+            row_data_dictionary['edit_binary_string'] = ''.join(binary_string)
+            temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
+            to_update_article_list.append(temporary_record.id)
 
-        return
-        #         temporary_record = self.env['article.wizard.publication'].create(row_data_dictionary)
-        #     to_update_article_list.append(temporary_record.id)
-        # # --------------Set all record relation-------------
-        # self.wizard_excel_extracted_record_ids = [(6, 0, to_update_article_list)]
-
+            self.wizard_excel_extracted_record_ids = [(6, 0, to_update_article_list)]
+        
         return { 
             'type': 'ir.actions.act_window', 
             'name': 'Part 2', 
