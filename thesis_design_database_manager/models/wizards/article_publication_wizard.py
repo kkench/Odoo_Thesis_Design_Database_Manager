@@ -240,7 +240,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'course':instructor_type,
             }
             binary_string = list('0000')
-            print(f"ROW: :{row['Id']}")
+            # print(f"ROW: :{row['Id']}")
             for column in self.excel_column_ids:
                 if not column.official_record_id: 
                     continue
@@ -521,33 +521,41 @@ class ArticleImportExcelWizard(models.TransientModel):
         linking_tags = []
         creating_tags = []
         similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
-        similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
-        # if temp_record.duplicate_temp_to_create_ids:
-        #     duplicate_temp_tags = [tag.name for tag in temp_record.duplicate_temp_to_create_ids]
-        #     for d_tag in duplicate_temp_tags:
-        #         if self.env["article.tag"].search([('name','=', d_tag)],limit=1):
-        #             similar_tag_names.append(d_tag)
-        #         else:
-        #             tag_dict = {"name": d_tag}
-        #             creating_tags.append(tag_dict)         
+        similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])    
                     
 
         new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
         for n_tag in new_tag_names:
-            # dupli = self.env["article.tag"].search([('name','=', n_tag)],limit=1) #second redundancy check if there is a tag that was new and is shared by multiple new entries
-            # if dupli:
-            #     # print("There is a duplicate: ")
-            #     # print(dupli.name)
-            #     similar_tag_names.append(n_tag)
-            # else:
-            tag_dict = {"name": n_tag}
-            creating_tags.append(tag_dict)
-        new_tag = self.env["article.tag"].create(creating_tags)
-        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+            dupli = self.env["article.tag"].search([('name','=', n_tag)],limit=1) #first redundancy check if there is a tag that was new and is shared by multiple new entries
+            if dupli:
+                # print("There is a duplicate: ")
+                # print(dupli.name)
+                similar_tag_names.append(n_tag)
+            else:
+                # print("Creating tag: ")
+                # print(dupli.name)
+                tag_dict = {"name": n_tag}
+                creating_tags.append(tag_dict)
+        
+        # print([tag.name for tag in creating_tags])
+        
+        for s_tag in similar_tag_names: #second redundancy check if temp tag exists but not real tag
+            tag_exists = self.env["article.tag"].search([('name','=', s_tag)],limit=1)
+            if not tag_exists:
+                # print("Tag must be created: ")
+                # print(tag_exists.name)
+                tag_dict = {"name": s_tag}
+                creating_tags.append(tag_dict) 
+                similar_tag_names.remove(s_tag) #move missing tag to create tags and then remove from similar
+            else:
+                continue
 
+        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+        new_tag = self.env["article.tag"].create(creating_tags)
         all_tags = []
         all_tags.extend(similar_tag)
         all_tags.extend(new_tag)
+        print([tag.name for tag in all_tags])
 
         return all_tags
         
