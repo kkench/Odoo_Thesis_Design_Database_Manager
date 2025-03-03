@@ -328,15 +328,16 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_failed_list = []
         record_updated_list = []
         for form_record in self.wizard_excel_extracted_record_ids:
-            all_tags = []
-            tag_list = self.set_similar_tags(form_record)
-            all_tags.extend(tag_list)
             if form_record.error_code != 0:
                 record_failed_list.append(form_record.id)
                 continue
             else:
-                new_tag_obj = self.set_new_tags(form_record)
-                all_tags.extend(new_tag_obj)
+                all_tags = self.convert_temp_to_tags(form_record)
+                # all_tags = self.get_duplicate_temp(form_record)
+                # tag_list = self.set_similar_tags(form_record)
+                # all_tags.extend(tag_list)
+                # new_tag_obj = self.set_new_tags(form_record)
+                # all_tags.extend(new_tag_obj)
             form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,
@@ -386,11 +387,12 @@ class ArticleImportExcelWizard(models.TransientModel):
             update_abstract_flag = int(temp_record.edit_binary_string[2])
             update_tag_flag = int(temp_record.edit_binary_string[3])
 
-            all_tags = []
-            tag_list = self.set_similar_tags(temp_record)
-            all_tags.extend(tag_list)
-            new_tag_obj = self.set_new_tags(temp_record)
-            all_tags.extend(new_tag_obj)
+            all_tags = self.convert_temp_to_tags(temp_record)
+            # all_tags = []
+            # tag_list = self.set_similar_tags(temp_record)
+            # all_tags.extend(tag_list)
+            # new_tag_obj = self.set_new_tags(temp_record)
+            # all_tags.extend(new_tag_obj)
             
             if temp_record.error_code:
                 record_failed_list.append(temp_record.id)
@@ -511,18 +513,46 @@ class ArticleImportExcelWizard(models.TransientModel):
             'views': [(self.env.ref('thesis_design_database_manager.article_import_excel_wizard_form_view_tags').id, 'form')], 
             'target': 'current', }
     
-    def set_similar_tags(self, temp_record):       
+    def convert_temp_to_tags(self, temp_record):
+        linking_tags = []
+        creating_tags = []
         similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
         similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
-        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
-       
-        return similar_tag
-    
-    def set_new_tags(self, temp_record):
-        tag_list = []
+
         new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
+
         for n_tag in new_tag_names:
-            tag_dict = {"name": n_tag}
-            tag_list.append(tag_dict)
-        new_tag = self.env["article.tag"].create(tag_list)
-        return new_tag
+            dupli = self.env["article.tag"].search([('name','=', n_tag)],limit=1) #second redundancy check if there is a tag that was new and is shared by multiple new entries
+            if dupli:
+                print("There is a duplicate: ")
+                print(dupli.name)
+                similar_tag_names.append(n_tag)
+            else:
+                tag_dict = {"name": n_tag}
+                creating_tags.append(tag_dict)
+        new_tag = self.env["article.tag"].create(creating_tags)
+        similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+
+        all_tags = []
+        all_tags.extend(similar_tag)
+        all_tags.extend(new_tag)
+
+        return all_tags
+        
+
+    
+    # def set_similar_tags(self, temp_record):       
+    #     similar_tag_names = [tag.name for tag in temp_record.similar_tag_ids]
+    #     similar_tag_names.extend([tag.name for tag in temp_record.existing_tag_ids])
+    #     similar_tag = self.env["article.tag"].search([('name','in', similar_tag_names)])
+       
+    #     return similar_tag
+    
+    # def set_new_tags(self, temp_record):
+    #     tag_list = []
+    #     new_tag_names = [ntag.name for ntag in temp_record.to_create_tag_ids]
+    #     for n_tag in new_tag_names:
+    #         tag_dict = {"name": n_tag}
+    #         tag_list.append(tag_dict)
+    #     new_tag = self.env["article.tag"].create(tag_list)
+    #     return new_tag

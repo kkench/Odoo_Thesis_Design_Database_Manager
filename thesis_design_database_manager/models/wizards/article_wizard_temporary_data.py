@@ -424,28 +424,21 @@ class ArticleWizardPublication(models.TransientModel):
                     existing_tags.append(existing_tag.id)
                     # self.link_existing_tag(tag) #link existing temporary tags to real tags
             else:
-                    dupli = self.check_duplicate_temp_tags(found_tag) #search duplicates
-                    if dupli:
-                        similar_tags.append(dupli.id)#link existing tags to real tags 
-                        continue
-                    else:
-                        sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
-                        similar_tags.append(sim_tag.id)
+                    sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
+                    similar_tags.append(sim_tag.id)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
             # print(similar_tags)
         return similar_tags or existing_tags or tags_to_create
     
-    def check_duplicate_temp_tags(self, tag):
-        tag_flag = self.env["article.wizard.publication.tag"].search([('name','in',tag)], limit=1)
-        return tag_flag
+    def get_duplicate_temp_tag(self, tag):
+        dupli = self.env["article.wizard.publication.tag"].search([('name', '=', tag)],limit=1)
+        return dupli
 
+    
     def get_tag_changes(self, tag_list):
-        # self.check_abbreviation(tag_list)
-        # print(tag_list)
         sim = self.check_similar_tags(tag_list)
-        # print(sim)
         if (not sim and not self.to_create_tag_ids.exists()):
             needs_change = False
         else:
