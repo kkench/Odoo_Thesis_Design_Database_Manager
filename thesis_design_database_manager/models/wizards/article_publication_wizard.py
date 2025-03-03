@@ -27,6 +27,8 @@ class ArticleImportExcelWizard(models.TransientModel):
     updated_article_records_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_updated_rel',string="Updated Records")
     voided_article_record_ids = fields.Many2many('article.publication', 'article_import_excel_wizard_voided_rel',string="Voided Records")
     failed_form_submissions_record_ids = fields.Many2many("article.wizard.publication", 'article_import_excel_wizard_failed_rel',string="Failed Records")
+    succesful_display_article_record_ids = fields.Many2many("article.wizard.publication",'article_import_excel_wizard_succesful_rel',string="Records to be Uploaded")
+    
     wizard_check_tags_records_ids = fields.One2many('article.wizard.publication','checking_wizard_id','List of Records for Checking')
 
     ignore_instructor_privilege = fields.Boolean("As Adviser, not Instructor", default=False)
@@ -212,6 +214,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             new_article_list.append(new_article.id)
             
             self.wizard_excel_extracted_record_ids = [(6, 0, new_article_list)]
+            self.succesful_display_article_record_ids = [(6,0,[article.id for article in self.wizard_excel_extracted_record_ids if article.error_code==0])]
 
         return { 
             'type': 'ir.actions.act_window', 
@@ -269,6 +272,7 @@ class ArticleImportExcelWizard(models.TransientModel):
             to_update_article_list.append(temporary_record.id)
 
             self.wizard_excel_extracted_record_ids = [(6, 0, to_update_article_list)]
+            self.succesful_display_article_record_ids = [(6,0,[article.id for article in self.wizard_excel_extracted_record_ids if article.error_code==0])]
         
         return { 
             'type': 'ir.actions.act_window', 
@@ -439,7 +443,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         possible_existing_record_id = self.env['article.wizard.record.column'].search([('name', '=', dictionary_converted_name)],limit=1)
         if possible_existing_record_id: return possible_existing_record_id
         return self.env['article.wizard.record.column'].create({'name': dictionary_converted_name})
-
+            
     @api.depends('excel_file','ignore_instructor_privilege')
     def _compute_user_privilege(self):
         for record in self:
