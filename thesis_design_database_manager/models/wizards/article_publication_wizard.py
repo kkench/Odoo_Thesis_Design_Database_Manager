@@ -342,6 +342,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 # all_tags.extend(tag_list)
                 # new_tag_obj = self.set_new_tags(form_record)
                 # all_tags.extend(new_tag_obj)
+            # adviser_list = [name for name in form_record.adviser.split(';')]
+            # print(adviser_list)
             # print(form_record.adviser.split(';'))
             form_record_adviser = self.env['res.users'].search([('name', '=',[name for name in form_record.adviser.split(';')])])
             row_record_dictionary = {

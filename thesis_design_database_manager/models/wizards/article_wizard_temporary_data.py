@@ -197,6 +197,8 @@ class ArticleWizardPublication(models.TransientModel):
             return False
 
         for adviser_name in self.adviser.split(';'):
+            if adviser_name == "":
+                continue
             adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
             # print(adviser.name)
 
