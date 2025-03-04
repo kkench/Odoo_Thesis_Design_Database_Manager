@@ -40,7 +40,12 @@ class ResUsers(models.Model):
                       (self.env.ref('thesis_design_database_manager.article_faculty_adviser_form_view').id, 'form')],  # Replace with your view ID
         }
     
-    def act_shutdown_rpi(self):        
+    def act_shutdown_rpi(self):
+        is_not_instructor = ((not self.env.user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or 
+            (not self.env.user.has_group('thesis_design_database_manager.group_article_design_instructor')))
+        if is_not_instructor:
+            raise UserError("Instructors Only")
+
         import subprocess
         # Check if the device is a Raspberry Pi
         def is_raspberry_pi():
