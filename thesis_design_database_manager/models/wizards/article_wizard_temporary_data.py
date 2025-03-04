@@ -197,8 +197,10 @@ class ArticleWizardPublication(models.TransientModel):
             return False
 
         for adviser_name in self.adviser.split(';'):
+            if adviser_name == "":
+                continue
             adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
-            # print(adviser)
+            # print(adviser.name)
 
             if adviser:
                 if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
@@ -433,15 +435,15 @@ class ArticleWizardPublication(models.TransientModel):
                     duplicate = self.env["article.wizard.publication.tag"].search([('name', 'in', [tag])],limit=1)
                     if duplicate:
                         similar_tags.append(duplicate.id)
-                        print("Duplicate detected")
-                        print(duplicate.name)
+                        # print("Duplicate detected")
+                        # print(duplicate.name)
                     else:
                         sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                         similar_tags.append(sim_tag.id)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
-            print([tag.name for tag in self.similar_tag_ids])
+            # print([tag.name for tag in self.similar_tag_ids])
         return similar_tags or existing_tags or tags_to_create
     
     
