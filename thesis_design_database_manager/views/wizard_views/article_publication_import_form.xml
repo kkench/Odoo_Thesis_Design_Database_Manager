@@ -93,7 +93,7 @@
                         <notebook>
                             <page string="Changed Works">
                                 <field name="succesful_display_article_record_ids">
-                                    <tree create="0" delete="0">
+                                    <tree create="0" delete="0" editable="false">
                                         <!-- <field name="initial_id" string="ID"/> -->
                                         <field name="name" string="Title"/>
                                         <field name="course" string="Course"/>

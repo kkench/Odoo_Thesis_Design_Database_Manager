@@ -342,7 +342,8 @@ class ArticleImportExcelWizard(models.TransientModel):
                 # all_tags.extend(tag_list)
                 # new_tag_obj = self.set_new_tags(form_record)
                 # all_tags.extend(new_tag_obj)
-            form_record_advisor = self.env['res.users'].search([('name', '=', form_record.adviser)], limit=1)
+            # print(form_record.adviser.split(';'))
+            form_record_adviser = self.env['res.users'].search([('name', '=',[name for name in form_record.adviser.split(';')])])
             row_record_dictionary = {
                 'custom_id': form_record.initial_id,
                 'name': form_record.name,
@@ -353,7 +354,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'author2': form_record.author2,
                 'author3': form_record.author3,
                 'article2_flag': form_record.article_2_flag,
-                'adviser_ids': [(6, 0, [form_record_advisor.id])], # this is new, so replace is good
+                'adviser_ids': [(6, 0, [adviser.id for adviser in form_record_adviser])], # this is new, so replace is good
                 'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
             }
             if not form_record.article_related_id:
@@ -555,7 +556,7 @@ class ArticleImportExcelWizard(models.TransientModel):
         all_tags = []
         all_tags.extend(similar_tag)
         all_tags.extend(new_tag)
-        print([tag.name for tag in all_tags])
+        # print([tag.name for tag in all_tags])
 
         return all_tags
         
