@@ -4,6 +4,8 @@ from odoo.exceptions import UserError
 class ResUsers(models.Model):
     _inherit = "res.users"
 
+    # rpi_password = fields.Char(string='RPI Password', widget='password')
+
     article_publication_ids = fields.Many2many(
         "article.publication",
         "article_publication_res_users_rel",
@@ -38,26 +40,49 @@ class ResUsers(models.Model):
                       (self.env.ref('thesis_design_database_manager.article_faculty_adviser_form_view').id, 'form')],  # Replace with your view ID
         }
     
-    def act_shutdown_rpi(self):
-        # import os
+    def act_shutdown_rpi(self):        
+        import subprocess
+        # Check if the device is a Raspberry Pi
         def is_raspberry_pi():
             try:
                 with open('/sys/firmware/devicetree/base/model', 'r') as model_file:
                     model = model_file.read().strip()
-                    if 'Raspberry Pi 4' in model:
+                    if 'Raspberry Pi' in model:
                         return True
             except FileNotFoundError:
                 return False
+            return False
 
-        def get_os_info():
-            try:
-                with open('/etc/os-release', 'r') as os_file:
-                    os_info = os_file.read().strip()
-                    return os_info
-            except FileNotFoundError:
-                return "OS information not found"
-        
         if not is_raspberry_pi():
             raise UserError("This only works on RPI Systems")
-        else:
-            raise UserError("IS RPI but not implemented")
+
+        # rpi_password = 'article_database_password_C8i3ZS'.encode()  # Encode the password to bytes
+        try:
+            # Execute the shutdown command and capture the output
+            result = subprocess.run(
+                ['sudo', '-S', 'shutdown', '-h', 'now'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+
+            # Read the output and error
+            output = result.stdout.decode('utf-8')
+            error = result.stderr.decode('utf-8')
+
+            # Check for errors
+            if result.returncode != 0:
+                raise UserError(f"Error Shutting Down: {error}")
+            else:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'Shutdown Initiated',
+                        'message': f'The shutdown command has been successfully executed by. {self.name}',
+                        'type': 'success',
+                        'sticky': False,
+                    }
+                }
+        
+        except Exception as e:
+            raise UserError(f"An unexpected error occurred: {str(e)}")

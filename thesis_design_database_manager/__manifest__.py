@@ -27,7 +27,8 @@
         "views/article_menus.xml",
     ],
     "assets": { 'web.assets_backend': 
-               [ 'thesis_design_database_manager/static/src/css/custom_styles.css', 
+               [ 'thesis_design_database_manager/static/src/css/custom_styles.css',
+                # 'thesis_design_database_manager/static/src/js/notify_all.js',
                 ], 
     },
     "application": True,
