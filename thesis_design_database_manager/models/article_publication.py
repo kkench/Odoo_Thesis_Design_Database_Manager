@@ -7,7 +7,7 @@ class ArticlePublication(models.Model):
     _name = "article.publication"
     _description = "Main Studies of CpE Students"
     _sql_constraints = [
-        ("check_title", "UNIQUE(name)", "Title must be unique.")
+        ("check_title", "UNIQUE(name)", "Title must be unique for each publication")
     ]
     #-------Form Requirements--------
     custom_id = fields.Char(string='Custom ID', required=True, default='None', readonly=True)
