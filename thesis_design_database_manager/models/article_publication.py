@@ -58,6 +58,9 @@ class ArticlePublication(models.Model):
         domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])], required=True
         )
     
+    # article_2_relation_id = fields.Many2one('article_publication',"Secondary Article")
+    # article_1_relation_id = fields.Many2one('article_publication',"Primary Article")
+
     popup_message = fields.Char("Warning", readonly=True)
     doi = fields.Char("DOI", default=None)
 
@@ -85,6 +88,23 @@ class ArticlePublication(models.Model):
             #     continue
             record.authors = ' '.join(filter(None, [record.author1, record.author2, record.author3]))
 
+    # @api.depends('custom_id')
+    # def _compute_same_author_article(self):
+    #     for record in self:
+    #         if record.course_name != 'thesis':
+    #             continue
+    #         id_to_search = record.custom_id[:-1] + ('2' if record.custom_id[-1] == '1' else '1')
+    #         article_found = record.env['article.publication'].search([('custom_id', '=', id_to_search)], limit=1)
+    #         print(article_found.name)
+    #         if not article_found: continue
+    #         if record.custom_id[-1] == '1':
+    #             record.article_1_relation_id = None
+    #             record.article_2_relation_id = article_found
+    #         else:
+    #             record.article_1_relation_id = article_found
+    #             record.article_2_relation_id = None
+
+    
     @api.depends("course_name","adviser_ids")
     def _compute_article_editability(self):
         user = self.env.user
@@ -197,6 +217,17 @@ class ArticlePublication(models.Model):
         if self.state == 'final_defense':
             return self.write({'state':'final_redefense'})
         
+    def act_initial_proto_demo(self):
+        if self.state == 'in_progress':
+            return self.write({'state':'pre_final_defense'})
+
+    # @api.model
+    # def has_art1(self, article_1_relation_id):
+    #     return hasattr(self, article_1_relation_id)    
+    
+    # @api.model
+    # def has_art2(self, article_2_relation_id):
+    #     return hasattr(self, article_2_relation_id)    
         
     def act_member_change(self):
         self.replacement_identifier = None

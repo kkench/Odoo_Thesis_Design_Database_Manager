@@ -25,6 +25,7 @@
             <menuitem name="Enlistment (Design)" id="article_d_enlistment_menu" action="article_d_enlistment_view" sequence="25" groups="thesis_design_database_manager.group_article_design_instructor"/>
         </menuitem>
         <menuitem name="My Advisees" id="open_current_user_form_menu_outside" action="action_open_current_user_form" sequence="20" groups="thesis_design_database_manager.group_article_faculty_adviser"/>
+        <menuitem name="Shutdown RPI" id="shutdown_action_menu" action="action_shutdown_button" sequence="25"/>
     </menuitem>
 </odoo>
 

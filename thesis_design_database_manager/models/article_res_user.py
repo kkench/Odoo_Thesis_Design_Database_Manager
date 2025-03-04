@@ -1,4 +1,5 @@
 from odoo import api,models, fields
+from odoo.exceptions import UserError
 
 class ResUsers(models.Model):
     _inherit = "res.users"
@@ -36,3 +37,27 @@ class ResUsers(models.Model):
             'views': [(self.env.ref('thesis_design_database_manager.article_faculty_adviser_tree_view').id, 'tree'),
                       (self.env.ref('thesis_design_database_manager.article_faculty_adviser_form_view').id, 'form')],  # Replace with your view ID
         }
+    
+    def act_shutdown_rpi(self):
+        # import os
+        def is_raspberry_pi():
+            try:
+                with open('/sys/firmware/devicetree/base/model', 'r') as model_file:
+                    model = model_file.read().strip()
+                    if 'Raspberry Pi 4' in model:
+                        return True
+            except FileNotFoundError:
+                return False
+
+        def get_os_info():
+            try:
+                with open('/etc/os-release', 'r') as os_file:
+                    os_info = os_file.read().strip()
+                    return os_info
+            except FileNotFoundError:
+                return "OS information not found"
+        
+        if not is_raspberry_pi():
+            raise UserError("This only works on RPI Systems")
+        else:
+            raise UserError("IS RPI but not implemented")

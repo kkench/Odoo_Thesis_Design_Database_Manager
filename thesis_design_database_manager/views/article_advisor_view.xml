@@ -64,6 +64,7 @@
         <field name="state">code</field>
         <field name="code">action = model.act_open_faculty_list()</field>
     </record>
+
     <record id="action_open_current_user_form" model="ir.actions.server">
         <field name="name">Open Current User Form</field>
         <field name="model_id" ref="model_res_users"/>
@@ -77,6 +78,40 @@
                 'res_id': user.id,
                 'views': [(env.ref('thesis_design_database_manager.article_faculty_adviser_form_view').id, 'form')], 
                 'target': 'current',
+            }
+        </field>
+    </record>
+
+
+    <record id="action_shutdown_warning_popup" model="ir.ui.view">
+            <field name="name">action_shutdown_warning_view</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+                <form string="Shutdown Warning">
+                    <h1>
+                        You are about to shutdown the RPI database;
+                        RPI must be replugged to reopen
+                    </h1>
+                    <footer>
+                        <button string="Confirm Shutdown" type="object" class="btn-danger" name="act_shutdown_rpi"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+    </record>
+
+    <record id="action_shutdown_button" model="ir.actions.server">
+        <field name="name">Shutdown</field>
+        <field name="model_id" ref="model_res_users"/>
+        <field name="binding_model_id" ref="model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">action = {
+                'type': 'ir.actions.act_window',
+                'res_model': 'res.users',
+                'view_mode': 'form',
+                'res_id': user.id,
+                'views': [(env.ref('thesis_design_database_manager.action_shutdown_warning_popup').id, 'form')], 
+                'target': 'new',
             }
         </field>
     </record>

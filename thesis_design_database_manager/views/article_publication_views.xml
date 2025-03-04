@@ -25,6 +25,9 @@
                                 <field name="adviser_ids" widget="many2many_tags"
                                     readonly="is_course_instructor == False"
                                     options="{'no_create': True}" />
+                                <field name="onedrive"/>
+                                <!-- <field name="article_1_relation_id"/>
+                                <field name="article_2_relation_id"/> -->
                             </group>
                             <group>
                                 <field name="author1" readonly="1" />
