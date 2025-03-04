@@ -41,7 +41,7 @@ class ArticleWizardPublication(models.TransientModel):
     def reset_record(record):
         record.initial_id = None
 
-    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_batch_year_1', 'student_batch_year_2', 'student_batch_year_3', 'adviser','import_article_wizard_id')
+    @api.depends('author1', 'author2', 'author3', 'uploader_email', 'tags','course', 'student_batch_year_1', 'student_batch_year_2', 'student_batch_year_3', 'adviser','import_article_wizard_id','name')
     def _compute_data_and_errors(self):
         ''' Error Codes:
         0 - No Errors
@@ -127,7 +127,7 @@ class ArticleWizardPublication(models.TransientModel):
                 or record.article_related_id.state == 'proposal_redefense'
                 or record.article_related_id.state == 'pre_final_defense'
                 or record.article_related_id.state == 'final_redefense'):
-            record.error_code = 10
+            record.error_code = 11
             record.error_comment = "Existing Study is Not Ready For Defense"
         return
 
@@ -198,7 +198,7 @@ class ArticleWizardPublication(models.TransientModel):
 
         for adviser_name in self.adviser.split(';'):
             adviser = self.env['res.users'].search([('name', '=', adviser_name)], limit=1)
-            print(adviser)
+            # print(adviser)
 
             if adviser:
                 if adviser.has_group('thesis_design_database_manager.group_article_faculty_adviser'):
@@ -231,14 +231,14 @@ class ArticleWizardPublication(models.TransientModel):
     def _has_errors_for_new_articles(self):
         #the function that calls this will cycle the records already, keep it as 'self' 
         #THIS IS A COMPUTE FUNCTION, DONT EDIT NON STORED DATA
-        print("for new records")
+        # print("for new records")
         if not self.adviser_is_searchable():
-            print("adviser is not searchable")
+            # print("adviser is not searchable")
             self.error_code = 8
             self.error_comment = "Adviser is Not Found"
             return True
         if self.record_has_the_same_title_as_existing():
-                self.error_code = 10
+                self.error_code = 12
                 self.error_comment = "Title Already Exists on Database"
                 return True
         return False
@@ -292,7 +292,7 @@ class ArticleWizardPublication(models.TransientModel):
             #-------------For Thesis Articles-----------------------
             if record.course == "T":
                 record.initial_id += "_Art2" if record.article_2_flag else "_Art1"
-            print(record.initial_id)
+            # print(record.initial_id)
             return
 
     def arrange_authors_alphabetically(self):
@@ -404,17 +404,24 @@ class ArticleWizardPublication(models.TransientModel):
         return abbreviations
          #([A-Z\S]{2,}+) [A-Z] is all uppercase \S ignore all whitespace {2,}
         #regex for later to make abbreviation checking work better if no correction via menu is implemented
+    
     def check_similar_tags(self, keywords):  
             
         similar_tags = []
         tags_to_create = []
         existing_tags = []
+        # duplicate_temps = []
         all_tags = self.env['article.tag'].search([])
         tag_names = [tag.name for tag in all_tags]
         for tag in keywords:
             found_tag = get_close_matches(tag, tag_names)
+            # duplicate = self.env["article.wizard.publication.tag"].search([('name', 'in', found_tag)],limit=1)
             if found_tag == "" or tag == "":
                     continue
+            # if duplicate and not found_tag: #first redundancy check
+            #         similar_tags.append(duplicate.id)
+            #         print("Duplicate detected")
+            #         print(duplicate)
             elif not found_tag:
                     created_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                     tags_to_create.append(created_tag.id)
@@ -422,30 +429,24 @@ class ArticleWizardPublication(models.TransientModel):
             elif tag in found_tag:
                     existing_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                     existing_tags.append(existing_tag.id)
-                    # self.link_existing_tag(tag) #link existing temporary tags to real tags
             else:
-                    dupli = self.check_duplicate_temp_tags(found_tag) #search duplicates
-                    if dupli:
-                        similar_tags.append(dupli.id)#link existing tags to real tags 
-                        continue
+                    duplicate = self.env["article.wizard.publication.tag"].search([('name', 'in', [tag])],limit=1)
+                    if duplicate:
+                        similar_tags.append(duplicate.id)
+                        print("Duplicate detected")
+                        print(duplicate.name)
                     else:
                         sim_tag = self.env["article.wizard.publication.tag"].create({ 'name': tag })
                         similar_tags.append(sim_tag.id)
             self.to_create_tag_ids = [(6,0,tags_to_create)]
             self.similar_tag_ids = [(6,0,similar_tags)]
             self.existing_tag_ids = [(6,0,existing_tags)]
-            # print(similar_tags)
+            print([tag.name for tag in self.similar_tag_ids])
         return similar_tags or existing_tags or tags_to_create
     
-    def check_duplicate_temp_tags(self, tag):
-        tag_flag = self.env["article.wizard.publication.tag"].search([('name','in',tag)], limit=1)
-        return tag_flag
-
+    
     def get_tag_changes(self, tag_list):
-        # self.check_abbreviation(tag_list)
-        # print(tag_list)
         sim = self.check_similar_tags(tag_list)
-        # print(sim)
         if (not sim and not self.to_create_tag_ids.exists()):
             needs_change = False
         else:

@@ -7,7 +7,7 @@ class ArticlePublication(models.Model):
     _name = "article.publication"
     _description = "Main Studies of CpE Students"
     _sql_constraints = [
-        ("check_title", "UNIQUE(name)", "Title must be unique.")
+        ("check_title", "UNIQUE(name)", "Title must be unique for each publication")
     ]
     #-------Form Requirements--------
     custom_id = fields.Char(string='Custom ID', required=True, default='None', readonly=True)
@@ -44,6 +44,7 @@ class ArticlePublication(models.Model):
                                                 ],
                                     default="thesis")
     abstract = fields.Text(string="Abstract", required=True)
+    onedrive = fields.Text(string="Onedrive Link")
     date_registered = fields.Date(string="Day of Registration") 
     author1 = fields.Char("Author 1",default=None)
     author2 = fields.Char("Author 2",default=None)
@@ -141,6 +142,12 @@ class ArticlePublication(models.Model):
                 self.related_article_ids = [(5, 0, 0)]
         else:
             self.related_article_ids = [(5, 0, 0)]
+    @api.onchange('doi')
+    def _onchange_doi_status(self):
+        if self.doi:
+            self.publishing_state = "published"
+        elif not self.doi:
+            self.publishing_state = "not_published"
     
     @api.constrains('author3')
     def _check_author3_eligability(self):
@@ -230,6 +237,8 @@ class ArticlePublication(models.Model):
     #     return hasattr(self, article_2_relation_id)    
         
     def act_member_change(self):
+        if self.state == "voided":
+            raise UserError("This topic is already voided. Members cannot be changed.")
         self.replacement_identifier = None
         return {
             'type': 'ir.actions.act_window',
@@ -275,7 +284,7 @@ class ArticlePublication(models.Model):
     def act_void_topic_confirm(self):
         self.ensure_one()
         return {
-            'name': 'Upload Confirmation',
+            'name': 'Void Topic',
             'type': 'ir.actions.act_window',
             'res_model': 'article.publication',
             'view_mode': 'form',
@@ -283,14 +292,14 @@ class ArticlePublication(models.Model):
             'view_id': self.env.ref('thesis_design_database_manager.article_publication_voiding_confirmation_popup_form').id,
             'target': 'new',
         }
-    
+        
     def act_void_topic(self):
         self.ensure_one()
         if self.custom_id == "":
             raise UserError("Topic is already voided.")
         else:
             return self.write({
-            'custom_id':"", 'state':"voided"
+            'custom_id':"Voided", 'state':"voided"
         })
     
     def act_redirect_doi(self):
