@@ -55,10 +55,10 @@ class ResUsers(models.Model):
         }
     
     def act_shutdown_rpi(self):
-        is_not_instructor = ((self.env.user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or 
+        is_instructor = ((self.env.user.has_group('thesis_design_database_manager.group_article_thesis_instructor')) or 
             (self.env.user.has_group('thesis_design_database_manager.group_article_design_instructor')))
-        
-        if is_not_instructor:
+        raise UserError(f"Instructors Only {is_instructor}")
+        if not is_instructor:
             raise UserError("Instructors Only")
 
         import subprocess
