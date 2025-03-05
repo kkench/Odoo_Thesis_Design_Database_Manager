@@ -37,6 +37,17 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Articles To Publish"> 
+                            <field name="publication_non_scopus_filter_ids">
+                                <tree editable="bottom">
+                                    <button name="act_view_article" type="object" string="View" class="oe_highlight"/>
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="publishing_state"/>
+                                    <field name="course_name"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

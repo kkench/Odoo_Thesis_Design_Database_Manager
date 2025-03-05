@@ -21,11 +21,25 @@ class ResUsers(models.Model):
         compute="_compute_conformity_publications"
     )
 
+    publication_non_scopus_filter_ids = fields.Many2many(
+        "article.publication",
+        "article_publication_non_scopus_filter_rel",
+        string="Articles For Scopus", readonly=True,
+        compute="_compute_non_scopus_publications"
+    )
+
     @api.depends("article_publication_ids","conformity_publication_filter_ids")
     def _compute_conformity_publications(self):
         for record in self:
             conformity_articles = record.article_publication_ids.filtered(lambda a: a.state in ['proposal_minor_revisions','final_minor_revisions'])
             record.conformity_publication_filter_ids = conformity_articles
+
+    @api.depends("article_publication_ids","publication_non_scopus_filter_ids")
+    def _compute_non_scopus_publications(self):
+        for record in self:
+            non_scopus_articles = record.article_publication_ids.filtered(lambda a: ((a.state in ['accepted']) 
+                                                                                     and a.publishing_state in ['not_published']))
+            record.publication_non_scopus_filter_ids = non_scopus_articles
 
     def act_open_faculty_list(self):
         group = self.env.ref('thesis_design_database_manager.group_article_faculty_adviser')

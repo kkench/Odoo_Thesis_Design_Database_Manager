@@ -11,30 +11,30 @@
                     an alternative idea is having two copies of the same form with different readonly capabilities-->
                         <h1 style="width: 100%;">
                             <field name="name"
-                                readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                readonly="(is_course_instructor == False)" />
                         </h1>
                         <field name="is_course_instructor" readonly="True" invisible="True" />
                         <field name="is_article_adviser" readonly="True" invisible="True" />
                         <group>
                             <group>
                                 <field name="state"
-                                    readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                    readonly="(is_course_instructor == False)" />
                                 <field name="publishing_state" invisible="course_name != 'thesis'"
-                                    readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                    readonly="(is_course_instructor == False)" />
                                 <field name="course_name" readonly="True" />
                                 <field name="adviser_ids" widget="many2many_tags"
                                     readonly="is_course_instructor == False"
                                     options="{'no_create': True}" />
-                                <field name="onedrive"/>
-                                <field name="latest_pdf_document_link" invisible="1"/>
+                                <field name="onedrive" readonly="(is_course_instructor == False)"/>
+                                <field name="latest_pdf_document_link" invisible="1" readonly="(is_course_instructor == False)"/>
                             </group>
                             <group>
-                                <field name="author1" readonly="1" />
-                                <field name="author2" readonly="1" />
+                                <field name="author1" readonly="1"/>
+                                <field name="author2" readonly="1"/>
                                 <field name="author3" readonly="1"
-                                    invisible="course_name != 'design'" />
-                                <field name="doi"/>
-                                <field name='custom_id' />
+                                    invisible="course_name != 'design'"/>
+                                <field name="doi" readonly="(is_course_instructor == False)" placeholder="DOI Number"/>
+                                <field name='custom_id' readonly="(is_course_instructor == False)"/>
                                 <group>
                                     <button name="act_member_change" string="Change Member"
                                         type="object" class="oe_highlight"
@@ -52,27 +52,27 @@
                         <div class="row" style="width: 100%;">
                             <div class="col-lg-3 rounded-3 custom-hover-effect" 
                             style="background-color: #6e9075; text-align: center;" 
-                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False)">
                                 <button name="act_accept_defense" string="Accept Topic" type="object" class="oe_button"/>
                             </div>
                             <div class="col-lg-3 rounded-3 custom-hover-effect" 
                             style="background-color: #d7b49e; text-align: center;" 
-                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False)">
                                 <button name="act_minor_revisions_defense" string="Minor Revisions" type="object" class="oe_button"/>
                             </div>
                             <div class="col-lg-3 rounded-3 custom-hover-effect" 
                             style="background-color: #578aad; text-align: center;" 
-                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False)">
                                 <button name="act_redef_defense" string="Accept but Redef" type="object" class="oe_button"/>
                             </div>
                             <div class="col-lg-3 rounded-3 custom-hover-effect" 
                             style="background-color: #ff474c; text-align: center;" 
-                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False and is_article_adviser == False)">
+                            invisible="(state not in ['proposal', 'final_defense']) or (is_course_instructor == False)">
                                 <button name="act_reject_defense" string="Reject" type="object" class="oe_button"/>
                             </div>
                             <div class="col-lg-3 rounded-3 custom-hover-effect" 
                             style="background-color: #d7b49e; text-align: center;" 
-                            invisible="(state not in ['in_progress']) or (is_course_instructor == False and is_article_adviser == False)">
+                            invisible="(state not in ['in_progress']) or (is_course_instructor == False)">
                                 <button name="act_initial_proto_demo" string="Prototype Checked" type="object" class="oe_button"/>
                             </div>
                         </div>
@@ -80,13 +80,13 @@
                             <page string="details">
                                 <h1 style="width: 100%;">
                                     <field name="article_tag_ids" widget="many2many_tags"
-                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                        readonly="(is_course_instructor == False)" />
                                 </h1>
                                 <group>
                                     <field name="abstract"
-                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                        readonly="(is_course_instructor == False)" />
                                     <field name="max_tag_similarity_score"
-                                        readonly="(is_article_adviser == False) and (is_course_instructor == False)" />
+                                        readonly="(is_course_instructor == False)" />
                                 </group>
                             </page>
                             <page string="Similar Studies">
