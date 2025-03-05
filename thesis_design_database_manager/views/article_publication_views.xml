@@ -26,8 +26,7 @@
                                     readonly="is_course_instructor == False"
                                     options="{'no_create': True}" />
                                 <field name="onedrive"/>
-                                <!-- <field name="article_1_relation_id"/>
-                                <field name="article_2_relation_id"/> -->
+                                <field name="latest_pdf_document_link" invisible="1"/>
                             </group>
                             <group>
                                 <field name="author1" readonly="1" />
@@ -36,14 +35,18 @@
                                     invisible="course_name != 'design'" />
                                 <field name="doi"/>
                                 <field name='custom_id' />
-                                <button name="act_member_change" string="Change Member"
-                                    type="object" class="oe_highlight"
-                                    invisible="is_course_instructor == False" />
-                                <button name="act_void_topic_confirm" string="Void Topic"
-                                    type="object" class="oe_highlight"
-                                    invisible="is_course_instructor == False" />
-                                <button name='act_redirect_doi' type="object" string="Link" 
-                                    invisible="doi==False" class="oe_highlight"/>
+                                <group>
+                                    <button name="act_member_change" string="Change Member"
+                                        type="object" class="oe_highlight"
+                                        invisible="is_course_instructor == False" />
+                                    <button name="act_void_topic_confirm" string="Void Topic"
+                                        type="object" class="oe_highlight"
+                                        invisible="is_course_instructor == False" />
+                                    <button name='act_redirect_doi' type="object" string="Link" 
+                                        invisible="doi==False" class="oe_highlight"/>
+                                    <button name='act_redirect_pdf' type="object" string="PDF" 
+                                        invisible="latest_pdf_document_link==False" class="oe_highlight"/>
+                                </group>
                             </group>
                         </group> 
                         <div class="row" style="width: 100%;">

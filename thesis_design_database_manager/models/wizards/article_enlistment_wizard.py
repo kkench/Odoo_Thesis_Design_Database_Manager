@@ -41,6 +41,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
                                             '1st Author Batch Year': 'student_batch_year_1',
                                             '2nd Author Batch Year': 'student_batch_year_2',
                                             '3rd Author Batch Year': 'student_batch_year_3',
+                                            'PDF Document Link': 'uploaded_pdf_link',
                                         }
     
     DEFAULT_EXCEL_COLUMNS_DICTIONARY = {
@@ -57,6 +58,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
         "Author 3 Batch Year":"3rd Author Batch Year",
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
+        "PDF":"PDF Document Link",
     }
     
     def act_view_enlistment_wizard_page1(self):

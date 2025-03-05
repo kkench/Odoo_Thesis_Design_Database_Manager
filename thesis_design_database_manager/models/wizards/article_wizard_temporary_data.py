@@ -19,6 +19,7 @@ class ArticleWizardPublication(models.TransientModel):
     student_batch_year_1 = fields.Char("Student 1 Batch Year", default=None)
     student_batch_year_2 = fields.Char("Student 2 Batch Year", default=None)
     student_batch_year_3 = fields.Char("Student 3 Batch Year", default=None)
+    uploaded_pdf_link = fields.Char("latest PDF Document", default=None)
     
     article_2_flag = fields.Boolean("Check if Article 2",default=False)
     article_related_id = fields.Many2one("article.publication","If Author has already existing ID",compute="_compute_data_and_errors",store=True)

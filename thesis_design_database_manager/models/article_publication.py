@@ -59,8 +59,25 @@ class ArticlePublication(models.Model):
         domain=lambda self: [('groups_id', 'in', [self.env.ref('thesis_design_database_manager.group_article_faculty_adviser').id])], required=True
         )
     
-    # article_2_relation_id = fields.Many2one('article_publication',"Secondary Article")
-    # article_1_relation_id = fields.Many2one('article_publication',"Primary Article")
+
+    latest_pdf_document_link = fields.Char('Latest PDF Document')
+    
+    
+    api.constrains("latest_pdf_document_link")
+    def _check_for_pdf(self):
+        for record in self:
+            if 'mymailmapuaedu-my.sharepoint' not in record.latest_pdf_document_link:
+                raise UserError("You're uploading a non onedrive file")
+            
+    def act_redirect_pdf(self):
+        self.ensure_one()
+        return {
+            'name': 'Go to Link',
+            'res_model': 'ir.actions.act_url',
+            'type': 'ir.actions.act_url',
+            'target': 'new',
+            'url': self.latest_pdf_document_link,
+        }
 
     popup_message = fields.Char("Warning", readonly=True)
     doi = fields.Char("DOI", default=None)

@@ -57,6 +57,8 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Article 2?":"Article 2 Flag",
         'Email': 'Uploader Email',
         'Name': 'Uploader Name',
+        "PDF":"PDF Document Link",
+        "Document":"PDF Document Link",
     }
 
     QUESTIONS_FOR_EDIT_MODE = {
@@ -68,7 +70,6 @@ class ArticleImportExcelWizard(models.TransientModel):
         "Description?":"For Abstract Update?",
         "Abstract?":"For Abstract Update?",
         "Tags?":"For Tag Update?",
-        "Article 2?":"Article 2 Flag",
     }
 
     LABEL_TO_RECORD_DICTIONARY = {
@@ -86,6 +87,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                                             'Article 2 Flag':'article_2_flag',
                                             'Uploader Email': 'uploader_email',
                                             'Uploader Name': 'uploader_name',
+                                            'PDF Document Link': 'uploaded_pdf_link',
                                         }
     #Buttons
     def act_set_import_new(self):
@@ -358,6 +360,7 @@ class ArticleImportExcelWizard(models.TransientModel):
                 'article2_flag': form_record.article_2_flag,
                 'adviser_ids': [(6, 0, [adviser.id for adviser in form_record_adviser])], # this is new, so replace is good
                 'article_tag_ids': [(6, 0, [tag.id for tag in all_tags])],
+                'latest_pdf_document_link':form_record.uploaded_pdf_link if form_record.uploaded_pdf_link else None
             }
             if not form_record.article_related_id:
                 record = self.env['article.publication'].create(row_record_dictionary)
@@ -388,7 +391,10 @@ class ArticleImportExcelWizard(models.TransientModel):
         record_updated_list = []
 
         for temp_record in self.wizard_excel_extracted_record_ids:
-            record_dictionary = {'custom_id': temp_record.initial_id,}
+            record_dictionary = {
+                'custom_id': temp_record.initial_id, 
+                'latest_pdf_document_link':temp_record.uploaded_pdf_link if temp_record.uploaded_pdf_link else None
+            }
             override_everything = int(temp_record.edit_binary_string[0])
             update_title_flag = int(temp_record.edit_binary_string[1])
             update_abstract_flag = int(temp_record.edit_binary_string[2])
