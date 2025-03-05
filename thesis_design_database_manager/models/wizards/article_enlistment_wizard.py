@@ -59,6 +59,7 @@ class ArticleEnlistmentWizard(models.TransientModel):
         "Main Advisor":"Adviser",
         "Main Adviser":"Adviser",
         "PDF":"PDF Document Link",
+        "Document":"PDF Document Link",
     }
     
     def act_view_enlistment_wizard_page1(self):
@@ -153,9 +154,10 @@ class ArticleEnlistmentWizard(models.TransientModel):
                                                                         'course_name':course_name})
 
         self.failed_to_search_records_ids = [(5, 0, 0)]
+        self.linked_enlistment_record_ids = [(5, 0, 0)]
         for record in self.wizard_excel_extracted_record_ids:
             if record.error_code == 0:
-                # region defense flag
+                # region editing part
                 if record.article_related_id.state in ['draft','proposal_redefense']:
                     final_defense_flag = 0 
                 elif record.article_related_id.state in ['pre_final_defense','final_redefense']:
@@ -163,10 +165,14 @@ class ArticleEnlistmentWizard(models.TransientModel):
                 else:
                     raise UserError("record went through relation, without error, call admin")
                 
+                if record.uploaded_pdf_link:
+                    record.article_related_id.latest_pdf_document_link = record.uploaded_pdf_link
+                record.article_related_id.state = 'final_defense' if final_defense_flag else 'proposal'
+                
                 # endregion
                 self.enlistment_id.enlisted_article_ids = [(4, record.article_related_id.id, 0)]
                 self.linked_enlistment_record_ids = [(4, record.article_related_id.id, 0)]
-                record.article_related_id.state = 'final_defense' if final_defense_flag else 'proposal'
+
             else:
                 self.failed_to_search_records_ids = [(4, record.id, 0)]
 
